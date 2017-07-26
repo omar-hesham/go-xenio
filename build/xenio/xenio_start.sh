@@ -1,0 +1,1 @@
+geth --rpc --datadir="xenio" --networkid 157489 --etherbase=0x6e6D5e7056a8518019b2c286b62a3a25c931f97F --bootnodes=enode://1e36dee20b95650dcc8b22b02244e849173f74cf3c903cf8bf718d7042eec45056c430fa99ca7ff4a28e59c7ad6b4df86f3414e95200d9779b2b8c8cc7cf4fde@<git_hidden>:30303 console
