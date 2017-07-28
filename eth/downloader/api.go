@@ -20,9 +20,9 @@ import (
 	"context"
 	"sync"
 
-	ethereum "github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/rpc"
+	ethereum "https://github.com/xenioplatform/go-xenio"
+	"https://github.com/xenioplatform/go-xenio/event"
+	"https://github.com/xenioplatform/go-xenio/rpc"
 )
 
 // PublicDownloaderAPI provides an API which gives information about the current synchronisation status.

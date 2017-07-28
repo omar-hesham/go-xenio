@@ -24,10 +24,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p/discover"
-	"github.com/ethereum/go-ethereum/rlp"
+	"https://github.com/xenioplatform/go-xenio/common/mclock"
+	"https://github.com/xenioplatform/go-xenio/log"
+	"https://github.com/xenioplatform/go-xenio/p2p/discover"
+	"https://github.com/xenioplatform/go-xenio/rlp"
 )
 
 const (

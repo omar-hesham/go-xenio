@@ -25,7 +25,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/log"
+	"https://github.com/xenioplatform/go-xenio/log"
 )
 
 // makeWizard creates and returns a new puppeth wizard.

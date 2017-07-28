@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
+	"https://github.com/xenioplatform/go-xenio/common"
 )
 
 type testInPayment struct {

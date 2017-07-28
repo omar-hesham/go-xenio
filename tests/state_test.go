@@ -22,7 +22,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/core/vm"
+	"https://github.com/xenioplatform/go-xenio/core/vm"
 )
 
 func TestState(t *testing.T) {

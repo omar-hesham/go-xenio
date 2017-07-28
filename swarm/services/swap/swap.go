@@ -26,14 +26,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/contracts/chequebook"
-	"github.com/ethereum/go-ethereum/contracts/chequebook/contract"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/swarm/services/swap/swap"
+	"https://github.com/xenioplatform/go-xenio/accounts/abi/bind"
+	"https://github.com/xenioplatform/go-xenio/common"
+	"https://github.com/xenioplatform/go-xenio/contracts/chequebook"
+	"https://github.com/xenioplatform/go-xenio/contracts/chequebook/contract"
+	"https://github.com/xenioplatform/go-xenio/core/types"
+	"https://github.com/xenioplatform/go-xenio/crypto"
+	"https://github.com/xenioplatform/go-xenio/log"
+	"https://github.com/xenioplatform/go-xenio/swarm/services/swap/swap"
 )
 
 // SwAP       Swarm Accounting Protocol with

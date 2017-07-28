@@ -24,8 +24,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/p2p"
+	"https://github.com/xenioplatform/go-xenio/crypto"
+	"https://github.com/xenioplatform/go-xenio/p2p"
 )
 
 // Tests that datadirs can be successfully created, be them manually configured

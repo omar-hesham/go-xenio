@@ -27,16 +27,16 @@ import (
 
 	goruntime "runtime"
 
-	"github.com/ethereum/go-ethereum/cmd/evm/internal/compiler"
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/core/vm/runtime"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
+	"https://github.com/xenioplatform/go-xenio/cmd/evm/internal/compiler"
+	"https://github.com/xenioplatform/go-xenio/cmd/utils"
+	"https://github.com/xenioplatform/go-xenio/common"
+	"https://github.com/xenioplatform/go-xenio/core"
+	"https://github.com/xenioplatform/go-xenio/core/state"
+	"https://github.com/xenioplatform/go-xenio/core/vm"
+	"https://github.com/xenioplatform/go-xenio/core/vm/runtime"
+	"https://github.com/xenioplatform/go-xenio/ethdb"
+	"https://github.com/xenioplatform/go-xenio/log"
+	"https://github.com/xenioplatform/go-xenio/params"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

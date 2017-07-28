@@ -23,12 +23,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/rpc"
+	"https://github.com/xenioplatform/go-xenio"
+	"https://github.com/xenioplatform/go-xenio/common"
+	"https://github.com/xenioplatform/go-xenio/common/hexutil"
+	"https://github.com/xenioplatform/go-xenio/core/types"
+	"https://github.com/xenioplatform/go-xenio/rlp"
+	"https://github.com/xenioplatform/go-xenio/rpc"
 )
 
 // Client defines typed wrappers for the Ethereum RPC API.

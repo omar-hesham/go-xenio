@@ -21,17 +21,17 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
+	"https://github.com/xenioplatform/go-xenio/accounts"
+	"https://github.com/xenioplatform/go-xenio/common"
+	"https://github.com/xenioplatform/go-xenio/consensus"
+	"https://github.com/xenioplatform/go-xenio/core"
+	"https://github.com/xenioplatform/go-xenio/core/state"
+	"https://github.com/xenioplatform/go-xenio/core/types"
+	"https://github.com/xenioplatform/go-xenio/eth/downloader"
+	"https://github.com/xenioplatform/go-xenio/ethdb"
+	"https://github.com/xenioplatform/go-xenio/event"
+	"https://github.com/xenioplatform/go-xenio/log"
+	"https://github.com/xenioplatform/go-xenio/params"
 )
 
 // Backend wraps all methods required for mining.

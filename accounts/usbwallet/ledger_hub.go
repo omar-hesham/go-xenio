@@ -26,9 +26,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
+	"https://github.com/xenioplatform/go-xenio/accounts"
+	"https://github.com/xenioplatform/go-xenio/event"
+	"https://github.com/xenioplatform/go-xenio/log"
 	"github.com/karalabe/hid"
 )
 

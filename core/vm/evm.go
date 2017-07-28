@@ -20,9 +20,9 @@ import (
 	"math/big"
 	"sync/atomic"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/params"
+	"https://github.com/xenioplatform/go-xenio/common"
+	"https://github.com/xenioplatform/go-xenio/crypto"
+	"https://github.com/xenioplatform/go-xenio/params"
 )
 
 type (

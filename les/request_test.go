@@ -21,11 +21,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/light"
+	"https://github.com/xenioplatform/go-xenio/common"
+	"https://github.com/xenioplatform/go-xenio/core"
+	"https://github.com/xenioplatform/go-xenio/crypto"
+	"https://github.com/xenioplatform/go-xenio/ethdb"
+	"https://github.com/xenioplatform/go-xenio/light"
 )
 
 var testBankSecureTrieKey = secAddr(testBankAddress)

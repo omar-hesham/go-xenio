@@ -21,10 +21,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto/sha3"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
+	"https://github.com/xenioplatform/go-xenio/common"
+	"https://github.com/xenioplatform/go-xenio/crypto/sha3"
+	"https://github.com/xenioplatform/go-xenio/log"
+	"https://github.com/xenioplatform/go-xenio/rlp"
 )
 
 // Prove constructs a merkle proof for key. The result contains all

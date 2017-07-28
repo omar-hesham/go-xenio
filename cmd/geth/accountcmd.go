@@ -20,12 +20,12 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/console"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
+	"https://github.com/xenioplatform/go-xenio/accounts"
+	"https://github.com/xenioplatform/go-xenio/accounts/keystore"
+	"https://github.com/xenioplatform/go-xenio/cmd/utils"
+	"https://github.com/xenioplatform/go-xenio/console"
+	"https://github.com/xenioplatform/go-xenio/crypto"
+	"https://github.com/xenioplatform/go-xenio/log"
 	"gopkg.in/urfave/cli.v1"
 )
 

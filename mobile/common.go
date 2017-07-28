@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
+	"https://github.com/xenioplatform/go-xenio/common"
 )
 
 // Hash represents the 32 byte Keccak256 hash of arbitrary data.

@@ -26,11 +26,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/internal/jsre"
-	"github.com/ethereum/go-ethereum/node"
+	"https://github.com/xenioplatform/go-xenio/common"
+	"https://github.com/xenioplatform/go-xenio/core"
+	"https://github.com/xenioplatform/go-xenio/eth"
+	"https://github.com/xenioplatform/go-xenio/internal/jsre"
+	"https://github.com/xenioplatform/go-xenio/node"
 )
 
 const (

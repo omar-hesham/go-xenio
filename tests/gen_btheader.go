@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/core/types"
+	"https://github.com/xenioplatform/go-xenio/common"
+	"https://github.com/xenioplatform/go-xenio/common/hexutil"
+	"https://github.com/xenioplatform/go-xenio/common/math"
+	"https://github.com/xenioplatform/go-xenio/core/types"
 )
 
 var _ = (*btHeaderMarshaling)(nil)

@@ -19,9 +19,9 @@ package vm
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/params"
+	"https://github.com/xenioplatform/go-xenio/common"
+	"https://github.com/xenioplatform/go-xenio/common/math"
+	"https://github.com/xenioplatform/go-xenio/params"
 )
 
 // memoryGasCosts calculates the quadratic gas for memory expansion. It does so

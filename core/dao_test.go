@@ -20,11 +20,11 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/params"
+	"https://github.com/xenioplatform/go-xenio/consensus/ethash"
+	"https://github.com/xenioplatform/go-xenio/core/vm"
+	"https://github.com/xenioplatform/go-xenio/ethdb"
+	"https://github.com/xenioplatform/go-xenio/event"
+	"https://github.com/xenioplatform/go-xenio/params"
 )
 
 // Tests that DAO-fork enabled clients can properly filter out fork-commencing

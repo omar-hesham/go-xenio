@@ -19,7 +19,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/core/vm"
+	"https://github.com/xenioplatform/go-xenio/core/vm"
 )
 
 func TestVM(t *testing.T) {

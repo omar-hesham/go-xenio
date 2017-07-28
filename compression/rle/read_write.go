@@ -21,7 +21,7 @@ import (
 	"bytes"
 	"errors"
 
-	"github.com/ethereum/go-ethereum/crypto"
+	"https://github.com/xenioplatform/go-xenio/crypto"
 )
 
 const (

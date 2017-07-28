@@ -21,7 +21,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/core/vm"
+	"https://github.com/xenioplatform/go-xenio/core/vm"
 )
 
 // Iterator for disassembled EVM instructions

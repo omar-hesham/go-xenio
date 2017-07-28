@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/crypto"
+	"https://github.com/xenioplatform/go-xenio/crypto"
 )
 
 // Callable method given a `Name` and whether the method is a constant.

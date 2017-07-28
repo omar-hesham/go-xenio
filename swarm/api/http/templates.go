@@ -20,7 +20,7 @@ import (
 	"html/template"
 	"path"
 
-	"github.com/ethereum/go-ethereum/swarm/api"
+	"https://github.com/xenioplatform/go-xenio/swarm/api"
 )
 
 type htmlListData struct {

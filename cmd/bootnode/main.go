@@ -23,13 +23,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p/discover"
-	"github.com/ethereum/go-ethereum/p2p/discv5"
-	"github.com/ethereum/go-ethereum/p2p/nat"
-	"github.com/ethereum/go-ethereum/p2p/netutil"
+	"https://github.com/xenioplatform/go-xenio/cmd/utils"
+	"https://github.com/xenioplatform/go-xenio/crypto"
+	"https://github.com/xenioplatform/go-xenio/log"
+	"https://github.com/xenioplatform/go-xenio/p2p/discover"
+	"https://github.com/xenioplatform/go-xenio/p2p/discv5"
+	"https://github.com/xenioplatform/go-xenio/p2p/nat"
+	"https://github.com/xenioplatform/go-xenio/p2p/netutil"
 )
 
 func main() {

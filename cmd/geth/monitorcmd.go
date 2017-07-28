@@ -25,9 +25,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/rpc"
+	"https://github.com/xenioplatform/go-xenio/cmd/utils"
+	"https://github.com/xenioplatform/go-xenio/node"
+	"https://github.com/xenioplatform/go-xenio/rpc"
 	"github.com/gizak/termui"
 	"gopkg.in/urfave/cli.v1"
 )

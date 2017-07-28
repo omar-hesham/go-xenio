@@ -19,7 +19,7 @@ package ethapi
 import (
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
+	"https://github.com/xenioplatform/go-xenio/common"
 )
 
 type AddrLocker struct {

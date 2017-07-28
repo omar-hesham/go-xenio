@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
+	"https://github.com/xenioplatform/go-xenio/cmd/utils"
 	"gopkg.in/urfave/cli.v1"
 )
 

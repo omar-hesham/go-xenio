@@ -17,8 +17,8 @@
 package main
 
 import (
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"https://github.com/xenioplatform/go-xenio/cmd/utils"
+	"https://github.com/xenioplatform/go-xenio/swarm/storage"
 	"gopkg.in/urfave/cli.v1"
 )
 

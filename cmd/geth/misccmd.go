@@ -25,10 +25,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/params"
+	"https://github.com/xenioplatform/go-xenio/cmd/utils"
+	"https://github.com/xenioplatform/go-xenio/consensus/ethash"
+	"https://github.com/xenioplatform/go-xenio/eth"
+	"https://github.com/xenioplatform/go-xenio/params"
 	"gopkg.in/urfave/cli.v1"
 )
 

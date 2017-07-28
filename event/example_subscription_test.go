@@ -19,7 +19,7 @@ package event_test
 import (
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/event"
+	"https://github.com/xenioplatform/go-xenio/event"
 )
 
 func ExampleNewSubscription() {

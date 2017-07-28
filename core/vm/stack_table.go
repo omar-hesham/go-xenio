@@ -19,7 +19,7 @@ package vm
 import (
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/params"
+	"https://github.com/xenioplatform/go-xenio/params"
 )
 
 func makeStackFunc(pop, push int) stackValidationFunc {

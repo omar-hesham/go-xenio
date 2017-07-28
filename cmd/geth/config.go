@@ -28,12 +28,12 @@ import (
 
 	cli "gopkg.in/urfave/cli.v1"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/contracts/release"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/params"
-	whisper "github.com/ethereum/go-ethereum/whisper/whisperv5"
+	"https://github.com/xenioplatform/go-xenio/cmd/utils"
+	"https://github.com/xenioplatform/go-xenio/contracts/release"
+	"https://github.com/xenioplatform/go-xenio/eth"
+	"https://github.com/xenioplatform/go-xenio/node"
+	"https://github.com/xenioplatform/go-xenio/params"
+	whisper "https://github.com/xenioplatform/go-xenio/whisper/whisperv5"
 	"github.com/naoina/toml"
 )
 

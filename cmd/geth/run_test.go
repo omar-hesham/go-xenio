@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/docker/docker/pkg/reexec"
-	"github.com/ethereum/go-ethereum/internal/cmdtest"
+	"https://github.com/xenioplatform/go-xenio/internal/cmdtest"
 )
 
 func tmpdir(t *testing.T) string {

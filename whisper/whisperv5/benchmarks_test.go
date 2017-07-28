@@ -19,7 +19,7 @@ package whisperv5
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/crypto"
+	"https://github.com/xenioplatform/go-xenio/crypto"
 )
 
 func BenchmarkDeriveKeyMaterial(b *testing.B) {

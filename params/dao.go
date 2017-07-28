@@ -19,7 +19,7 @@ package params
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
+	"https://github.com/xenioplatform/go-xenio/common"
 )
 
 // DAOForkBlockExtra is the block header extra-data field to set for the DAO fork

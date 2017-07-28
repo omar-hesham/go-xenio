@@ -42,7 +42,7 @@ import (
 	"fmt"
 	"hash"
 
-	ethcrypto "github.com/ethereum/go-ethereum/crypto"
+	ethcrypto "https://github.com/xenioplatform/go-xenio/crypto"
 )
 
 var (

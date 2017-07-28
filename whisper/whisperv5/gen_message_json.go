@@ -5,7 +5,7 @@ package whisperv5
 import (
 	"encoding/json"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"https://github.com/xenioplatform/go-xenio/common/hexutil"
 )
 
 func (m Message) MarshalJSON() ([]byte, error) {

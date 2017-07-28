@@ -17,7 +17,7 @@
 package fuse
 
 import (
-	"github.com/ethereum/go-ethereum/swarm/api"
+	"https://github.com/xenioplatform/go-xenio/swarm/api"
 	"sync"
 	"time"
 )
