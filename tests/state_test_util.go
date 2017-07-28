@@ -25,16 +25,16 @@ import (
 	"reflect"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/common/hexutil"
-	"https://github.com/xenioplatform/go-xenio/common/math"
-	"https://github.com/xenioplatform/go-xenio/core"
-	"https://github.com/xenioplatform/go-xenio/core/state"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/core/vm"
-	"https://github.com/xenioplatform/go-xenio/crypto"
-	"https://github.com/xenioplatform/go-xenio/ethdb"
-	"https://github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common/hexutil"
+	"github.com/xenioplatform/go-xenio/common/math"
+	"github.com/xenioplatform/go-xenio/core"
+	"github.com/xenioplatform/go-xenio/core/state"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/core/vm"
+	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/ethdb"
+	"github.com/xenioplatform/go-xenio/params"
 )
 
 // This table defines supported forks and their chain config.

@@ -29,7 +29,7 @@ import (
 	"strings"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/params"
 )
 
 var (
