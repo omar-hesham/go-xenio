@@ -10,7 +10,7 @@ fi
 # Create fake Go workspace if it doesn't exist yet.
 workspace="$PWD/build/_workspace"
 root="$PWD"
-ethdir="$workspace/src/github.com/ethereum"
+ethdir="$workspace/src/github.com/xenioplatform"
 if [ ! -L "$ethdir/go-xenio" ]; then
     mkdir -p "$ethdir"
     cd "$ethdir"
