@@ -24,7 +24,7 @@ import (
 	"math/big"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/rlp"
+	"github.com/xenioplatform/go-xenio/rlp"
 )
 
 // RLPTest is the JSON structure of a single RLP test.

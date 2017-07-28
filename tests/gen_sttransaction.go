@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"https://github.com/xenioplatform/go-xenio/common/hexutil"
-	"https://github.com/xenioplatform/go-xenio/common/math"
+	"github.com/xenioplatform/go-xenio/common/hexutil"
+	"github.com/xenioplatform/go-xenio/common/math"
 )
 
 var _ = (*stTransactionMarshaling)(nil)

@@ -20,7 +20,7 @@ import (
 	"math/big"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/params"
 )
 
 func TestTransaction(t *testing.T) {
