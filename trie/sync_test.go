@@ -20,8 +20,8 @@ import (
 	"bytes"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/ethdb"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/ethdb"
 )
 
 // makeTestTrie create a sample test trie to test node-wise reconstruction.

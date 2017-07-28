@@ -23,12 +23,12 @@ import (
 	"sort"
 	"sync"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/crypto"
-	"https://github.com/xenioplatform/go-xenio/log"
-	"https://github.com/xenioplatform/go-xenio/rlp"
-	"https://github.com/xenioplatform/go-xenio/trie"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/rlp"
+	"github.com/xenioplatform/go-xenio/trie"
 )
 
 type revision struct {

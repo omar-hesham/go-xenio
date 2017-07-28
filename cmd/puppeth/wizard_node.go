@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/accounts/keystore"
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/accounts/keystore"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 // deployNode creates a new node configuration based on some user input.

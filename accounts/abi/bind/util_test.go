@@ -22,12 +22,12 @@ import (
 	"testing"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/accounts/abi/bind"
-	"https://github.com/xenioplatform/go-xenio/accounts/abi/bind/backends"
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/accounts/abi/bind"
+	"github.com/xenioplatform/go-xenio/accounts/abi/bind/backends"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/crypto"
 )
 
 var testKey, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")

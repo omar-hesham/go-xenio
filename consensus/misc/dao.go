@@ -21,9 +21,9 @@ import (
 	"errors"
 	"math/big"
 
-	"https://github.com/xenioplatform/go-xenio/core/state"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/core/state"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/params"
 )
 
 var (

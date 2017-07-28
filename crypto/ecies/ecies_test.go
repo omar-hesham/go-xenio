@@ -41,7 +41,7 @@ import (
 	"math/big"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/crypto"
 )
 
 var dumpEnc bool

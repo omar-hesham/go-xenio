@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/params"
 )
 
 func TestByteOp(t *testing.T) {

@@ -22,8 +22,8 @@ import (
 	"sync"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/log"
-	"https://github.com/xenioplatform/go-xenio/metrics"
+	"github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/metrics"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/filter"

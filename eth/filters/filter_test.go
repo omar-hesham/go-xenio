@@ -23,13 +23,13 @@ import (
 	"os"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/crypto"
-	"https://github.com/xenioplatform/go-xenio/ethdb"
-	"https://github.com/xenioplatform/go-xenio/event"
-	"https://github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/ethdb"
+	"github.com/xenioplatform/go-xenio/event"
+	"github.com/xenioplatform/go-xenio/params"
 )
 
 func makeReceipt(addr common.Address) *types.Receipt {

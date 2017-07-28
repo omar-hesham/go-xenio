@@ -32,9 +32,9 @@ import (
 	"unsafe"
 
 	mmap "github.com/edsrzf/mmap-go"
-	"https://github.com/xenioplatform/go-xenio/consensus"
-	"https://github.com/xenioplatform/go-xenio/log"
-	"https://github.com/xenioplatform/go-xenio/rpc"
+	"github.com/xenioplatform/go-xenio/consensus"
+	"github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/rpc"
 	metrics "github.com/rcrowley/go-metrics"
 )
 

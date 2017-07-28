@@ -23,11 +23,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core/state"
-	"https://github.com/xenioplatform/go-xenio/crypto/sha3"
-	"https://github.com/xenioplatform/go-xenio/log"
-	"https://github.com/xenioplatform/go-xenio/trie"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core/state"
+	"github.com/xenioplatform/go-xenio/crypto/sha3"
+	"github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/trie"
 )
 
 // stateReq represents a batch of state fetch requests groupped together into

@@ -21,7 +21,7 @@ import (
 	"sort"
 	"sync"
 
-	"https://github.com/xenioplatform/go-xenio/event"
+	"github.com/xenioplatform/go-xenio/event"
 )
 
 // Manager is an overarching account manager that can communicate with various

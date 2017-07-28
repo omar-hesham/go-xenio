@@ -33,7 +33,7 @@ import (
 	"strconv"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/swarm/api"
+	"github.com/xenioplatform/go-xenio/swarm/api"
 )
 
 var (

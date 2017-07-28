@@ -25,9 +25,9 @@ import (
 	"sync"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/common/hexutil"
-	"https://github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common/hexutil"
+	"github.com/xenioplatform/go-xenio/core/types"
 )
 
 // Tests that verification caches can be correctly generated.

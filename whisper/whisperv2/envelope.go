@@ -26,11 +26,11 @@ import (
 	"math/big"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/common/math"
-	"https://github.com/xenioplatform/go-xenio/crypto"
-	"https://github.com/xenioplatform/go-xenio/crypto/ecies"
-	"https://github.com/xenioplatform/go-xenio/rlp"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common/math"
+	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/crypto/ecies"
+	"github.com/xenioplatform/go-xenio/rlp"
 )
 
 // Envelope represents a clear-text data packet to transmit through the Whisper

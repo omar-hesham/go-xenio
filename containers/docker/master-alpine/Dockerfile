@@ -2,7 +2,7 @@ FROM alpine:3.5
 
 RUN \
   apk add --update go git make gcc musl-dev linux-headers ca-certificates && \
-  git clone --depth 1 --branch release/1.6 https://github.com/xenioplatform/go-xenio && \
+  git clone --depth 1 --branch release/1.6 github.com/xenioplatform/go-xenio && \
   (cd go-xenio && make geth) && \
   cp go-xenio/build/bin/geth /geth && \
   apk del go git make gcc musl-dev linux-headers && \

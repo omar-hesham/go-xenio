@@ -27,10 +27,10 @@ import (
 	"errors"
 	"strconv"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/crypto"
-	"https://github.com/xenioplatform/go-xenio/crypto/ecies"
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/crypto/ecies"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 // Options specifies the exact way a message should be wrapped into an Envelope.

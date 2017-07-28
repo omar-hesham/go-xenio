@@ -19,8 +19,8 @@ package runtime_test
 import (
 	"fmt"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core/vm/runtime"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core/vm/runtime"
 )
 
 func ExampleExecute() {

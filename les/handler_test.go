@@ -20,15 +20,15 @@ import (
 	"math/rand"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/crypto"
-	"https://github.com/xenioplatform/go-xenio/eth/downloader"
-	"https://github.com/xenioplatform/go-xenio/ethdb"
-	"https://github.com/xenioplatform/go-xenio/p2p"
-	"https://github.com/xenioplatform/go-xenio/rlp"
-	"https://github.com/xenioplatform/go-xenio/trie"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/eth/downloader"
+	"github.com/xenioplatform/go-xenio/ethdb"
+	"github.com/xenioplatform/go-xenio/p2p"
+	"github.com/xenioplatform/go-xenio/rlp"
+	"github.com/xenioplatform/go-xenio/trie"
 )
 
 func expectResponse(r p2p.MsgReader, msgcode, reqID, bv uint64, data interface{}) error {

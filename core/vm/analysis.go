@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 // destinations stores one map per contract (keyed by hash of code).

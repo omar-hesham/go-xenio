@@ -27,9 +27,9 @@ import (
 	"sort"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/internal/jsre"
-	"https://github.com/xenioplatform/go-xenio/internal/web3ext"
-	"https://github.com/xenioplatform/go-xenio/rpc"
+	"github.com/xenioplatform/go-xenio/internal/jsre"
+	"github.com/xenioplatform/go-xenio/internal/web3ext"
+	"github.com/xenioplatform/go-xenio/rpc"
 	"github.com/mattn/go-colorable"
 	"github.com/peterh/liner"
 	"github.com/robertkrimen/otto"

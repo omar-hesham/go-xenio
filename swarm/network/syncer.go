@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"https://github.com/xenioplatform/go-xenio/log"
-	"https://github.com/xenioplatform/go-xenio/swarm/storage"
+	"github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/swarm/storage"
 )
 
 // syncer parameters (global, not peer specific) default values

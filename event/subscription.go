@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/common/mclock"
+	"github.com/xenioplatform/go-xenio/common/mclock"
 )
 
 // Subscription represents a stream of events. The carrier of the events is typically a

@@ -23,10 +23,10 @@ import (
 	"errors"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/accounts"
-	"https://github.com/xenioplatform/go-xenio/accounts/keystore"
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/accounts"
+	"github.com/xenioplatform/go-xenio/accounts/keystore"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/crypto"
 )
 
 const (

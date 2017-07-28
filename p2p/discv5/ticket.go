@@ -25,9 +25,9 @@ import (
 	"sort"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/common/mclock"
-	"https://github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common/mclock"
+	"github.com/xenioplatform/go-xenio/crypto"
 )
 
 const (

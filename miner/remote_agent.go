@@ -23,11 +23,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/consensus"
-	"https://github.com/xenioplatform/go-xenio/consensus/ethash"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/consensus"
+	"github.com/xenioplatform/go-xenio/consensus/ethash"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 type hashrate struct {

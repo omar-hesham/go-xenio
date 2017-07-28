@@ -19,7 +19,7 @@ package trie
 import (
 	"fmt"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 // MissingNodeError is returned by the trie functions (TryGet, TryUpdate, TryDelete)

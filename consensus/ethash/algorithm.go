@@ -26,11 +26,11 @@ import (
 	"time"
 	"unsafe"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/common/bitutil"
-	"https://github.com/xenioplatform/go-xenio/crypto"
-	"https://github.com/xenioplatform/go-xenio/crypto/sha3"
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common/bitutil"
+	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/crypto/sha3"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 const (

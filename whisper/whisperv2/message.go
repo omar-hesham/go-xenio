@@ -26,10 +26,10 @@ import (
 	"math/rand"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/crypto"
-	"https://github.com/xenioplatform/go-xenio/crypto/ecies"
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/crypto/ecies"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 // Message represents an end-user data packet to transmit through the Whisper

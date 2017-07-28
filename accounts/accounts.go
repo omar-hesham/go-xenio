@@ -20,10 +20,10 @@ package accounts
 import (
 	"math/big"
 
-	ethereum "https://github.com/xenioplatform/go-xenio"
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/event"
+	ethereum "github.com/xenioplatform/go-xenio"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/event"
 )
 
 // Account represents an Ethereum account located at a specific location defined

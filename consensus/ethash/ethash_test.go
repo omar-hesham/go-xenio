@@ -20,7 +20,7 @@ import (
 	"math/big"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/core/types"
 )
 
 // Tests that ethash works correctly in test mode.

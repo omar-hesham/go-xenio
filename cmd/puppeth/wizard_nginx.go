@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 // ensureVirtualHost checks whether a reverse-proxy is running on the specified

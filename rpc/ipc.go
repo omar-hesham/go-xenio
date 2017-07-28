@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"net"
 
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 // CreateIPCListener creates an listener, on Unix platforms this is a unix socket, on

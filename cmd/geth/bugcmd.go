@@ -26,10 +26,10 @@ import (
 	"runtime"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/cmd/internal/browser"
-	"https://github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/cmd/internal/browser"
+	"github.com/xenioplatform/go-xenio/params"
 
-	"https://github.com/xenioplatform/go-xenio/cmd/utils"
+	"github.com/xenioplatform/go-xenio/cmd/utils"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -41,7 +41,7 @@ var bugCommand = cli.Command{
 	Category:  "MISCELLANEOUS COMMANDS",
 }
 
-const issueUrl = "https://github.com/xenioplatform/go-xenio/issues/new"
+const issueUrl = "github.com/xenioplatform/go-xenio/issues/new"
 
 // reportBug reports a bug by opening a new URL to the go-xenio GH issue
 // tracker and setting default values as the issue body.

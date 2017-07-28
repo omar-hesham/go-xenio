@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"https://github.com/xenioplatform/go-xenio/cmd/evm/internal/compiler"
+	"github.com/xenioplatform/go-xenio/cmd/evm/internal/compiler"
 
 	cli "gopkg.in/urfave/cli.v1"
 )

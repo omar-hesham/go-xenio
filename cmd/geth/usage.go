@@ -22,8 +22,8 @@ import (
 	"io"
 	"sort"
 
-	"https://github.com/xenioplatform/go-xenio/cmd/utils"
-	"https://github.com/xenioplatform/go-xenio/internal/debug"
+	"github.com/xenioplatform/go-xenio/cmd/utils"
+	"github.com/xenioplatform/go-xenio/internal/debug"
 	"gopkg.in/urfave/cli.v1"
 )
 

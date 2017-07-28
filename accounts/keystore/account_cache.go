@@ -28,9 +28,9 @@ import (
 	"sync"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/accounts"
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/accounts"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 // Minimum amount of time between cache reloads. This limit applies if the platform does

@@ -20,9 +20,9 @@ import (
 	"context"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/core"
-	"https://github.com/xenioplatform/go-xenio/eth/downloader"
-	"https://github.com/xenioplatform/go-xenio/light"
+	"github.com/xenioplatform/go-xenio/core"
+	"github.com/xenioplatform/go-xenio/eth/downloader"
+	"github.com/xenioplatform/go-xenio/light"
 )
 
 const (

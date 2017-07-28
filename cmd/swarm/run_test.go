@@ -27,12 +27,12 @@ import (
 	"time"
 
 	"github.com/docker/docker/pkg/reexec"
-	"https://github.com/xenioplatform/go-xenio/accounts/keystore"
-	"https://github.com/xenioplatform/go-xenio/internal/cmdtest"
-	"https://github.com/xenioplatform/go-xenio/node"
-	"https://github.com/xenioplatform/go-xenio/p2p"
-	"https://github.com/xenioplatform/go-xenio/rpc"
-	"https://github.com/xenioplatform/go-xenio/swarm"
+	"github.com/xenioplatform/go-xenio/accounts/keystore"
+	"github.com/xenioplatform/go-xenio/internal/cmdtest"
+	"github.com/xenioplatform/go-xenio/node"
+	"github.com/xenioplatform/go-xenio/p2p"
+	"github.com/xenioplatform/go-xenio/rpc"
+	"github.com/xenioplatform/go-xenio/swarm"
 )
 
 func init() {

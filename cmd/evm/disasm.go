@@ -22,7 +22,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/core/asm"
+	"github.com/xenioplatform/go-xenio/core/asm"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

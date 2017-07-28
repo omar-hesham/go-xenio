@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"io"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/common/hexutil"
-	"https://github.com/xenioplatform/go-xenio/rlp"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common/hexutil"
+	"github.com/xenioplatform/go-xenio/rlp"
 )
 
 //go:generate gencodec -type Log -field-override logMarshaling -out gen_log_json.go

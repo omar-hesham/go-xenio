@@ -20,8 +20,8 @@ import (
 	"math/big"
 	"reflect"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/common/math"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common/math"
 )
 
 var (

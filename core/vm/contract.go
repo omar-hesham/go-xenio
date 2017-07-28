@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 // ContractRef is a reference to the contract's backing object

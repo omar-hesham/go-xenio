@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/log"
 	"golang.org/x/net/websocket"
 	"gopkg.in/fatih/set.v0"
 )

@@ -26,9 +26,9 @@ import (
 	"testing"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/accounts"
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/event"
+	"github.com/xenioplatform/go-xenio/accounts"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/event"
 )
 
 var testSigData = make([]byte, 32)

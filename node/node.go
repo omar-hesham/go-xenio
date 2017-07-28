@@ -27,13 +27,13 @@ import (
 	"sync"
 	"syscall"
 
-	"https://github.com/xenioplatform/go-xenio/accounts"
-	"https://github.com/xenioplatform/go-xenio/ethdb"
-	"https://github.com/xenioplatform/go-xenio/event"
-	"https://github.com/xenioplatform/go-xenio/internal/debug"
-	"https://github.com/xenioplatform/go-xenio/log"
-	"https://github.com/xenioplatform/go-xenio/p2p"
-	"https://github.com/xenioplatform/go-xenio/rpc"
+	"github.com/xenioplatform/go-xenio/accounts"
+	"github.com/xenioplatform/go-xenio/ethdb"
+	"github.com/xenioplatform/go-xenio/event"
+	"github.com/xenioplatform/go-xenio/internal/debug"
+	"github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/p2p"
+	"github.com/xenioplatform/go-xenio/rpc"
 	"github.com/syndtr/goleveldb/leveldb/storage"
 )
 

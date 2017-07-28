@@ -3,9 +3,9 @@ InstallDir "$InstDir"
 OutFile "${OUTPUTFILE}" # set through command line arguments
 
 # Links for "Add/Remove Programs"
-!define HELPURL "https://github.com/xenioplatform/go-xenio/issues"
-!define UPDATEURL "https://github.com/xenioplatform/go-xenio/releases"
-!define ABOUTURL "https://github.com/xenioplatform/go-xenio#ethereum-go"
+!define HELPURL "github.com/xenioplatform/go-xenio/issues"
+!define UPDATEURL "github.com/xenioplatform/go-xenio/releases"
+!define ABOUTURL "github.com/xenioplatform/go-xenio#ethereum-go"
 !define /date NOW "%Y%m%d"
 
 PageEx license

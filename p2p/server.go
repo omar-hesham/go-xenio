@@ -25,13 +25,13 @@ import (
 	"sync"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/common/mclock"
-	"https://github.com/xenioplatform/go-xenio/log"
-	"https://github.com/xenioplatform/go-xenio/p2p/discover"
-	"https://github.com/xenioplatform/go-xenio/p2p/discv5"
-	"https://github.com/xenioplatform/go-xenio/p2p/nat"
-	"https://github.com/xenioplatform/go-xenio/p2p/netutil"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common/mclock"
+	"github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/p2p/discover"
+	"github.com/xenioplatform/go-xenio/p2p/discv5"
+	"github.com/xenioplatform/go-xenio/p2p/nat"
+	"github.com/xenioplatform/go-xenio/p2p/netutil"
 )
 
 const (

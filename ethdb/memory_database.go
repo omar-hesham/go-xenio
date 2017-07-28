@@ -20,7 +20,7 @@ import (
 	"errors"
 	"sync"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 /*

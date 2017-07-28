@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/log"
-	"https://github.com/xenioplatform/go-xenio/swarm/storage"
+	"github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/swarm/storage"
 )
 
 // Handler for storage/retrieval related protocol requests

@@ -28,7 +28,7 @@ import (
 	"testing"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 // In this test, nodes try to randomly resolve each other.

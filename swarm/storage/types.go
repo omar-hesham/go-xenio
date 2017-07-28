@@ -24,8 +24,8 @@ import (
 	"io"
 	"sync"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/crypto/sha3"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/crypto/sha3"
 )
 
 type Hasher func() hash.Hash

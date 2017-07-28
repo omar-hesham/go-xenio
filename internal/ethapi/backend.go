@@ -21,17 +21,17 @@ import (
 	"context"
 	"math/big"
 
-	"https://github.com/xenioplatform/go-xenio/accounts"
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core"
-	"https://github.com/xenioplatform/go-xenio/core/state"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/core/vm"
-	"https://github.com/xenioplatform/go-xenio/eth/downloader"
-	"https://github.com/xenioplatform/go-xenio/ethdb"
-	"https://github.com/xenioplatform/go-xenio/event"
-	"https://github.com/xenioplatform/go-xenio/params"
-	"https://github.com/xenioplatform/go-xenio/rpc"
+	"github.com/xenioplatform/go-xenio/accounts"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core"
+	"github.com/xenioplatform/go-xenio/core/state"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/core/vm"
+	"github.com/xenioplatform/go-xenio/eth/downloader"
+	"github.com/xenioplatform/go-xenio/ethdb"
+	"github.com/xenioplatform/go-xenio/event"
+	"github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/rpc"
 )
 
 // Backend interface provides the common API services (that are provided by

@@ -26,7 +26,7 @@ import (
 	"os"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/rlp"
+	"github.com/xenioplatform/go-xenio/rlp"
 )
 
 var (

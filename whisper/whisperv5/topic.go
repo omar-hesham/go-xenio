@@ -19,8 +19,8 @@
 package whisperv5
 
 import (
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/common/hexutil"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common/hexutil"
 )
 
 // Topic represents a cryptographically secure, probabilistic partial

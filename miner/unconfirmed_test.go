@@ -19,8 +19,8 @@ package miner
 import (
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core/types"
 )
 
 // noopHeaderRetriever is an implementation of headerRetriever that always

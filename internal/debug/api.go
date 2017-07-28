@@ -33,7 +33,7 @@ import (
 	"sync"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 // Handler is the global debugging handler.

@@ -31,11 +31,11 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	"https://github.com/xenioplatform/go-xenio/crypto"
-	"https://github.com/xenioplatform/go-xenio/crypto/ecies"
-	"https://github.com/xenioplatform/go-xenio/crypto/sha3"
-	"https://github.com/xenioplatform/go-xenio/p2p/discover"
-	"https://github.com/xenioplatform/go-xenio/rlp"
+	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/crypto/ecies"
+	"github.com/xenioplatform/go-xenio/crypto/sha3"
+	"github.com/xenioplatform/go-xenio/p2p/discover"
+	"github.com/xenioplatform/go-xenio/rlp"
 )
 
 func TestSharedSecret(t *testing.T) {

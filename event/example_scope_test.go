@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"sync"
 
-	"https://github.com/xenioplatform/go-xenio/event"
+	"github.com/xenioplatform/go-xenio/event"
 )
 
 // This example demonstrates how SubscriptionScope can be used to control the lifetime of

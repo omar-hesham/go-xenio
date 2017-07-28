@@ -24,7 +24,7 @@ import (
 	"strings"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 func TestSimpleMethodUnpack(t *testing.T) {

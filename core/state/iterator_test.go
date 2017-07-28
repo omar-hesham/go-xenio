@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 // Tests that the node iterator indeed walks over the entire database contents.

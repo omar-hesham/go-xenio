@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 
-	"https://github.com/xenioplatform/go-xenio/core/asm"
+	"github.com/xenioplatform/go-xenio/core/asm"
 )
 
 func Compile(fn string, src []byte, debug bool) (string, error) {

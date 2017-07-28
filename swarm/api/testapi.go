@@ -17,7 +17,7 @@
 package api
 
 import (
-	"https://github.com/xenioplatform/go-xenio/swarm/network"
+	"github.com/xenioplatform/go-xenio/swarm/network"
 )
 
 type Control struct {

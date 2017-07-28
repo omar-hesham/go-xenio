@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/p2p"
-	"https://github.com/xenioplatform/go-xenio/p2p/discover"
+	"github.com/xenioplatform/go-xenio/p2p"
+	"github.com/xenioplatform/go-xenio/p2p/discover"
 )
 
 func startTestCluster(n int) []*Whisper {

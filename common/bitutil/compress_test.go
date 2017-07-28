@@ -21,7 +21,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common/hexutil"
+	"github.com/xenioplatform/go-xenio/common/hexutil"
 )
 
 // Tests that data bitset encoding and decoding works and is bijective.

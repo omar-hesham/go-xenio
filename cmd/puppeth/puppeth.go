@@ -22,7 +22,7 @@ import (
 	"os"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/log"
 	"gopkg.in/urfave/cli.v1"
 )
 

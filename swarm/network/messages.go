@@ -21,11 +21,11 @@ import (
 	"net"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/contracts/chequebook"
-	"https://github.com/xenioplatform/go-xenio/p2p/discover"
-	"https://github.com/xenioplatform/go-xenio/swarm/network/kademlia"
-	"https://github.com/xenioplatform/go-xenio/swarm/services/swap"
-	"https://github.com/xenioplatform/go-xenio/swarm/storage"
+	"github.com/xenioplatform/go-xenio/contracts/chequebook"
+	"github.com/xenioplatform/go-xenio/p2p/discover"
+	"github.com/xenioplatform/go-xenio/swarm/network/kademlia"
+	"github.com/xenioplatform/go-xenio/swarm/services/swap"
+	"github.com/xenioplatform/go-xenio/swarm/storage"
 )
 
 /*

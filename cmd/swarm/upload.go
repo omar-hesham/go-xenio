@@ -30,8 +30,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/cmd/utils"
-	swarm "https://github.com/xenioplatform/go-xenio/swarm/api/client"
+	"github.com/xenioplatform/go-xenio/cmd/utils"
+	swarm "github.com/xenioplatform/go-xenio/swarm/api/client"
 	"gopkg.in/urfave/cli.v1"
 )
 

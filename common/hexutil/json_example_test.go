@@ -20,7 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"https://github.com/xenioplatform/go-xenio/common/hexutil"
+	"github.com/xenioplatform/go-xenio/common/hexutil"
 )
 
 type MyType [5]byte

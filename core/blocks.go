@@ -16,7 +16,7 @@
 
 package core
 
-import "https://github.com/xenioplatform/go-xenio/common"
+import "github.com/xenioplatform/go-xenio/common"
 
 // BadHashes represent a set of manually tracked bad hashes (usually hard forks)
 var BadHashes = map[common.Hash]bool{

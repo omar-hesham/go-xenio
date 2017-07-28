@@ -22,7 +22,7 @@ const (
 
 // locationTrims are trimmed for display to avoid unwieldy log lines.
 var locationTrims = []string{
-	"https://github.com/xenioplatform/go-xenio/",
+	"github.com/xenioplatform/go-xenio/",
 }
 
 // PrintOrigins sets or unsets log location (file:line) printing for terminal

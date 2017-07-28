@@ -25,7 +25,7 @@ import (
 	"strings"
 	"text/template"
 
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 // nodeDockerfile is the Dockerfile required to run an Ethereum node.

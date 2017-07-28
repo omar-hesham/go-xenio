@@ -21,9 +21,9 @@ import (
 	"hash"
 	"sync"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/crypto/sha3"
-	"https://github.com/xenioplatform/go-xenio/rlp"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/crypto/sha3"
+	"github.com/xenioplatform/go-xenio/rlp"
 )
 
 type hasher struct {

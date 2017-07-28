@@ -20,9 +20,9 @@ import (
 	"bytes"
 	"math/big"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/rlp"
-	"https://github.com/xenioplatform/go-xenio/trie"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/rlp"
+	"github.com/xenioplatform/go-xenio/trie"
 )
 
 // StateSync is the main state synchronisation scheduler, which provides yet the

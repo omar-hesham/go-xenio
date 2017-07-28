@@ -21,7 +21,7 @@ package p2p
 import (
 	"net"
 
-	"https://github.com/xenioplatform/go-xenio/metrics"
+	"github.com/xenioplatform/go-xenio/metrics"
 )
 
 var (

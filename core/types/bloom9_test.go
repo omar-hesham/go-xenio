@@ -54,7 +54,7 @@ func TestBloom(t *testing.T) {
 import (
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/core/state"
+	"github.com/xenioplatform/go-xenio/core/state"
 )
 
 func TestBloom9(t *testing.T) {

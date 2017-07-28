@@ -20,7 +20,7 @@ import (
 	"errors"
 	"math/big"
 
-	"https://github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/params"
 )
 
 type (

@@ -27,7 +27,7 @@ import (
 	"path"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/common/math"
+	"github.com/xenioplatform/go-xenio/common/math"
 	"gopkg.in/urfave/cli.v1"
 )
 

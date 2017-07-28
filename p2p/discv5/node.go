@@ -30,8 +30,8 @@ import (
 	"strconv"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/crypto"
 )
 
 // Node represents a host on the network.

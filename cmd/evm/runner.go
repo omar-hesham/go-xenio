@@ -27,16 +27,16 @@ import (
 
 	goruntime "runtime"
 
-	"https://github.com/xenioplatform/go-xenio/cmd/evm/internal/compiler"
-	"https://github.com/xenioplatform/go-xenio/cmd/utils"
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core"
-	"https://github.com/xenioplatform/go-xenio/core/state"
-	"https://github.com/xenioplatform/go-xenio/core/vm"
-	"https://github.com/xenioplatform/go-xenio/core/vm/runtime"
-	"https://github.com/xenioplatform/go-xenio/ethdb"
-	"https://github.com/xenioplatform/go-xenio/log"
-	"https://github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/cmd/evm/internal/compiler"
+	"github.com/xenioplatform/go-xenio/cmd/utils"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core"
+	"github.com/xenioplatform/go-xenio/core/state"
+	"github.com/xenioplatform/go-xenio/core/vm"
+	"github.com/xenioplatform/go-xenio/core/vm/runtime"
+	"github.com/xenioplatform/go-xenio/ethdb"
+	"github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/params"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

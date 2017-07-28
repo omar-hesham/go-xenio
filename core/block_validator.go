@@ -20,11 +20,11 @@ import (
 	"fmt"
 	"math/big"
 
-	"https://github.com/xenioplatform/go-xenio/common/math"
-	"https://github.com/xenioplatform/go-xenio/consensus"
-	"https://github.com/xenioplatform/go-xenio/core/state"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/common/math"
+	"github.com/xenioplatform/go-xenio/consensus"
+	"github.com/xenioplatform/go-xenio/core/state"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/params"
 )
 
 // BlockValidator is responsible for validating block headers, uncles and

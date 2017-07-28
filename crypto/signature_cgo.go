@@ -23,8 +23,8 @@ import (
 	"crypto/elliptic"
 	"fmt"
 
-	"https://github.com/xenioplatform/go-xenio/common/math"
-	"https://github.com/xenioplatform/go-xenio/crypto/secp256k1"
+	"github.com/xenioplatform/go-xenio/common/math"
+	"github.com/xenioplatform/go-xenio/crypto/secp256k1"
 )
 
 func Ecrecover(hash, sig []byte) ([]byte, error) {

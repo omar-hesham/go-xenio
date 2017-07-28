@@ -21,8 +21,8 @@ import (
 
 	"sync/atomic"
 
-	"https://github.com/xenioplatform/go-xenio/consensus"
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/consensus"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 type CpuAgent struct {

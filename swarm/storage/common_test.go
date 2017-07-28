@@ -24,7 +24,7 @@ import (
 	"sync"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 type brokenLimitedReader struct {

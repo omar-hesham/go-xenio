@@ -22,8 +22,8 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"https://github.com/xenioplatform/go-xenio/p2p"
-	"https://github.com/xenioplatform/go-xenio/p2p/nat"
+	"github.com/xenioplatform/go-xenio/p2p"
+	"github.com/xenioplatform/go-xenio/p2p/nat"
 )
 
 const (

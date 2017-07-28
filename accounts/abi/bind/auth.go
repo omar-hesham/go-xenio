@@ -22,10 +22,10 @@ import (
 	"io"
 	"io/ioutil"
 
-	"https://github.com/xenioplatform/go-xenio/accounts/keystore"
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/accounts/keystore"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/crypto"
 )
 
 // NewTransactor is a utility method to easily create a transaction signer from

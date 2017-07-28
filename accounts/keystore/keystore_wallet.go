@@ -19,9 +19,9 @@ package keystore
 import (
 	"math/big"
 
-	ethereum "https://github.com/xenioplatform/go-xenio"
-	"https://github.com/xenioplatform/go-xenio/accounts"
-	"https://github.com/xenioplatform/go-xenio/core/types"
+	ethereum "github.com/xenioplatform/go-xenio"
+	"github.com/xenioplatform/go-xenio/accounts"
+	"github.com/xenioplatform/go-xenio/core/types"
 )
 
 // keystoreWallet implements the accounts.Wallet interface for the original

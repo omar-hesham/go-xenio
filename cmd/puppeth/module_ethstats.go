@@ -24,7 +24,7 @@ import (
 	"strings"
 	"text/template"
 
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 // ethstatsDockerfile is the Dockerfile required to build an ethstats backend

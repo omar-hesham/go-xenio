@@ -19,9 +19,9 @@ package misc
 import (
 	"fmt"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/params"
 )
 
 // VerifyForkHashes verifies that blocks conforming to network hard-forks do have

@@ -22,9 +22,9 @@ import (
 	"os"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/swarm/api"
-	httpapi "https://github.com/xenioplatform/go-xenio/swarm/api/http"
-	"https://github.com/xenioplatform/go-xenio/swarm/storage"
+	"github.com/xenioplatform/go-xenio/swarm/api"
+	httpapi "github.com/xenioplatform/go-xenio/swarm/api/http"
+	"github.com/xenioplatform/go-xenio/swarm/storage"
 )
 
 func NewTestSwarmServer(t *testing.T) *TestSwarmServer {

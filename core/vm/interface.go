@@ -19,8 +19,8 @@ package vm
 import (
 	"math/big"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core/types"
 )
 
 // StateDB is an EVM database for full state querying.

@@ -17,8 +17,8 @@
 package eth
 
 import (
-	"https://github.com/xenioplatform/go-xenio/metrics"
-	"https://github.com/xenioplatform/go-xenio/p2p"
+	"github.com/xenioplatform/go-xenio/metrics"
+	"github.com/xenioplatform/go-xenio/p2p"
 )
 
 var (

@@ -22,9 +22,9 @@ import (
 	"math/big"
 	"sort"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 // nonceHeap is a heap.Interface implementation over 64bit unsigned integers for

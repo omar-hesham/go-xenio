@@ -20,9 +20,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/rlp"
-	"https://github.com/xenioplatform/go-xenio/trie"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/rlp"
+	"github.com/xenioplatform/go-xenio/trie"
 )
 
 type DumpAccount struct {

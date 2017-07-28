@@ -22,7 +22,7 @@ package geth
 import (
 	"errors"
 
-	"https://github.com/xenioplatform/go-xenio/p2p/discv5"
+	"github.com/xenioplatform/go-xenio/p2p/discv5"
 )
 
 // Enode represents a host on the network.

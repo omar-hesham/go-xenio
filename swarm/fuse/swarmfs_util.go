@@ -24,7 +24,7 @@ import (
 	"os/exec"
 	"runtime"
 
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 func externalUnmount(mountPoint string) error {

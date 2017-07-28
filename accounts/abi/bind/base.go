@@ -22,11 +22,11 @@ import (
 	"fmt"
 	"math/big"
 
-	"https://github.com/xenioplatform/go-xenio"
-	"https://github.com/xenioplatform/go-xenio/accounts/abi"
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio"
+	"github.com/xenioplatform/go-xenio/accounts/abi"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/crypto"
 )
 
 // SignerFn is a signer function callback when a contract requires a method to

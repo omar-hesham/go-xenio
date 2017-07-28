@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"math/big"
 
-	"https://github.com/xenioplatform/go-xenio/core/state"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/core/state"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/params"
 )
 
 // ValidateDAOHeaderExtraData validates the extra-data field of a block header to

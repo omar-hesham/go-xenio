@@ -20,7 +20,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common/math"
+	"github.com/xenioplatform/go-xenio/common/math"
 )
 
 func TestBlockNumberJSONUnmarshal(t *testing.T) {

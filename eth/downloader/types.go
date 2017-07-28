@@ -19,7 +19,7 @@ package downloader
 import (
 	"fmt"
 
-	"https://github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/core/types"
 )
 
 // peerDropFn is a callback type for dropping a peer detected as malicious.

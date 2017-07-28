@@ -22,8 +22,8 @@ import (
 	"os"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/core"
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/core"
+	"github.com/xenioplatform/go-xenio/log"
 	"github.com/olekukonko/tablewriter"
 )
 

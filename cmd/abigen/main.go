@@ -24,8 +24,8 @@ import (
 	"os"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/accounts/abi/bind"
-	"https://github.com/xenioplatform/go-xenio/common/compiler"
+	"github.com/xenioplatform/go-xenio/accounts/abi/bind"
+	"github.com/xenioplatform/go-xenio/common/compiler"
 )
 
 var (

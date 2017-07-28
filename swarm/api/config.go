@@ -24,12 +24,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/contracts/ens"
-	"https://github.com/xenioplatform/go-xenio/crypto"
-	"https://github.com/xenioplatform/go-xenio/swarm/network"
-	"https://github.com/xenioplatform/go-xenio/swarm/services/swap"
-	"https://github.com/xenioplatform/go-xenio/swarm/storage"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/contracts/ens"
+	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/swarm/network"
+	"github.com/xenioplatform/go-xenio/swarm/services/swap"
+	"github.com/xenioplatform/go-xenio/swarm/storage"
 )
 
 const (

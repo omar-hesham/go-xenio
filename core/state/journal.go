@@ -19,7 +19,7 @@ package state
 import (
 	"math/big"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 type journalEntry interface {

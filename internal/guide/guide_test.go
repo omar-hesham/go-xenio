@@ -30,8 +30,8 @@ import (
 	"testing"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/accounts/keystore"
-	"https://github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/accounts/keystore"
+	"github.com/xenioplatform/go-xenio/core/types"
 )
 
 // Tests that the account management snippets work correctly.

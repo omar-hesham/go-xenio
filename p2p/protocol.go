@@ -19,7 +19,7 @@ package p2p
 import (
 	"fmt"
 
-	"https://github.com/xenioplatform/go-xenio/p2p/discover"
+	"github.com/xenioplatform/go-xenio/p2p/discover"
 )
 
 // Protocol represents a P2P subprotocol implementation.

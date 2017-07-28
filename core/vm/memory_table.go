@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"https://github.com/xenioplatform/go-xenio/common/math"
+	"github.com/xenioplatform/go-xenio/common/math"
 )
 
 func memorySha3(stack *Stack) *big.Int {

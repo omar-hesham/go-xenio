@@ -16,7 +16,7 @@
 
 package ethclient
 
-import "https://github.com/xenioplatform/go-xenio"
+import "github.com/xenioplatform/go-xenio"
 
 // Verify that Client implements the ethereum interfaces.
 var (

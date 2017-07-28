@@ -17,7 +17,7 @@
 // Package bind generates Ethereum contract Go bindings.
 //
 // Detailed usage document and tutorial available on the go-xenio Wiki page:
-// https://github.com/xenioplatform/go-xenio/wiki/Native-DApps:-Go-bindings-to-Ethereum-contracts
+// github.com/xenioplatform/go-xenio/wiki/Native-DApps:-Go-bindings-to-Ethereum-contracts
 package bind
 
 import (
@@ -28,7 +28,7 @@ import (
 	"text/template"
 	"unicode"
 
-	"https://github.com/xenioplatform/go-xenio/accounts/abi"
+	"github.com/xenioplatform/go-xenio/accounts/abi"
 	"golang.org/x/tools/imports"
 )
 

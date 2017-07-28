@@ -24,8 +24,8 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common/math"
-	"https://github.com/xenioplatform/go-xenio/crypto/randentropy"
+	"github.com/xenioplatform/go-xenio/common/math"
+	"github.com/xenioplatform/go-xenio/crypto/randentropy"
 )
 
 const TestCount = 1000

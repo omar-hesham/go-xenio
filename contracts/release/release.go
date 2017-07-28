@@ -25,15 +25,15 @@ import (
 	"strings"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/accounts/abi/bind"
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/eth"
-	"https://github.com/xenioplatform/go-xenio/internal/ethapi"
-	"https://github.com/xenioplatform/go-xenio/les"
-	"https://github.com/xenioplatform/go-xenio/log"
-	"https://github.com/xenioplatform/go-xenio/node"
-	"https://github.com/xenioplatform/go-xenio/p2p"
-	"https://github.com/xenioplatform/go-xenio/rpc"
+	"github.com/xenioplatform/go-xenio/accounts/abi/bind"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/eth"
+	"github.com/xenioplatform/go-xenio/internal/ethapi"
+	"github.com/xenioplatform/go-xenio/les"
+	"github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/node"
+	"github.com/xenioplatform/go-xenio/p2p"
+	"github.com/xenioplatform/go-xenio/rpc"
 )
 
 // Interval to check for new releases
@@ -149,7 +149,7 @@ func (r *ReleaseService) checkVersion() {
 
 		warning := fmt.Sprintf("Client v%d.%d.%d-%x seems older than the latest upstream release v%d.%d.%d-%x",
 			r.config.Major, r.config.Minor, r.config.Patch, r.config.Commit[:4], version.Major, version.Minor, version.Patch, version.Commit[:4])
-		howtofix := fmt.Sprintf("Please check https://github.com/xenioplatform/go-xenio/releases for new releases")
+		howtofix := fmt.Sprintf("Please check github.com/xenioplatform/go-xenio/releases for new releases")
 		separator := strings.Repeat("-", len(warning))
 
 		log.Warn(separator)

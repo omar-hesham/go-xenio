@@ -25,7 +25,7 @@ import (
 	"testing"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/internal/build"
+	"github.com/xenioplatform/go-xenio/internal/build"
 )
 
 // androidTestClass is a Java class to do some lightweight tests against the Android
@@ -202,7 +202,7 @@ func TestAndroid(t *testing.T) {
 		}
 	}
 	// Generate the mobile bindings for Geth and add the tester class
-	gobind := exec.Command("gomobile", "bind", "-javapkg", "org.ethereum", "https://github.com/xenioplatform/go-xenio/mobile")
+	gobind := exec.Command("gomobile", "bind", "-javapkg", "org.ethereum", "github.com/xenioplatform/go-xenio/mobile")
 	if output, err := gobind.CombinedOutput(); err != nil {
 		t.Logf("%s", output)
 		t.Fatalf("failed to run gomobile bind: %v", err)

@@ -23,7 +23,7 @@ import (
 	"os"
 	"runtime/trace"
 
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 // StartGoTrace turns on tracing, writing to the given file.

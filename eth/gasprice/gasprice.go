@@ -22,10 +22,10 @@ import (
 	"sort"
 	"sync"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/internal/ethapi"
-	"https://github.com/xenioplatform/go-xenio/params"
-	"https://github.com/xenioplatform/go-xenio/rpc"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/internal/ethapi"
+	"github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/rpc"
 )
 
 var maxPrice = big.NewInt(500 * params.Shannon)

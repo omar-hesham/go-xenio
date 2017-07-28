@@ -30,9 +30,9 @@ import (
 
 	check "gopkg.in/check.v1"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/ethdb"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/ethdb"
 )
 
 // Tests that updating a state trie does not leak any database writes prior to

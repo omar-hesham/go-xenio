@@ -21,8 +21,8 @@ import (
 	mrand "math/rand"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/crypto"
-	"https://github.com/xenioplatform/go-xenio/rlp"
+	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/rlp"
 )
 
 func copyFromBuf(dst []byte, src []byte, beg int) int {

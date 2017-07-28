@@ -24,17 +24,17 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"https://github.com/xenioplatform/go-xenio/core"
-	"https://github.com/xenioplatform/go-xenio/eth"
-	"https://github.com/xenioplatform/go-xenio/eth/downloader"
-	"https://github.com/xenioplatform/go-xenio/ethclient"
-	"https://github.com/xenioplatform/go-xenio/ethstats"
-	"https://github.com/xenioplatform/go-xenio/les"
-	"https://github.com/xenioplatform/go-xenio/node"
-	"https://github.com/xenioplatform/go-xenio/p2p"
-	"https://github.com/xenioplatform/go-xenio/p2p/nat"
-	"https://github.com/xenioplatform/go-xenio/params"
-	whisper "https://github.com/xenioplatform/go-xenio/whisper/whisperv5"
+	"github.com/xenioplatform/go-xenio/core"
+	"github.com/xenioplatform/go-xenio/eth"
+	"github.com/xenioplatform/go-xenio/eth/downloader"
+	"github.com/xenioplatform/go-xenio/ethclient"
+	"github.com/xenioplatform/go-xenio/ethstats"
+	"github.com/xenioplatform/go-xenio/les"
+	"github.com/xenioplatform/go-xenio/node"
+	"github.com/xenioplatform/go-xenio/p2p"
+	"github.com/xenioplatform/go-xenio/p2p/nat"
+	"github.com/xenioplatform/go-xenio/params"
+	whisper "github.com/xenioplatform/go-xenio/whisper/whisperv5"
 )
 
 // NodeConfig represents the collection of configuration values to fine tune the Geth

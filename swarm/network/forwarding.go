@@ -21,8 +21,8 @@ import (
 	"math/rand"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/log"
-	"https://github.com/xenioplatform/go-xenio/swarm/storage"
+	"github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/swarm/storage"
 )
 
 const requesterCount = 3

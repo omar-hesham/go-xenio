@@ -20,10 +20,10 @@ import (
 	"math/big"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/accounts/abi/bind"
-	"https://github.com/xenioplatform/go-xenio/accounts/abi/bind/backends"
-	"https://github.com/xenioplatform/go-xenio/core"
-	"https://github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/accounts/abi/bind"
+	"github.com/xenioplatform/go-xenio/accounts/abi/bind/backends"
+	"github.com/xenioplatform/go-xenio/core"
+	"github.com/xenioplatform/go-xenio/crypto"
 )
 
 var (

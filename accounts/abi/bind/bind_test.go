@@ -26,7 +26,7 @@ import (
 	"strings"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 	"golang.org/x/tools/imports"
 )
 

@@ -5,8 +5,8 @@ Maintainer: {{.Author}}
 Build-Depends: debhelper (>= 8.0.0), golang-1.8
 Standards-Version: 3.9.5
 Homepage: https://ethereum.org
-Vcs-Git: git://https://github.com/xenioplatform/go-xenio.git
-Vcs-Browser: https://github.com/xenioplatform/go-xenio
+Vcs-Git: git://github.com/xenioplatform/go-xenio.git
+Vcs-Browser: github.com/xenioplatform/go-xenio
 
 Package: {{.Name}}
 Architecture: any

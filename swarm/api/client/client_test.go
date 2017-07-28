@@ -25,8 +25,8 @@ import (
 	"sort"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/swarm/api"
-	"https://github.com/xenioplatform/go-xenio/swarm/testutil"
+	"github.com/xenioplatform/go-xenio/swarm/api"
+	"github.com/xenioplatform/go-xenio/swarm/testutil"
 )
 
 // TestClientUploadDownloadRaw test uploading and downloading raw data to swarm

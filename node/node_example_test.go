@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"log"
 
-	"https://github.com/xenioplatform/go-xenio/node"
-	"https://github.com/xenioplatform/go-xenio/p2p"
-	"https://github.com/xenioplatform/go-xenio/rpc"
+	"github.com/xenioplatform/go-xenio/node"
+	"github.com/xenioplatform/go-xenio/p2p"
+	"github.com/xenioplatform/go-xenio/rpc"
 )
 
 // SampleService is a trivial network service that can be attached to a node for

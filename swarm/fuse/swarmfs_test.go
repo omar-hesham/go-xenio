@@ -27,8 +27,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/swarm/api"
-	"https://github.com/xenioplatform/go-xenio/swarm/storage"
+	"github.com/xenioplatform/go-xenio/swarm/api"
+	"github.com/xenioplatform/go-xenio/swarm/storage"
 )
 
 type fileInfo struct {

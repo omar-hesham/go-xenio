@@ -20,7 +20,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 func newDb() *LDBDatabase {

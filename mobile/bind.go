@@ -22,10 +22,10 @@ import (
 	"math/big"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/accounts/abi"
-	"https://github.com/xenioplatform/go-xenio/accounts/abi/bind"
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/accounts/abi"
+	"github.com/xenioplatform/go-xenio/accounts/abi/bind"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core/types"
 )
 
 // Signer is an interaface defining the callback when a contract requires a

@@ -23,7 +23,7 @@ import (
 	"math/rand"
 	"path/filepath"
 
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 // nginxDockerfile is theis the Dockerfile required to build an nginx reverse-

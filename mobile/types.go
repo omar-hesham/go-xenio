@@ -23,9 +23,9 @@ import (
 	"errors"
 	"fmt"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/rlp"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/rlp"
 )
 
 // A Nonce is a 64-bit hash which proves (combined with the mix-hash) that

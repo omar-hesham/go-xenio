@@ -16,7 +16,7 @@
 
 package bind
 
-import "https://github.com/xenioplatform/go-xenio/accounts/abi"
+import "github.com/xenioplatform/go-xenio/accounts/abi"
 
 // tmplData is the data structure required to fill the binding template.
 type tmplData struct {

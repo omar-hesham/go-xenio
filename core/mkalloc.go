@@ -34,8 +34,8 @@ import (
 	"sort"
 	"strconv"
 
-	"https://github.com/xenioplatform/go-xenio/core"
-	"https://github.com/xenioplatform/go-xenio/rlp"
+	"github.com/xenioplatform/go-xenio/core"
+	"github.com/xenioplatform/go-xenio/rlp"
 )
 
 type allocItem struct{ Addr, Balance *big.Int }

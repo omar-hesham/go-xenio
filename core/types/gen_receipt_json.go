@@ -7,8 +7,8 @@ import (
 	"errors"
 	"math/big"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/common/hexutil"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common/hexutil"
 )
 
 func (r Receipt) MarshalJSON() ([]byte, error) {

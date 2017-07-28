@@ -23,7 +23,7 @@ import (
 	"reflect"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 // The ABI holds information about a contract's context and available

@@ -22,7 +22,7 @@ import (
 	"errors"
 	"math/big"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 // Interface represents a wrapped version of Go's interface{}, with the capacity

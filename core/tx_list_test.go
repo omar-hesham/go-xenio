@@ -21,8 +21,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/crypto"
 )
 
 // Tests that transactions can be added to strict lists and list contents and

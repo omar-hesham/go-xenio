@@ -26,8 +26,8 @@ import (
 	"math/rand"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/internal/jsre/deps"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/internal/jsre/deps"
 	"github.com/robertkrimen/otto"
 )
 

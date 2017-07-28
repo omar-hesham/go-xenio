@@ -21,7 +21,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 func initDbStore(t *testing.T) *DbStore {

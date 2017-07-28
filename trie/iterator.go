@@ -21,7 +21,7 @@ import (
 	"container/heap"
 	"errors"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 // Iterator is a key-value trie iterator that traverses a Trie.

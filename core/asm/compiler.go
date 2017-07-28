@@ -23,8 +23,8 @@ import (
 	"os"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/common/math"
-	"https://github.com/xenioplatform/go-xenio/core/vm"
+	"github.com/xenioplatform/go-xenio/common/math"
+	"github.com/xenioplatform/go-xenio/core/vm"
 )
 
 // Compiler contains information about the parsed source

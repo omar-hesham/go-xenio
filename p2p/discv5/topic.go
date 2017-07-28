@@ -23,7 +23,7 @@ import (
 	"math/rand"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/common/mclock"
+	"github.com/xenioplatform/go-xenio/common/mclock"
 )
 
 const (

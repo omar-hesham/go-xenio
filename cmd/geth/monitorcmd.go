@@ -25,9 +25,9 @@ import (
 	"strings"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/cmd/utils"
-	"https://github.com/xenioplatform/go-xenio/node"
-	"https://github.com/xenioplatform/go-xenio/rpc"
+	"github.com/xenioplatform/go-xenio/cmd/utils"
+	"github.com/xenioplatform/go-xenio/node"
+	"github.com/xenioplatform/go-xenio/rpc"
 	"github.com/gizak/termui"
 	"gopkg.in/urfave/cli.v1"
 )

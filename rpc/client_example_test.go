@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/rpc"
+	"github.com/xenioplatform/go-xenio/rpc"
 )
 
 // In this example, our client whishes to track the latest 'block number'

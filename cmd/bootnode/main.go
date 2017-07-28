@@ -23,13 +23,13 @@ import (
 	"fmt"
 	"os"
 
-	"https://github.com/xenioplatform/go-xenio/cmd/utils"
-	"https://github.com/xenioplatform/go-xenio/crypto"
-	"https://github.com/xenioplatform/go-xenio/log"
-	"https://github.com/xenioplatform/go-xenio/p2p/discover"
-	"https://github.com/xenioplatform/go-xenio/p2p/discv5"
-	"https://github.com/xenioplatform/go-xenio/p2p/nat"
-	"https://github.com/xenioplatform/go-xenio/p2p/netutil"
+	"github.com/xenioplatform/go-xenio/cmd/utils"
+	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/p2p/discover"
+	"github.com/xenioplatform/go-xenio/p2p/discv5"
+	"github.com/xenioplatform/go-xenio/p2p/nat"
+	"github.com/xenioplatform/go-xenio/p2p/netutil"
 )
 
 func main() {

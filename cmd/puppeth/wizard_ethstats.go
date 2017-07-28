@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 // deployEthstats queries the user for various input on deploying an ethstats

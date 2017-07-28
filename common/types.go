@@ -23,7 +23,7 @@ import (
 	"math/rand"
 	"reflect"
 
-	"https://github.com/xenioplatform/go-xenio/common/hexutil"
+	"github.com/xenioplatform/go-xenio/common/hexutil"
 )
 
 const (

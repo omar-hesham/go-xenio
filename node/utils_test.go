@@ -22,8 +22,8 @@ package node
 import (
 	"reflect"
 
-	"https://github.com/xenioplatform/go-xenio/p2p"
-	"https://github.com/xenioplatform/go-xenio/rpc"
+	"github.com/xenioplatform/go-xenio/p2p"
+	"github.com/xenioplatform/go-xenio/rpc"
 )
 
 // NoopService is a trivial implementation of the Service interface.

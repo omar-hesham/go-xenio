@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/crypto"
 )
 
 // Event is an event potentially triggered by the EVM's LOG mechanism. The Event

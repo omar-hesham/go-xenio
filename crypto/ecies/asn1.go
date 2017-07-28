@@ -42,7 +42,7 @@ import (
 	"hash"
 	"math/big"
 
-	ethcrypto "https://github.com/xenioplatform/go-xenio/crypto"
+	ethcrypto "github.com/xenioplatform/go-xenio/crypto"
 )
 
 var (

@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/common/hexutil"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common/hexutil"
 )
 
 func (l Log) MarshalJSON() ([]byte, error) {

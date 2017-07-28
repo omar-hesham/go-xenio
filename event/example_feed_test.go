@@ -19,7 +19,7 @@ package event_test
 import (
 	"fmt"
 
-	"https://github.com/xenioplatform/go-xenio/event"
+	"github.com/xenioplatform/go-xenio/event"
 )
 
 func ExampleFeed_acknowledgedEvents() {

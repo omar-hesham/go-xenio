@@ -21,9 +21,9 @@ package geth
 import (
 	"encoding/json"
 
-	"https://github.com/xenioplatform/go-xenio/core"
-	"https://github.com/xenioplatform/go-xenio/p2p/discv5"
-	"https://github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/core"
+	"github.com/xenioplatform/go-xenio/p2p/discv5"
+	"github.com/xenioplatform/go-xenio/params"
 )
 
 // MainnetGenesis returns the JSON spec to use for the main Ethereum network. It

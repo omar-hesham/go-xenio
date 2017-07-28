@@ -21,7 +21,7 @@ package keystore
 import (
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/log"
 	"github.com/rjeczalik/notify"
 )
 

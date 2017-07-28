@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 func (Address) Generate(rand *rand.Rand, size int) reflect.Value {

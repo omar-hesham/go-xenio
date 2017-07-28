@@ -27,7 +27,7 @@ import (
 	"testing"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/params"
 )
 
 const (

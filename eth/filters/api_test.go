@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/rpc"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/rpc"
 )
 
 func TestUnmarshalJSONNewFilterArgs(t *testing.T) {

@@ -22,8 +22,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/ethdb"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/ethdb"
 )
 
 func TestIterator(t *testing.T) {

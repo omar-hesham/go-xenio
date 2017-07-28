@@ -19,7 +19,7 @@
 package downloader
 
 import (
-	"https://github.com/xenioplatform/go-xenio/metrics"
+	"github.com/xenioplatform/go-xenio/metrics"
 )
 
 var (

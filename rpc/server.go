@@ -25,7 +25,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/log"
 	"gopkg.in/fatih/set.v0"
 )
 

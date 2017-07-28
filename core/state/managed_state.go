@@ -19,7 +19,7 @@ package state
 import (
 	"sync"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 type account struct {

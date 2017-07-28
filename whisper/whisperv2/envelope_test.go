@@ -21,8 +21,8 @@ import (
 	"testing"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/crypto"
-	"https://github.com/xenioplatform/go-xenio/crypto/ecies"
+	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/crypto/ecies"
 )
 
 func TestEnvelopeOpen(t *testing.T) {

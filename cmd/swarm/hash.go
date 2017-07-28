@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"os"
 
-	"https://github.com/xenioplatform/go-xenio/cmd/utils"
-	"https://github.com/xenioplatform/go-xenio/swarm/storage"
+	"github.com/xenioplatform/go-xenio/cmd/utils"
+	"github.com/xenioplatform/go-xenio/swarm/storage"
 	"gopkg.in/urfave/cli.v1"
 )
 

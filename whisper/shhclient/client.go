@@ -19,10 +19,10 @@ package shhclient
 import (
 	"context"
 
-	"https://github.com/xenioplatform/go-xenio"
-	"https://github.com/xenioplatform/go-xenio/common/hexutil"
-	"https://github.com/xenioplatform/go-xenio/rpc"
-	whisper "https://github.com/xenioplatform/go-xenio/whisper/whisperv5"
+	"github.com/xenioplatform/go-xenio"
+	"github.com/xenioplatform/go-xenio/common/hexutil"
+	"github.com/xenioplatform/go-xenio/rpc"
+	whisper "github.com/xenioplatform/go-xenio/whisper/whisperv5"
 )
 
 // Client defines typed wrappers for the Whisper v5 RPC API.

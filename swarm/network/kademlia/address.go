@@ -21,7 +21,7 @@ import (
 	"math/rand"
 	"strings"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 type Address common.Hash

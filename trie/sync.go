@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 
-	"https://github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/common"
 	"gopkg.in/karalabe/cookiejar.v2/collections/prque"
 )
 

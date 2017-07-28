@@ -37,7 +37,7 @@ import (
 	"sync"
 	"unsafe"
 
-	"https://github.com/xenioplatform/go-xenio/common/math"
+	"github.com/xenioplatform/go-xenio/common/math"
 )
 
 /*

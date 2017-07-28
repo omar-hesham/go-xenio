@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/common/mclock"
+	"github.com/xenioplatform/go-xenio/common/mclock"
 )
 
 const rcConst = 1000000

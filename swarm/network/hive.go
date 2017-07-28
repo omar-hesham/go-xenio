@@ -22,12 +22,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/log"
-	"https://github.com/xenioplatform/go-xenio/p2p/discover"
-	"https://github.com/xenioplatform/go-xenio/p2p/netutil"
-	"https://github.com/xenioplatform/go-xenio/swarm/network/kademlia"
-	"https://github.com/xenioplatform/go-xenio/swarm/storage"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/p2p/discover"
+	"github.com/xenioplatform/go-xenio/p2p/netutil"
+	"github.com/xenioplatform/go-xenio/swarm/network/kademlia"
+	"github.com/xenioplatform/go-xenio/swarm/storage"
 )
 
 // Hive is the logistic manager of the swarm

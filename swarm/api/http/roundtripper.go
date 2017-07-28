@@ -20,17 +20,17 @@ import (
 	"fmt"
 	"net/http"
 
-	"https://github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 /*
 http roundtripper to register for bzz url scheme
-see https://github.com/xenioplatform/go-xenio/issues/2040
+see github.com/xenioplatform/go-xenio/issues/2040
 Usage:
 
 import (
- "https://github.com/xenioplatform/go-xenio/common/httpclient"
- "https://github.com/xenioplatform/go-xenio/swarm/api/http"
+ "github.com/xenioplatform/go-xenio/common/httpclient"
+ "github.com/xenioplatform/go-xenio/swarm/api/http"
 )
 client := httpclient.New()
 // for (private) swarm proxy running locally

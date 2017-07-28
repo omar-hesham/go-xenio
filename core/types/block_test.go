@@ -23,8 +23,8 @@ import (
 	"reflect"
 	"testing"
 
-	"https://github.com/xenioplatform/go-xenio/common"
-	"https://github.com/xenioplatform/go-xenio/rlp"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/rlp"
 )
 
 // from bcValidBlockTest.json, "SimpleTx"

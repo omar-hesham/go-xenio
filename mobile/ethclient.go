@@ -21,8 +21,8 @@ package geth
 import (
 	"math/big"
 
-	"https://github.com/xenioplatform/go-xenio/core/types"
-	"https://github.com/xenioplatform/go-xenio/ethclient"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/ethclient"
 )
 
 // EthereumClient provides access to the Ethereum APIs.
