@@ -24,10 +24,7 @@ import (
 	"reflect"
 
 	"github.com/xenioplatform/go-xenio/common/hexutil"
-<<<<<<< HEAD
 	"github.com/xenioplatform/go-xenio/crypto/sha3"
-=======
->>>>>>> PropName
 )
 
 const (
