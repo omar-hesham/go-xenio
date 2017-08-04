@@ -39,7 +39,7 @@ import (
 )
 
 const (
-	clientIdentifier = "geth" // Client identifier to advertise over the network
+	clientIdentifier = "xenio" // Client identifier to advertise over the network
 )
 
 var (
@@ -132,6 +132,7 @@ var (
 		utils.WhisperEnabledFlag,
 		utils.WhisperMaxMessageSizeFlag,
 		utils.WhisperMinPOWFlag,
+
 	}
 )
 

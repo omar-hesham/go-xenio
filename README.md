@@ -13,7 +13,7 @@ Binary archives are published at https://geth.ethereum.org/downloads/.
 ## Building the source
 
 For prerequisites and detailed build instructions please read the
-[Installation Instructions](github.com/xenioplatform/go-xenio/wiki/Building-Ethereum)
+[Installation Instructions](https://github.com/xenioplatform/go-xenio/wiki/Building-Ethereum)
 on the wiki.
 
 Building geth requires both a Go (version 1.7 or later) and a C compiler.

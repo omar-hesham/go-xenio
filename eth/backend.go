@@ -309,7 +309,7 @@ func (s *Ethereum) Etherbase() (eb common.Address, err error) {
 			return accounts[0].Address, nil
 		}
 	}
-	return common.Address{}, fmt.Errorf("etherbase address must be explicitly specified")
+	return common.Address{}, fmt.Errorf("xeniobase address must be explicitly specified")
 }
 
 // set in js console via admin interface or wrapper from cli flags
@@ -324,13 +324,13 @@ func (self *Ethereum) SetEtherbase(etherbase common.Address) {
 func (s *Ethereum) StartMining(local bool) error {
 	eb, err := s.Etherbase()
 	if err != nil {
-		log.Error("Cannot start mining without etherbase", "err", err)
-		return fmt.Errorf("etherbase missing: %v", err)
+		log.Error("Cannot start mining without xeniobase", "err", err)
+		return fmt.Errorf("xeniobase missing: %v", err)
 	}
 	if clique, ok := s.engine.(*clique.Clique); ok {
 		wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
 		if wallet == nil || err != nil {
-			log.Error("Etherbase account unavailable locally", "err", err)
+			log.Error("Xeniobase account unavailable locally", "err", err)
 			return fmt.Errorf("singer missing: %v", err)
 		}
 		clique.Authorize(eb, wallet.SignHash)
