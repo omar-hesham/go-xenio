@@ -274,6 +274,10 @@ var (
 		Name:  "mine",
 		Usage: "Enable mining",
 	}
+	StakingEnabledFlag = cli.BoolFlag{
+		Name:  "stake",
+		Usage: "Enable staking",
+	}
 	MinerThreadsFlag = cli.IntFlag{
 		Name:  "minerthreads",
 		Usage: "Number of CPU threads to use for mining",

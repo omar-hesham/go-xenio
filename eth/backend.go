@@ -289,6 +289,11 @@ func (s *Ethereum) APIs() []rpc.API {
 			Service:   s.netRPCService,
 			Public:    true,
 		},
+		{
+			Namespace: "stake",
+			Version:   "1.0",
+			Service:   NewPrivateDebugAPI(s.chainConfig, s), // TODO: should change that
+		},
 	}...)
 }
 

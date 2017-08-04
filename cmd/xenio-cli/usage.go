@@ -170,6 +170,17 @@ var AppHelpFlagGroups = []flagGroup{
 		},
 	},
 	{
+		Name: "STAKER",
+		Flags: []cli.Flag{
+			utils.StakingEnabledFlag,
+			//utils.MinerThreadsFlag,
+			utils.EtherbaseFlag,
+			utils.TargetGasLimitFlag,
+			utils.GasPriceFlag,
+			utils.ExtraDataFlag,
+		},
+	},
+	{
 		Name: "GAS PRICE ORACLE",
 		Flags: []cli.Flag{
 			utils.GpoBlocksFlag,

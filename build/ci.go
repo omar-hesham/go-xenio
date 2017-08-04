@@ -96,7 +96,7 @@ var (
 		},
 		{
 			Name:        "geth",
-			Description: "Ethereum CLI client.",
+			Description: "Xenio CLI client.",
 		},
 		{
 			Name:        "puppeth",
