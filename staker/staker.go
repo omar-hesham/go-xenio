@@ -67,10 +67,10 @@ out:
 		switch ev.Data.(type) {
 		case downloader.StartEvent:
 			atomic.StoreInt32(&self.canStart, 0)
-			if self.Mining() {
+			if self.Staking() {
 				self.Stop()
 				atomic.StoreInt32(&self.shouldStart, 1)
-				log.Info("Stakeking aborted due to sync")
+				log.Info("Staking aborted due to sync")
 			}
 		case downloader.DoneEvent, downloader.FailedEvent:
 			shouldStart := atomic.LoadInt32(&self.shouldStart) == 1
@@ -113,7 +113,7 @@ func (self *Staker) Stop() {
 }
 
 func (self *Staker) Register(agent Agent) {
-	if self.Mining() {
+	if self.Staking() {
 		agent.Start()
 	}
 	self.worker.register(agent)
@@ -123,7 +123,7 @@ func (self *Staker) Unregister(agent Agent) {
 	self.worker.unregister(agent)
 }
 
-func (self *Staker) Mining() bool {
+func (self *Staker) Staking() bool {
 	return atomic.LoadInt32(&self.mining) > 0
 }
 

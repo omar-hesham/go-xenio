@@ -42,6 +42,7 @@ import (
 	"github.com/xenioplatform/go-xenio/internal/ethapi"
 	"github.com/xenioplatform/go-xenio/log"
 	"github.com/xenioplatform/go-xenio/miner"
+	"github.com/xenioplatform/go-xenio/staker"
 	"github.com/xenioplatform/go-xenio/node"
 	"github.com/xenioplatform/go-xenio/p2p"
 	"github.com/xenioplatform/go-xenio/params"
@@ -83,6 +84,8 @@ type Ethereum struct {
 	netRPCService *ethapi.PublicNetAPI
 
 	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and etherbase)
+
+	staker     *staker.Staker
 }
 
 func (s *Ethereum) AddLesServer(ls LesServer) {
@@ -170,6 +173,10 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 
 	eth.miner = miner.New(eth, eth.chainConfig, eth.EventMux(), eth.engine)
 	eth.miner.SetExtra(makeExtraData(config.ExtraData))
+
+	eth.staker = staker.New(eth, eth.chainConfig, eth.EventMux(), eth.engine)
+	eth.staker.SetExtra(makeExtraData(config.ExtraData))
+
 
 	eth.ApiBackend = &EthApiBackend{eth, nil}
 	gpoParams := config.GPO
@@ -290,9 +297,9 @@ func (s *Ethereum) APIs() []rpc.API {
 			Public:    true,
 		},
 		{
-			Namespace: "stake",
+			Namespace: "staker",
 			Version:   "1.0",
-			Service:   NewPrivateDebugAPI(s.chainConfig, s), // TODO: should change that
+			Service:   NewPublicStakerAPI(s),
 		},
 	}...)
 }
@@ -351,9 +358,38 @@ func (s *Ethereum) StartMining(local bool) error {
 	return nil
 }
 
+func (s *Ethereum) StartStaking(local bool) error {
+	eb, err := s.Etherbase()
+	if err != nil {
+		log.Error("Cannot start staking without xeniobase", "err", err)
+		return fmt.Errorf("xeniobase missing: %v", err)
+	}
+	if clique, ok := s.engine.(*clique.Clique); ok {
+		wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
+		if wallet == nil || err != nil {
+			log.Error("Xeniobase account unavailable locally", "err", err)
+			return fmt.Errorf("singer missing: %v", err)
+		}
+		clique.Authorize(eb, wallet.SignHash)
+	}
+	if local {
+		// If local (CPU) mining is started, we can disable the transaction rejection
+		// mechanism introduced to speed sync times. CPU mining on mainnet is ludicrous
+		// so noone will ever hit this path, whereas marking sync done on CPU mining
+		// will ensure that private networks work in single miner mode too.
+		atomic.StoreUint32(&s.protocolManager.acceptTxs, 1)
+	}
+	go s.staker.Start(eb)
+	return nil
+}
+
+
 func (s *Ethereum) StopMining()         { s.miner.Stop() }
+func (s *Ethereum) StopStaking()         { s.staker.Stop() }
 func (s *Ethereum) IsMining() bool      { return s.miner.Mining() }
+func (s *Ethereum) IsStaking() bool      { return s.staker.Staking() }
 func (s *Ethereum) Miner() *miner.Miner { return s.miner }
+func (s *Ethereum) Staker() *staker.Staker { return s.staker }
 
 func (s *Ethereum) AccountManager() *accounts.Manager  { return s.accountManager }
 func (s *Ethereum) BlockChain() *core.BlockChain       { return s.blockchain }
@@ -401,6 +437,7 @@ func (s *Ethereum) Stop() error {
 	}
 	s.txPool.Stop()
 	s.miner.Stop()
+	s.staker.Stop()
 	s.eventMux.Stop()
 
 	s.chainDb.Close()

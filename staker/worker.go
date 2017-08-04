@@ -115,7 +115,7 @@ type worker struct {
 	unconfirmed *unconfirmedBlocks // set of locally mined blocks pending canonicalness confirmations
 
 	// atomic status counters
-	mining int32
+	staking int32
 	atWork int32
 
 	fullValidation bool
@@ -163,7 +163,7 @@ func (self *worker) pending() (*types.Block, *state.StateDB) {
 	self.currentMu.Lock()
 	defer self.currentMu.Unlock()
 
-	if atomic.LoadInt32(&self.mining) == 0 {
+	if atomic.LoadInt32(&self.staking) == 0 {
 		return types.NewBlock(
 			self.current.header,
 			self.current.txs,
@@ -178,7 +178,7 @@ func (self *worker) pendingBlock() *types.Block {
 	self.currentMu.Lock()
 	defer self.currentMu.Unlock()
 
-	if atomic.LoadInt32(&self.mining) == 0 {
+	if atomic.LoadInt32(&self.staking) == 0 {
 		return types.NewBlock(
 			self.current.header,
 			self.current.txs,
@@ -193,7 +193,7 @@ func (self *worker) start() {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 
-	atomic.StoreInt32(&self.mining, 1)
+	atomic.StoreInt32(&self.staking, 1)
 
 	// spin up agents
 	for agent := range self.agents {
@@ -206,12 +206,12 @@ func (self *worker) stop() {
 
 	self.mu.Lock()
 	defer self.mu.Unlock()
-	if atomic.LoadInt32(&self.mining) == 1 {
+	if atomic.LoadInt32(&self.staking) == 1 {
 		for agent := range self.agents {
 			agent.Stop()
 		}
 	}
-	atomic.StoreInt32(&self.mining, 0)
+	atomic.StoreInt32(&self.staking, 0)
 	atomic.StoreInt32(&self.atWork, 0)
 }
 
@@ -241,7 +241,7 @@ func (self *worker) update() {
 			self.uncleMu.Unlock()
 		case core.TxPreEvent:
 			// Apply transaction to the pending state if we're not mining
-			if atomic.LoadInt32(&self.mining) == 0 {
+			if atomic.LoadInt32(&self.staking) == 0 {
 				self.currentMu.Lock()
 
 				acc, _ := types.Sender(self.current.signer, ev.Tx)
@@ -326,7 +326,7 @@ func (self *worker) wait() {
 
 // push sends a new work task to currently live miner agents.
 func (self *worker) push(work *Work) {
-	if atomic.LoadInt32(&self.mining) != 1 {
+	if atomic.LoadInt32(&self.staking) != 1 {
 		return
 	}
 	for agent := range self.agents {
@@ -405,7 +405,7 @@ func (self *worker) commitNewWork() {
 		Time:       big.NewInt(tstamp),
 	}
 	// Only set the coinbase if we are mining (avoid spurious block rewards)
-	if atomic.LoadInt32(&self.mining) == 1 {
+	if atomic.LoadInt32(&self.staking) == 1 {
 		header.Coinbase = self.coinbase
 	}
 	if err := self.engine.Prepare(self.chain, header); err != nil {
@@ -474,8 +474,8 @@ func (self *worker) commitNewWork() {
 		return
 	}
 	// We only care about logging if we're actually mining.
-	if atomic.LoadInt32(&self.mining) == 1 {
-		log.Info("Commit new mining work", "number", work.Block.Number(), "txs", work.tcount, "uncles", len(uncles), "elapsed", common.PrettyDuration(time.Since(tstart)))
+	if atomic.LoadInt32(&self.staking) == 1 {
+		log.Info("Commit new staking work", "number", work.Block.Number(), "txs", work.tcount, "uncles", len(uncles), "elapsed", common.PrettyDuration(time.Since(tstart)))
 		self.unconfirmed.Shift(work.Block.NumberU64() - 1)
 	}
 	self.push(work)

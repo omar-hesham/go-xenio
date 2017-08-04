@@ -24,6 +24,7 @@ var Modules = map[string]string{
 	"debug":      Debug_JS,
 	"eth":        Eth_JS,
 	"miner":      Miner_JS,
+	"staker":     Staker_JS,
 	"net":        Net_JS,
 	"personal":   Personal_JS,
 	"rpc":        RPC_JS,
@@ -456,6 +457,43 @@ web3._extend({
 	properties: []
 });
 `
+const Staker_JS = `
+web3._extend({
+	property: 'staker',
+	methods:
+	[
+		new web3._extend.Method({
+			name: 'start',
+			call: 'staker_start',
+			params: 1,
+			inputFormatter: [null]
+		}),
+		new web3._extend.Method({
+			name: 'stop',
+			call: 'staker_stop'
+		}),
+		new web3._extend.Method({
+			name: 'setEtherbase',
+			call: 'staker_setEtherbase',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'setExtra',
+			call: 'staker_setExtra',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'setGasPrice',
+			call: 'staker_setGasPrice',
+			params: 1,
+			inputFormatter: [web3._extend.utils.fromDecimal]
+		})
+	],
+	properties: []
+});
+`
+
 
 const Net_JS = `
 web3._extend({
