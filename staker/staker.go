@@ -31,7 +31,7 @@ type Backend interface {
 type Staker struct {
 	mux *event.TypeMux
 
-	worker *worker
+	watcher *watcher
 
 	coinbase common.Address
 	staking   int32
@@ -47,7 +47,7 @@ func New(eth Backend, config *params.ChainConfig, mux *event.TypeMux, engine con
 		eth:      eth,
 		mux:      mux,
 		engine:   engine,
-		worker:   newWorker(config, engine, common.Address{}, eth, mux),
+		watcher:   newWatcher(config, engine, common.Address{}, eth, mux),
 		canStart: 1,
 	}
 	staker.Register(NewCpuAgent(eth.BlockChain(), engine))
@@ -91,7 +91,7 @@ out:
 
 func (self *Staker) Start(coinbase common.Address) {
 	atomic.StoreInt32(&self.shouldStart, 1)
-	self.worker.setEtherbase(coinbase)
+	self.watcher.setEtherbase(coinbase)
 	self.coinbase = coinbase
 
 	if atomic.LoadInt32(&self.canStart) == 0 {
@@ -101,13 +101,13 @@ func (self *Staker) Start(coinbase common.Address) {
 	atomic.StoreInt32(&self.staking, 1)
 
 	log.Info("Starting staking operation")
-	self.worker.start()
-	self.worker.commitNewWork()
+	self.watcher.start()
+	self.watcher.commitNewWork()
 }
 
 
 func (self *Staker) Stop() {
-	self.worker.stop()
+	self.watcher.stop()
 	atomic.StoreInt32(&self.staking, 0)
 	atomic.StoreInt32(&self.shouldStart, 0)
 }
@@ -116,11 +116,11 @@ func (self *Staker) Register(agent Agent) {
 	if self.Staking() {
 		agent.Start()
 	}
-	self.worker.register(agent)
+	self.watcher.register(agent)
 }
 
 func (self *Staker) Unregister(agent Agent) {
-	self.worker.unregister(agent)
+	self.watcher.unregister(agent)
 }
 
 func (self *Staker) Staking() bool {
@@ -132,9 +132,9 @@ func (self *Staker) Staking() bool {
 		tot += int64(pow.Hashrate())
 	}
 	// do we care this might race? is it worth we're rewriting some
-	// aspects of the worker/locking up agents so we can get an accurate
+	// aspects of the watcher/locking up agents so we can get an accurate
 	// hashrate?
-	for agent := range self.worker.agents {
+	for agent := range self.watcher.agents {
 		if _, ok := agent.(*CpuAgent); !ok {
 			tot += agent.GetHashRate()
 		}
@@ -146,13 +146,13 @@ func (self *Staker) SetExtra(extra []byte) error {
 	if uint64(len(extra)) > params.MaximumExtraDataSize {
 		return fmt.Errorf("Extra exceeds max length. %d > %v", len(extra), params.MaximumExtraDataSize)
 	}
-	self.worker.setExtra(extra)
+	self.watcher.setExtra(extra)
 	return nil
 }
 
 // Pending returns the currently pending block and associated state.
 func (self *Staker) Pending() (*types.Block, *state.StateDB) {
-	return self.worker.pending()
+	return self.watcher.pending()
 }
 
 // PendingBlock returns the currently pending block.
@@ -161,10 +161,10 @@ func (self *Staker) Pending() (*types.Block, *state.StateDB) {
 // simultaneously, please use Pending(), as the pending state can
 // change between multiple method calls
 func (self *Staker) PendingBlock() *types.Block {
-	return self.worker.pendingBlock()
+	return self.watcher.pendingBlock()
 }
 
 func (self *Staker) SetEtherbase(addr common.Address) {
 	self.coinbase = addr
-	self.worker.setEtherbase(addr)
+	self.watcher.setEtherbase(addr)
 }

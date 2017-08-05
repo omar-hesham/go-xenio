@@ -44,7 +44,7 @@ const (
 	miningLogAtDepth = 5
 )
 
-// Agent can register themself with the worker
+// Agent can register themself with the watcher
 type Agent interface {
 	Work() chan<- *Work
 	SetReturnCh(chan<- *Result)
@@ -80,8 +80,8 @@ type Result struct {
 	Block *types.Block
 }
 
-// worker is the main object which takes care of applying messages to the new state
-type worker struct {
+// watcher is the main object which takes care of applying messages to the new state
+type watcher struct {
 	config *params.ChainConfig
 	engine consensus.Engine
 
@@ -121,8 +121,8 @@ type worker struct {
 	fullValidation bool
 }
 
-func newWorker(config *params.ChainConfig, engine consensus.Engine, coinbase common.Address, eth Backend, mux *event.TypeMux) *worker {
-	worker := &worker{
+func newWatcher(config *params.ChainConfig, engine consensus.Engine, coinbase common.Address, eth Backend, mux *event.TypeMux) *watcher {
+	watcher := &watcher{
 		config:         config,
 		engine:         engine,
 		eth:            eth,
@@ -138,28 +138,28 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, coinbase com
 		unconfirmed:    newUnconfirmedBlocks(eth.BlockChain(), 5),
 		fullValidation: false,
 	}
-	worker.events = worker.mux.Subscribe(core.ChainHeadEvent{}, core.ChainSideEvent{}, core.TxPreEvent{})
-	go worker.update()
+	watcher.events = watcher.mux.Subscribe(core.ChainHeadEvent{}, core.ChainSideEvent{}, core.TxPreEvent{})
+	go watcher.update()
 
-	go worker.wait()
-	worker.commitNewWork()
+	go watcher.wait()
+	watcher.commitNewWork()
 
-	return worker
+	return watcher
 }
 
-func (self *worker) setEtherbase(addr common.Address) {
+func (self *watcher) setEtherbase(addr common.Address) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.coinbase = addr
 }
 
-func (self *worker) setExtra(extra []byte) {
+func (self *watcher) setExtra(extra []byte) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.extra = extra
 }
 
-func (self *worker) pending() (*types.Block, *state.StateDB) {
+func (self *watcher) pending() (*types.Block, *state.StateDB) {
 	self.currentMu.Lock()
 	defer self.currentMu.Unlock()
 
@@ -174,7 +174,7 @@ func (self *worker) pending() (*types.Block, *state.StateDB) {
 	return self.current.Block, self.current.state.Copy()
 }
 
-func (self *worker) pendingBlock() *types.Block {
+func (self *watcher) pendingBlock() *types.Block {
 	self.currentMu.Lock()
 	defer self.currentMu.Unlock()
 
@@ -189,7 +189,7 @@ func (self *worker) pendingBlock() *types.Block {
 	return self.current.Block
 }
 
-func (self *worker) start() {
+func (self *watcher) start() {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 
@@ -201,7 +201,7 @@ func (self *worker) start() {
 	}
 }
 
-func (self *worker) stop() {
+func (self *watcher) stop() {
 	self.wg.Wait()
 
 	self.mu.Lock()
@@ -215,21 +215,21 @@ func (self *worker) stop() {
 	atomic.StoreInt32(&self.atWork, 0)
 }
 
-func (self *worker) register(agent Agent) {
+func (self *watcher) register(agent Agent) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.agents[agent] = struct{}{}
 	agent.SetReturnCh(self.recv)
 }
 
-func (self *worker) unregister(agent Agent) {
+func (self *watcher) unregister(agent Agent) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	delete(self.agents, agent)
 	agent.Stop()
 }
 
-func (self *worker) update() {
+func (self *watcher) update() {
 	for event := range self.events.Chan() {
 		// A real event arrived, process interesting content
 		switch ev := event.Data.(type) {
@@ -255,7 +255,7 @@ func (self *worker) update() {
 	}
 }
 
-func (self *worker) wait() {
+func (self *watcher) wait() {
 	for {
 		mustCommitNewWork := true
 		for result := range self.recv {
@@ -325,7 +325,7 @@ func (self *worker) wait() {
 }
 
 // push sends a new work task to currently live miner agents.
-func (self *worker) push(work *Work) {
+func (self *watcher) push(work *Work) {
 	if atomic.LoadInt32(&self.staking) != 1 {
 		return
 	}
@@ -338,7 +338,7 @@ func (self *worker) push(work *Work) {
 }
 
 // makeCurrent creates a new environment for the current cycle.
-func (self *worker) makeCurrent(parent *types.Block, header *types.Header) error {
+func (self *watcher) makeCurrent(parent *types.Block, header *types.Header) error {
 	state, err := self.chain.StateAt(parent.Root())
 	if err != nil {
 		return err
@@ -373,7 +373,7 @@ func (self *worker) makeCurrent(parent *types.Block, header *types.Header) error
 	return nil
 }
 
-func (self *worker) commitNewWork() {
+func (self *watcher) commitNewWork() {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.uncleMu.Lock()
@@ -481,7 +481,7 @@ func (self *worker) commitNewWork() {
 	self.push(work)
 }
 
-func (self *worker) commitUncle(work *Work, uncle *types.Header) error {
+func (self *watcher) commitUncle(work *Work, uncle *types.Header) error {
 	hash := uncle.Hash()
 	if work.uncles.Has(hash) {
 		return fmt.Errorf("uncle not unique")
