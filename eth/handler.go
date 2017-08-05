@@ -246,12 +246,12 @@ func (pm *ProtocolManager) handle(p *peer) error {
 	if pm.peers.Len() >= pm.maxPeers {
 		return p2p.DiscTooManyPeers
 	}
-	p.Log().Debug("Ethereum peer connected", "name", p.Name())
+	p.Log().Debug("Xenio peer connected", "name", p.Name())
 
 	// Execute the Ethereum handshake
 	td, head, genesis := pm.blockchain.Status()
 	if err := p.Handshake(pm.networkId, td, head, genesis); err != nil {
-		p.Log().Debug("Ethereum handshake failed", "err", err)
+		p.Log().Debug("Xenio handshake failed", "err", err)
 		return err
 	}
 	if rw, ok := p.rw.(*meteredMsgReadWriter); ok {
@@ -259,7 +259,7 @@ func (pm *ProtocolManager) handle(p *peer) error {
 	}
 	// Register the peer locally
 	if err := pm.peers.Register(p); err != nil {
-		p.Log().Error("Ethereum peer registration failed", "err", err)
+		p.Log().Error("Xenio peer registration failed", "err", err)
 		return err
 	}
 	defer pm.removePeer(p.id)
@@ -294,7 +294,7 @@ func (pm *ProtocolManager) handle(p *peer) error {
 	// main loop. handle incoming messages.
 	for {
 		if err := pm.handleMsg(p); err != nil {
-			p.Log().Debug("Ethereum message handling failed", "err", err)
+			p.Log().Debug("Xenio message handling failed", "err", err)
 			return err
 		}
 	}

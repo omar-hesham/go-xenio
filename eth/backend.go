@@ -331,6 +331,7 @@ func (self *Ethereum) SetEtherbase(etherbase common.Address) {
 	self.lock.Unlock()
 
 	self.miner.SetEtherbase(etherbase)
+	self.staker.SetEtherbase(etherbase)
 }
 
 func (s *Ethereum) StartMining(local bool) error {

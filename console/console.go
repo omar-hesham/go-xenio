@@ -282,7 +282,7 @@ func (c *Console) Evaluate(statement string) error {
 	return c.jsre.Evaluate(statement, c.printer)
 }
 
-// Interactive starts an interactive user session, where input is propted from
+// Interactive starts an interactive user session, where input is prompted from
 // the configured user prompter.
 func (c *Console) Interactive() {
 	var (
