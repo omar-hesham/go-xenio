@@ -34,7 +34,7 @@ type Staker struct {
 	worker *worker
 
 	coinbase common.Address
-	mining   int32
+	staking   int32
 	eth      Backend
 	engine   consensus.Engine
 
@@ -98,7 +98,7 @@ func (self *Staker) Start(coinbase common.Address) {
 		log.Info("Network syncing, will start staker afterwards")
 		return
 	}
-	atomic.StoreInt32(&self.mining, 1)
+	atomic.StoreInt32(&self.staking, 1)
 
 	log.Info("Starting staking operation")
 	self.worker.start()
@@ -108,7 +108,7 @@ func (self *Staker) Start(coinbase common.Address) {
 
 func (self *Staker) Stop() {
 	self.worker.stop()
-	atomic.StoreInt32(&self.mining, 0)
+	atomic.StoreInt32(&self.staking, 0)
 	atomic.StoreInt32(&self.shouldStart, 0)
 }
 
@@ -124,7 +124,7 @@ func (self *Staker) Unregister(agent Agent) {
 }
 
 func (self *Staker) Staking() bool {
-	return atomic.LoadInt32(&self.mining) > 0
+	return atomic.LoadInt32(&self.staking) > 0
 }
 
 /*func (self *Staker) HashRate() (tot int64) {
