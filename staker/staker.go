@@ -127,7 +127,7 @@ func (self *Staker) Staking() bool {
 	return atomic.LoadInt32(&self.mining) > 0
 }
 
-func (self *Staker) HashRate() (tot int64) {
+/*func (self *Staker) HashRate() (tot int64) {
 	if pow, ok := self.engine.(consensus.PoW); ok {
 		tot += int64(pow.Hashrate())
 	}
@@ -140,7 +140,7 @@ func (self *Staker) HashRate() (tot int64) {
 		}
 	}
 	return
-}
+}*/
 
 func (self *Staker) SetExtra(extra []byte) error {
 	if uint64(len(extra)) > params.MaximumExtraDataSize {

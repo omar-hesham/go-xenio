@@ -36,17 +36,17 @@ type CpuAgent struct {
 	chain  consensus.ChainReader
 	engine consensus.Engine
 
-	isMining int32 // isMining indicates whether the agent is currently mining
+	isStaking int32 // isStaking indicates whether the agent is currently staking
 }
 
 func NewCpuAgent(chain consensus.ChainReader, engine consensus.Engine) *CpuAgent {
-	miner := &CpuAgent{
+	staker := &CpuAgent{
 		chain:  chain,
 		engine: engine,
 		stop:   make(chan struct{}, 1),
 		workCh: make(chan *Work, 1),
 	}
-	return miner
+	return staker
 }
 
 func (self *CpuAgent) Work() chan<- *Work            { return self.workCh }
@@ -57,7 +57,7 @@ func (self *CpuAgent) Stop() {
 }
 
 func (self *CpuAgent) Start() {
-	if !atomic.CompareAndSwapInt32(&self.isMining, 0, 1) {
+	if !atomic.CompareAndSwapInt32(&self.isStaking, 0, 1) {
 		return // agent already started
 	}
 	go self.update()
@@ -95,7 +95,7 @@ done:
 			break done
 		}
 	}
-	atomic.StoreInt32(&self.isMining, 0)
+	atomic.StoreInt32(&self.isStaking, 0)
 }
 
 func (self *CpuAgent) mine(work *Work, stop <-chan struct{}) {
@@ -109,10 +109,10 @@ func (self *CpuAgent) mine(work *Work, stop <-chan struct{}) {
 		self.returnCh <- nil
 	}
 }
-
+/*
 func (self *CpuAgent) GetHashRate() int64 {
 	if pow, ok := self.engine.(consensus.PoW); ok {
 		return int64(pow.Hashrate())
 	}
 	return 0
-}
+}*/

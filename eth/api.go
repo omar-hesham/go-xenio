@@ -106,7 +106,7 @@ func NewPublicStakerAPI(e *Ethereum) *PublicStakerAPI {
 func (api *PublicMinerAPI) Mining() bool {
 	return api.e.IsMining()
 }
-func (api *PublicMinerAPI) Staking() bool {
+func (api *PublicStakerAPI) Staking() bool {
 	return api.e.IsStaking()
 }
 // SubmitWork can be used by external miner to submit their POW solution. It returns an indication if the work was
