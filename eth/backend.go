@@ -77,6 +77,7 @@ type Ethereum struct {
 	ApiBackend *EthApiBackend
 
 	miner     *miner.Miner
+	staker    *staker.Staker
 	gasPrice  *big.Int
 	etherbase common.Address
 
@@ -84,8 +85,6 @@ type Ethereum struct {
 	netRPCService *ethapi.PublicNetAPI
 
 	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and etherbase)
-
-	staker     *staker.Staker
 }
 
 func (s *Ethereum) AddLesServer(ls LesServer) {
@@ -273,6 +272,11 @@ func (s *Ethereum) APIs() []rpc.API {
 			Service:   NewPrivateMinerAPI(s),
 			Public:    false,
 		}, {
+			Namespace: "staker",
+			Version:   "1.0",
+			Service:   NewPrivateStakerAPI(s),
+			Public:    false,
+		}, {
 			Namespace: "eth",
 			Version:   "1.0",
 			Service:   filters.NewPublicFilterAPI(s.ApiBackend, false),
@@ -295,11 +299,11 @@ func (s *Ethereum) APIs() []rpc.API {
 			Version:   "1.0",
 			Service:   s.netRPCService,
 			Public:    true,
-		},
-		{
-			Namespace: "staker",
+		}, {
+			Namespace: "xenio", // ex staker
 			Version:   "1.0",
 			Service:   NewPublicStakerAPI(s),
+			Public:    true,
 		},
 	}...)
 }

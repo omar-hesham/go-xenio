@@ -141,7 +141,7 @@ func (api *PublicMinerAPI) GetWork() ([3]string, error) {
 // result[2], 32 bytes hex encoded boundary condition ("target"), 2^256/difficulty
 func (api *PublicStakerAPI) GetWork() ([3]string, error) {
 	if !api.e.IsStaking() {
-		if err := api.e.StartMining(false); err != nil {
+		if err := api.e.StartStaking(false); err != nil {
 			return [3]string{}, err
 		}
 	}
