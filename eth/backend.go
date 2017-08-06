@@ -256,12 +256,12 @@ func (s *Ethereum) APIs() []rpc.API {
 			Version:   "1.0",
 			Service:   NewPublicEthereumAPI(s),
 			Public:    true,
-		}, {
+		}, /*{
 			Namespace: "eth",
 			Version:   "1.0",
 			Service:   NewPublicMinerAPI(s),
 			Public:    true,
-		},{
+		},*/{
 			Namespace: "eth",
 			Version:   "1.0",
 			Service:   NewPublicStakerAPI(s),
@@ -271,12 +271,12 @@ func (s *Ethereum) APIs() []rpc.API {
 			Version:   "1.0",
 			Service:   downloader.NewPublicDownloaderAPI(s.protocolManager.downloader, s.eventMux),
 			Public:    true,
-		}, {
+		}, /*{
 			Namespace: "miner",
 			Version:   "1.0",
 			Service:   NewPrivateMinerAPI(s),
 			Public:    false,
-		}, {
+		}, */{
 			Namespace: "staker",
 			Version:   "1.0",
 			Service:   NewPrivateStakerAPI(s),
