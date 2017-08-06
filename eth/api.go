@@ -301,9 +301,14 @@ func (api *PrivateMinerAPI) SetEtherbase(etherbase common.Address) bool {
 	api.e.SetEtherbase(etherbase)
 	return true
 }
-// SetEtherbase sets the etherbase of the miner
+// SetEtherbase sets the etherbase of the staker
 func (api *PrivateStakerAPI) SetEtherbase(etherbase common.Address) bool {
 	api.e.SetEtherbase(etherbase)
+	return true
+}
+// SetServerbase sets the serverbase of the staker
+func (api *PrivateStakerAPI) SetServerbase(serverbase common.Address) bool {
+	api.e.SetServerbase(serverbase)
 	return true
 }
 // GetHashrate returns the current hashrate of the miner.

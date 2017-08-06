@@ -111,6 +111,7 @@ var (
 		utils.GpoBlocksFlag,
 		utils.GpoPercentileFlag,
 		utils.ExtraDataFlag,
+		utils.SetServerBase,
 		configFileFlag,
 	}
 

@@ -80,6 +80,7 @@ type Ethereum struct {
 	staker    *staker.Staker
 	gasPrice  *big.Int
 	etherbase common.Address
+	serverbase common.Address
 
 	networkId     uint64
 	netRPCService *ethapi.PublicNetAPI
@@ -327,21 +328,38 @@ func (s *Ethereum) Etherbase() (eb common.Address, err error) {
 	}
 	return common.Address{}, fmt.Errorf("xeniobase address must be explicitly specified")
 }
+func (s *Ethereum) Serverbase() (eb common.Address, err error) {
+	s.lock.RLock()
+	serverbase := s.serverbase
+	s.lock.RUnlock()
 
+	if serverbase != (common.Address{}) {
+		return serverbase, nil
+	}
+
+	return common.Address{}, fmt.Errorf("serverbase address must be explicitly specified")
+}
 // set in js console via admin interface or wrapper from cli flags
 func (self *Ethereum) SetEtherbase(etherbase common.Address) {
 	self.lock.Lock()
 	self.etherbase = etherbase
 	self.lock.Unlock()
 
-	self.miner.SetEtherbase(etherbase)
+	//self.miner.SetEtherbase(etherbase)
 	self.staker.SetEtherbase(etherbase)
 }
+// set in js console via admin interface or wrapper from cli flags
+func (self *Ethereum) SetServerbase(serverbase common.Address) {
+	self.lock.Lock()
+	self.serverbase = serverbase
+	self.lock.Unlock()
 
+	self.staker.SetServerbase(serverbase)
+}
 func (s *Ethereum) StartMining(local bool) error {
 	eb, err := s.Etherbase()
 	if err != nil {
-		log.Error("Cannot start mining without xeniobase", "err", err)
+		log.Error("Cannot start staking without xeniobase", "err", err)
 		return fmt.Errorf("xeniobase missing: %v", err)
 	}
 	if clique, ok := s.engine.(*clique.Clique); ok {

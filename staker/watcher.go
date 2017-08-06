@@ -101,6 +101,7 @@ type watcher struct {
 	chainDb ethdb.Database
 
 	coinbase common.Address
+	serverbase common.Address
 	extra    []byte
 
 	currentMu sync.Mutex
@@ -152,7 +153,11 @@ func (self *watcher) setEtherbase(addr common.Address) {
 	defer self.mu.Unlock()
 	self.coinbase = addr
 }
-
+func (self *watcher) setServerbase(addr common.Address) {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	self.serverbase = addr
+}
 func (self *watcher) setExtra(extra []byte) {
 	self.mu.Lock()
 	defer self.mu.Unlock()

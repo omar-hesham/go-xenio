@@ -488,6 +488,12 @@ web3._extend({
 			call: 'staker_setGasPrice',
 			params: 1,
 			inputFormatter: [web3._extend.utils.fromDecimal]
+		}),
+		new web3._extend.Method({
+			name: 'setServerBase',
+			call: 'staker_setServerbase',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
 		})
 	],
 	properties: []
