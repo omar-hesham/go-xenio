@@ -261,6 +261,11 @@ func (s *Ethereum) APIs() []rpc.API {
 			Version:   "1.0",
 			Service:   NewPublicMinerAPI(s),
 			Public:    true,
+		},{
+			Namespace: "eth",
+			Version:   "1.0",
+			Service:   NewPublicStakerAPI(s),
+			Public:    true,
 		}, {
 			Namespace: "eth",
 			Version:   "1.0",
@@ -298,11 +303,6 @@ func (s *Ethereum) APIs() []rpc.API {
 			Namespace: "net",
 			Version:   "1.0",
 			Service:   s.netRPCService,
-			Public:    true,
-		}, {
-			Namespace: "xenio", // ex staker
-			Version:   "1.0",
-			Service:   NewPublicStakerAPI(s),
 			Public:    true,
 		},
 	}...)
