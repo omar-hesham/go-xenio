@@ -39,6 +39,7 @@ The go-xenio project comes with several wrappers/executables found in the `cmd` 
 | `gethrpctest` | Developer utility tool to support our [ethereum/rpc-test](github.com/xenioplatform/rpc-tests) test suite which validates baseline conformity to the [Ethereum JSON RPC](github.com/xenioplatform/wiki/wiki/JSON-RPC) specs. Please see the [test suite's readme](github.com/xenioplatform/rpc-tests/blob/master/README.md) for details. |
 | `rlpdump` | Developer utility tool to convert binary RLP ([Recursive Length Prefix](github.com/xenioplatform/wiki/wiki/RLP)) dumps (data encoding used by the Ethereum protocol both network as well as consensus wise) to user friendlier hierarchical representation (e.g. `rlpdump --hex CE0183FFFFFFC4C304050583616263`). |
 | `swarm`    | swarm daemon and tools. This is the entrypoint for the swarm network. `swarm --help` for command line options and subcommands. See https://swarm-guide.readthedocs.io for swarm documentation. |
+| `puppeth`    | a CLI wizard that aids in creating a new Ethereum network. |
 
 ## Running geth
 
