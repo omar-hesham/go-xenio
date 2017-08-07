@@ -88,12 +88,12 @@ here.
 
 Specifying the `--testnet` flag however will reconfigure your Geth instance a bit:
 
- * Instead of using the default data directory (`~/.ethereum` on Linux for example), Geth will nest
-   itself one level deeper into a `testnet` subfolder (`~/.ethereum/testnet` on Linux). Note, on OSX
+ * Instead of using the default data directory (`~/.xenio` on Linux for example), xenio-cli will nest
+   itself one level deeper into a `testnet` subfolder (`~/.xenio/testnet` on Linux). Note, on OSX
    and Linux this also means that attaching to a running testnet node requires the use of a custom
    endpoint since `geth attach` will try to attach to a production node endpoint by default. E.g.
-   `geth attach <datadir>/testnet/geth.ipc`. Windows users are not affected by this.
- * Instead of connecting the main Ethereum network, the client will connect to the test network,
+   `xenio-cli attach <datadir>/testnet/xenio.ipc`. Windows users are not affected by this.
+ * Instead of connecting the main Xenio network, the client will connect to the test network,
    which uses different P2P bootnodes, different network IDs and genesis states.
    
 *Note: Although there are some internal protective measures to prevent transactions from crossing
