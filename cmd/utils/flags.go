@@ -302,6 +302,10 @@ var (
 		Name:  "extradata",
 		Usage: "Block extra data set by the miner (default = client version)",
 	}
+	SetServerBase = cli.StringFlag{
+		Name:  "setServerBase",
+		Usage: "Sets the server that the staker should connected for the staking to be enabled",
+	}
 	// Account settings
 	UnlockedAccountFlag = cli.StringFlag{
 		Name:  "unlock",

@@ -38,9 +38,13 @@ type Staker struct {
 	eth      Backend
 	engine   consensus.Engine
 
-	canStart    int32 // can start indicates whether we can start the mining operation
+	canStart    int32 // can start indicates whether we can start the staking operation
 	shouldStart int32 // should start indicates whether we should start after sync
+
+	isConnected bool //indicates that the staker is connected to a server node, probably gaming
+	serverbase common.Address
 }
+
 
 func New(eth Backend, config *params.ChainConfig, mux *event.TypeMux, engine consensus.Engine) *Staker {
 	staker := &Staker{
@@ -99,8 +103,16 @@ func (self *Staker) Start(coinbase common.Address) {
 		return
 	}
 	atomic.StoreInt32(&self.staking, 1)
+	log.Info("Checking connection to server nodes")
+	if self.isConnected {
+		log.Info("   Connected!")
+	} else{
+		log.Info("   PoW will be removed soon")
+		//return
+	}
 
 	log.Info("Starting staking operation")
+
 	self.watcher.start()
 	self.watcher.commitNewWork()
 }
@@ -127,20 +139,6 @@ func (self *Staker) Staking() bool {
 	return atomic.LoadInt32(&self.staking) > 0
 }
 
-/*func (self *Staker) HashRate() (tot int64) {
-	if pow, ok := self.engine.(consensus.PoW); ok {
-		tot += int64(pow.Hashrate())
-	}
-	// do we care this might race? is it worth we're rewriting some
-	// aspects of the watcher/locking up agents so we can get an accurate
-	// hashrate?
-	for agent := range self.watcher.agents {
-		if _, ok := agent.(*CpuAgent); !ok {
-			tot += agent.GetHashRate()
-		}
-	}
-	return
-}*/
 
 func (self *Staker) SetExtra(extra []byte) error {
 	if uint64(len(extra)) > params.MaximumExtraDataSize {
@@ -167,4 +165,7 @@ func (self *Staker) PendingBlock() *types.Block {
 func (self *Staker) SetEtherbase(addr common.Address) {
 	self.coinbase = addr
 	self.watcher.setEtherbase(addr)
+}
+func(self *Staker) SetServerbase(addr common.Address) {//TODO: should be changed to a server node
+	self.serverbase = addr
 }
