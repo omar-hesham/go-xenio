@@ -31,7 +31,7 @@ var MainnetBootnodes = []string{
 	//"enode://979b7fa28feeb35a4741660a16076f1943202cb72b6af70d327f053e248bab9ba81760f39d0701ef1d8f89cc1fbd2cacba0710a12cd5314d5e0c9021aa3637f9@5.1.83.226:30303", // DE
 
 	// Xenio Bootnodes
-	"enode://d75a508eb97b41fede646d5095c7b8da06bcfae4a1c77eb14126a06e519430f5f84398999d043b32fc9f35cfad44bc696377e8c6a76de69eb1afd255122dd2e5@45.76.85.77:30666",
+	"enode://678b737a85d83d159c2f03a90767eb07ca18e167971a8e12a71c05153fc280aa626197cd16e42b9f58971d730db9936c8d7c793216e29b76227f6c2f3b99d206@45.76.85.77:30666",
 }
 
 // TestnetBootnodes are the enode URLs of the P2P bootstrap nodes running on the
