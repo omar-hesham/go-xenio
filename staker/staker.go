@@ -107,8 +107,8 @@ func (self *Staker) Start(coinbase common.Address) {
 	if self.isConnected {
 		log.Info("   Connected!")
 	} else{
-		log.Info("   Not Connected!, staking operation will be aborted")
-		return
+		log.Info("   PoW will be removed soon")
+		//return
 	}
 
 	log.Info("Starting staking operation")
