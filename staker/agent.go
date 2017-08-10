@@ -73,7 +73,7 @@ out:
 				close(self.quitCurrentOp)
 			}
 			self.quitCurrentOp = make(chan struct{})
-			go self.mine(work, self.quitCurrentOp)
+			go self.stake(work, self.quitCurrentOp)
 			self.mu.Unlock()
 		case <-self.stop:
 			self.mu.Lock()
@@ -98,7 +98,7 @@ done:
 	atomic.StoreInt32(&self.isStaking, 0)
 }
 
-func (self *CpuAgent) mine(work *Work, stop <-chan struct{}) {
+func (self *CpuAgent) stake(work *Work, stop <-chan struct{}) {
 	if result, err := self.engine.Seal(self.chain, work.Block, stop); result != nil {
 		log.Info("Successfully sealed new block", "number", result.Number(), "hash", result.Hash())
 		self.returnCh <- &Result{work, result}

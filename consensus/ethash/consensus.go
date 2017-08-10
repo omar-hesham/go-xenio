@@ -289,6 +289,8 @@ func (ethash *Ethash) verifyHeader(chain consensus.ChainReader, header, parent *
 func CalcDifficulty(config *params.ChainConfig, time uint64, parent *types.Header) *big.Int {
 	next := new(big.Int).Add(parent.Number, big1)
 	switch {
+	case config.IsXenio(next):
+		return calcDiffucultyXenio(time, parent)
 	case config.IsMetropolis(next):
 		return calcDifficultyMetropolis(time, parent)
 	case config.IsHomestead(next):
@@ -307,7 +309,10 @@ var (
 	big10         = big.NewInt(10)
 	bigMinus99    = big.NewInt(-99)
 )
+func calcDiffucultyXenio(time uint64, parent *types.Header) *big.Int {
+	return big.NewInt(0x4000)
 
+}
 // calcDifficultyMetropolis is the difficulty adjustment algorithm. It returns
 // the difficulty that a new block should have when created at time given the
 // parent block's time and difficulty. The calculation uses the Metropolis rules.
