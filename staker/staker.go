@@ -18,6 +18,7 @@ import (
 	"github.com/xenioplatform/go-xenio/event"
 	"github.com/xenioplatform/go-xenio/log"
 	"github.com/xenioplatform/go-xenio/params"
+	"math/big"
 )
 
 // Backend wraps all methods required for mining.
@@ -43,6 +44,7 @@ type Staker struct {
 
 	isConnected bool //indicates that the staker is connected to a server node, probably gaming
 	serverbase common.Address
+
 }
 
 
@@ -92,18 +94,36 @@ out:
 	}
 }
 
+func areBigEqualNumbers(a *big.Int, b *big.Int) (bool){
+	if a.String()==b.String() {
+		return true
+	}else{
+		return false
+
+	}
+
+}
 
 func (self *Staker) Start(coinbase common.Address) {
 	atomic.StoreInt32(&self.shouldStart, 1)
 	self.watcher.setEtherbase(coinbase)
 	self.coinbase = coinbase
+	dbs, _:=self.eth.BlockChain().State()
 
 	if atomic.LoadInt32(&self.canStart) == 0 {
 		log.Info("Network syncing, will start staker afterwards")
 		return
 	}
+
 	atomic.StoreInt32(&self.staking, 1)
 	log.Info("Checking connection to server nodes")
+	coins := dbs.GetBalance(self.coinbase)
+
+	if areBigEqualNumbers(coins,big.NewInt(0)){
+		log.Error("Your balance is 0 and you cannot wont be able to stake in the feature")
+	}else {
+		log.Info("Staking @ " + coinbase.String() + " with " + coins.String() + " coins")
+	}
 	if self.isConnected {
 		log.Info("   Connected!")
 	} else{
