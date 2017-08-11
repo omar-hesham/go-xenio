@@ -681,7 +681,7 @@ web3._extend({
 		new web3._extend.Method({
 			name: 'sendMessage',
 			call: 'shh_sendMessage',
-			params: 1
+			params: 3
 		}),
 	],
 	properties:
