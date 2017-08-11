@@ -672,7 +672,17 @@ web3._extend({
 			name: 'newMessageFilter',
 			call: 'shh_newMessageFilter',
 			params: 1
-		})
+		}),
+		new web3._extend.Method({
+			name: 'stavsFunc',
+			call: 'shh_stavsFunc',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'sendMessage',
+			call: 'shh_sendMessage',
+			params: 1
+		}),
 	],
 	properties:
 	[

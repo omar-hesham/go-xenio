@@ -23,6 +23,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	//mrand "math/rand"
+	"encoding/hex"
 
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/common/hexutil"
@@ -135,6 +137,37 @@ func (api *PublicWhisperAPI) MarkTrustedPeer(ctx context.Context, enode string) 
 // It returns an ID that can be used to refer to the keypair.
 func (api *PublicWhisperAPI) NewKeyPair(ctx context.Context) (string, error) {
 	return api.w.NewKeyPair()
+}
+
+// stavs whisper func template
+func (api *PublicWhisperAPI) StavsFunc(ctx context.Context, messageString string) (string, error) {
+	return api.w.StavsFunc(messageString)
+}
+
+func (api *PublicWhisperAPI) SendMessage(ctx context.Context, req NewMessage) ([]byte, error) {
+
+	//symKey_id, err := api.w.GenerateSymKey()
+	//symKey, err := api.w.GetSymKey(symKey_id)
+	//"0x0f99d381030a59edc477bddf741069e0d9158c191f04f3d8d079c01db9792ee2"
+	//var randomKey []byte //make([]byte, aesKeyLength)
+	randomKey, err := hex.DecodeString("7c8d019192c24224e2cafccae3a61fb586b14323a6bc8f9e7df1d929333ff993")
+	//mrand.Read(randomKey)
+	log.Info(hex.EncodeToString(randomKey))
+
+	symKey_id, err := api.AddSymKey(ctx, randomKey)
+	symKey, err := api.w.GetSymKey(symKey_id)
+
+	log.Info(string(symKey_id))
+	log.Info(string(symKey))
+
+	// Create new message, topic []byte("0x78656e696f")
+	req.SymKeyID = symKey_id
+
+	// post example
+	//shh.post({ttl: 600, topic: '0x78656e69', powTarget: 2.01, powTime: 2, payload: '0x68656c6c6fff', symKeyID: id})
+	_, err = api.Post(ctx, req)
+
+	return symKey, err
 }
 
 // AddPrivateKey imports the given private key.
