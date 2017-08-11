@@ -144,7 +144,7 @@ func (api *PublicWhisperAPI) StavsFunc(ctx context.Context, messageString string
 	return api.w.StavsFunc(messageString)
 }
 
-func (api *PublicWhisperAPI) SendMessage(ctx context.Context,  message string,  topic string, hexKey string) ([]byte, error) {
+func (api *PublicWhisperAPI) SendMessage(ctx context.Context,  message string,  topic string, hexKey string, targetPeer string) ([]byte, error) {
 
 	//symKey_id, err := api.w.GenerateSymKey()
 	//symKey, err := api.w.GetSymKey(symKey_id)
@@ -163,6 +163,9 @@ func (api *PublicWhisperAPI) SendMessage(ctx context.Context,  message string,  
 	_message.PowTime = 3
 	_message.TTL = 600
 	_message.Topic = BytesToTopic([]byte(topic))
+	if targetPeer != ""{
+		_message.TargetPeer = targetPeer
+	}
 	log.Info(hex.EncodeToString(randomKey))
 
 	symKey_id, err := api.AddSymKey(ctx, randomKey)
