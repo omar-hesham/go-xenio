@@ -199,8 +199,12 @@ func (sc *Client) StavsFunc(ctx context.Context, message string) (string, error)
 	return response, sc.c.CallContext(ctx, &response, "shh_stavsFunc", message)
 }
 
-// Stavs Go Send Message test
-func (sc *Client) SendMessage(ctx context.Context, message whisper.NewMessage) ([]byte, error) {
-	var response []byte
-	return response, sc.c.CallContext(ctx, &response, "shh_sendMessage", message)
+func (sc *Client) SendMessage(ctx context.Context, message string, topic string, hexKey string, targetPeer string) (string, error) {
+	var response string
+	return response, sc.c.CallContext(ctx, &response, "shh_sendMessage", message, topic, hexKey, targetPeer)
+}
+
+func (sc *Client) ReceiveMessage(ctx context.Context, topic string, hexKey string) ([]*whisper.Message, error) {
+	var response []*whisper.Message
+	return response, sc.c.CallContext(ctx, &response, "shh_receiveMessage", topic , hexKey)
 }

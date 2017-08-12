@@ -683,6 +683,11 @@ web3._extend({
 			call: 'shh_sendMessage',
 			params: 4
 		}),
+		new web3._extend.Method({
+			name: 'receiveMessage',
+			call: 'shh_receiveMessage',
+			params: 3
+		}),
 	],
 	properties:
 	[

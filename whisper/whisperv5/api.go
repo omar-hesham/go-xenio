@@ -144,7 +144,7 @@ func (api *PublicWhisperAPI) StavsFunc(ctx context.Context, messageString string
 	return api.w.StavsFunc(messageString)
 }
 
-func (api *PublicWhisperAPI) SendMessage(ctx context.Context,  message string,  topic string, hexKey string, targetPeer string) ([]byte, error) {
+func (api *PublicWhisperAPI) SendMessage(ctx context.Context,  message string,  topic string, hexKey string, targetPeer string) (string, error) {
 
 	//symKey_id, err := api.w.GenerateSymKey()
 	//symKey, err := api.w.GetSymKey(symKey_id)
@@ -163,25 +163,85 @@ func (api *PublicWhisperAPI) SendMessage(ctx context.Context,  message string,  
 	_message.PowTime = 3
 	_message.TTL = 600
 	_message.Topic = BytesToTopic([]byte(topic))
+
 	if targetPeer != ""{
 		_message.TargetPeer = targetPeer
 	}
-	log.Info(hex.EncodeToString(randomKey))
-
+	log.Info("key: " + hex.EncodeToString(randomKey))
+	log.Info("Topic String: " + topic)
+	log.Info("topic: " + _message.Topic.String())
 	symKey_id, err := api.AddSymKey(ctx, randomKey)
 	symKey, err := api.w.GetSymKey(symKey_id)
 
-	log.Info(string(symKey_id))
+	log.Info("sumkeyid: " + string(symKey_id))
 	//log.Info(string(symKey))
-
 	_message.SymKeyID = symKey_id
+
 
 	// post example
 	//shh.sendMessage('boohoo','tooopic', '')
 	_, err = api.Post(ctx, _message)
 
-	return symKey, err
+	return hex.EncodeToString(symKey), err
 }
+
+func (api *PublicWhisperAPI) ReceiveMessage(ctx context.Context, topic string, hexKey string , messagefilterid string) ([]*Message, error) {
+	// Allowed number of topics
+	const topicNum = 1
+
+	var _filter Filter
+	var _criteria Criteria
+
+	if hexKey == "" {
+		hexKey = "7c8d019192c24224e2cafccae3a61fb586b14323a6bc8f9e7df1d929333ff993"
+	}
+	if topic == "" {
+		topic = "Xenio"
+	}
+	randomKey, err := hex.DecodeString(hexKey)
+	//log.Info(hex.EncodeToString(randomKey))
+
+	symKey_id, err := api.AddSymKey(ctx, randomKey)
+	symKey, err := api.w.GetSymKey(symKey_id)
+
+	//log.Info(string(symKey_id))
+if messagefilterid == "" {
+		// Create a new Subscription
+		_filter.Topics = make([][]byte, topicNum)
+		log.Info("Topic String: " + topic)
+		for i := 0; i < topicNum; i++ {
+			_filter.Topics[i] = []byte(topic)
+			//log.Info("Filter Topics: " + hex.EncodeToString(_filter.Topics[i]))
+		}
+		_filter.KeySym = symKey
+		_filter.AllowP2P = true
+
+		//subscriptionID, err := api.w.Subscribe(&_filter)
+		//log.Info("SubID: " + subscriptionID)
+
+		// Set a new filter in order to poll new messages
+		_criteria.Topics = make([]TopicType, 1)
+		_criteria.Topics[0] = BytesToTopic([]byte(topic))
+		_criteria.SymKeyID = symKey_id
+		log.Info("Topic: " + _criteria.Topics[0].String())
+
+		messagefilterid, err := api.NewMessageFilter(_criteria)
+		log.Info("Filter ID: " + messagefilterid)
+		if  err != nil {
+			log.Error(fmt.Sprintf("%v\n", err))
+		}
+}
+	//messages2, err := api.Messages(ctx, _criteria)
+	//if messages2 != nil {log.Info("received")}
+
+	// Poll for new messages
+	messages, err := api.GetFilterMessages(messagefilterid)
+
+
+
+	return messages, err
+}
+
 
 // AddPrivateKey imports the given private key.
 func (api *PublicWhisperAPI) AddPrivateKey(ctx context.Context, privateKey hexutil.Bytes) (string, error) {
