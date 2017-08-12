@@ -139,12 +139,8 @@ func (api *PublicWhisperAPI) NewKeyPair(ctx context.Context) (string, error) {
 	return api.w.NewKeyPair()
 }
 
-// stavs whisper func template
-func (api *PublicWhisperAPI) StavsFunc(ctx context.Context, messageString string) (string, error) {
-	return api.w.StavsFunc(messageString)
-}
 
-func (api *PublicWhisperAPI) SendMessage(ctx context.Context,  message string,  topic string, hexKey string, targetPeer string) (string, error) {
+func (api *PublicWhisperAPI) MessageSend(ctx context.Context,  message string,  topic string, hexKey string, targetPeer string) (string, error) {
 
 	//symKey_id, err := api.w.GenerateSymKey()
 	//symKey, err := api.w.GetSymKey(symKey_id)
@@ -185,7 +181,21 @@ func (api *PublicWhisperAPI) SendMessage(ctx context.Context,  message string,  
 	return hex.EncodeToString(symKey), err
 }
 
-func (api *PublicWhisperAPI) ReceiveMessage(ctx context.Context, topic string, hexKey string , messagefilterid string) ([]*Message, error) {
+func (api *PublicWhisperAPI) MessageRead(ctx context.Context, topic string, hexKey string , messagefilterid string){
+	messages, err := api.MessageReceive(ctx,topic, hexKey,messagefilterid)
+	if err == nil{
+			for _, msg := range messages {
+				msg.ActualMessage = BytesToString(msg.Payload)
+				log.Info(msg.ActualMessage)
+			}
+	}else{
+		log.Warn("FilterID not found, new filter will be created now: ")
+		api.MessageReceive(ctx,topic, hexKey,"")
+		 }
+}
+
+
+func (api *PublicWhisperAPI) MessageReceive(ctx context.Context, topic string, hexKey string , messagefilterid string) ([]*Message, error) {
 	// Allowed number of topics
 	const topicNum = 1
 
@@ -194,7 +204,7 @@ func (api *PublicWhisperAPI) ReceiveMessage(ctx context.Context, topic string, h
 
 	if hexKey == "" {
 		hexKey = "7c8d019192c24224e2cafccae3a61fb586b14323a6bc8f9e7df1d929333ff993"
-	}
+	} //TODO: do something smarter here
 	if topic == "" {
 		topic = "Xenio"
 	}
@@ -211,13 +221,9 @@ if messagefilterid == "" {
 		log.Info("Topic String: " + topic)
 		for i := 0; i < topicNum; i++ {
 			_filter.Topics[i] = []byte(topic)
-			//log.Info("Filter Topics: " + hex.EncodeToString(_filter.Topics[i]))
 		}
 		_filter.KeySym = symKey
 		_filter.AllowP2P = true
-
-		//subscriptionID, err := api.w.Subscribe(&_filter)
-		//log.Info("SubID: " + subscriptionID)
 
 		// Set a new filter in order to poll new messages
 		_criteria.Topics = make([]TopicType, 1)
@@ -225,24 +231,19 @@ if messagefilterid == "" {
 		_criteria.SymKeyID = symKey_id
 		log.Info("Topic: " + _criteria.Topics[0].String())
 
-		messagefilterid, err := api.NewMessageFilter(_criteria)
-		log.Info("Filter ID: " + messagefilterid)
+		messagefilterID, err := api.NewMessageFilter(_criteria)
+		log.Info("Filter ID: " + messagefilterID)
 		if  err != nil {
 			log.Error(fmt.Sprintf("%v\n", err))
 		}
-}
-	//messages2, err := api.Messages(ctx, _criteria)
-	//if messages2 != nil {log.Info("received")}
-
-	// Poll for new messages
+	}
 	messages, err := api.GetFilterMessages(messagefilterid)
-
-
-
 	return messages, err
 }
 
-
+func BytesToString(data []byte) string {
+	return string(data[:])
+}
 // AddPrivateKey imports the given private key.
 func (api *PublicWhisperAPI) AddPrivateKey(ctx context.Context, privateKey hexutil.Bytes) (string, error) {
 	key, err := crypto.ToECDSA(privateKey)
@@ -547,6 +548,7 @@ type Message struct {
 	PoW       float64   `json:"pow"`
 	Hash      []byte    `json:"hash"`
 	Dst       []byte    `json:"recipientPublicKey,omitempty"`
+	ActualMessage string `json:"actualMessage,omitempty"`
 }
 
 type messageOverride struct {

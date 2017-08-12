@@ -674,18 +674,19 @@ web3._extend({
 			params: 1
 		}),
 		new web3._extend.Method({
-			name: 'stavsFunc',
-			call: 'shh_stavsFunc',
-			params: 1
-		}),
-		new web3._extend.Method({
-			name: 'sendMessage',
-			call: 'shh_sendMessage',
+			name: 'messageSend',
+			call: 'shh_messageSend',
 			params: 4
 		}),
 		new web3._extend.Method({
-			name: 'receiveMessage',
-			call: 'shh_receiveMessage',
+			name: 'messageReceive',
+			call: 'shh_messageReceive',
+			params: 3
+		}),
+		,
+		new web3._extend.Method({
+			name: 'messageRead',
+			call: 'shh_messageRead',
 			params: 3
 		}),
 	],
