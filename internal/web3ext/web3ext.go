@@ -672,7 +672,23 @@ web3._extend({
 			name: 'newMessageFilter',
 			call: 'shh_newMessageFilter',
 			params: 1
-		})
+		}),
+		new web3._extend.Method({
+			name: 'messageSend',
+			call: 'shh_messageSend',
+			params: 4
+		}),
+		new web3._extend.Method({
+			name: 'messageReceive',
+			call: 'shh_messageReceive',
+			params: 3
+		}),
+		,
+		new web3._extend.Method({
+			name: 'messageRead',
+			call: 'shh_messageRead',
+			params: 3
+		}),
 	],
 	properties:
 	[

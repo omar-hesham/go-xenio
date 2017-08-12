@@ -265,6 +265,10 @@ func (w *Whisper) NewKeyPair() (string, error) {
 	return id, nil
 }
 
+func (w *Whisper) StavsFunc(messageString string) (string, error) {
+	return messageString, nil
+}
+
 // DeleteKeyPair deletes the specified key if it exists.
 func (w *Whisper) DeleteKeyPair(key string) bool {
 	w.keyMu.Lock()

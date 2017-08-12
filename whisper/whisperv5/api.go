@@ -23,6 +23,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	//mrand "math/rand"
+	"encoding/hex"
 
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/common/hexutil"
@@ -137,6 +139,111 @@ func (api *PublicWhisperAPI) NewKeyPair(ctx context.Context) (string, error) {
 	return api.w.NewKeyPair()
 }
 
+
+func (api *PublicWhisperAPI) MessageSend(ctx context.Context,  message string,  topic string, hexKey string, targetPeer string) (string, error) {
+
+	//symKey_id, err := api.w.GenerateSymKey()
+	//symKey, err := api.w.GetSymKey(symKey_id)
+	//"0x0f99d381030a59edc477bddf741069e0d9158c191f04f3d8d079c01db9792ee2"
+	//var randomKey []byte //make([]byte, aesKeyLength)
+	if hexKey == "" {
+		hexKey = "7c8d019192c24224e2cafccae3a61fb586b14323a6bc8f9e7df1d929333ff993"
+	}
+	if topic == "" {
+		topic = "Xenio"
+	}
+	randomKey, err := hex.DecodeString(hexKey)
+	var _message NewMessage
+	_message.Payload = []byte(message)
+	_message.PowTarget = 2
+	_message.PowTime = 3
+	_message.TTL = 600
+	_message.Topic = BytesToTopic([]byte(topic))
+
+	if targetPeer != ""{
+		_message.TargetPeer = targetPeer
+	}
+	log.Info("key: " + hex.EncodeToString(randomKey))
+	log.Info("Topic String: " + topic)
+	log.Info("topic: " + _message.Topic.String())
+	symKey_id, err := api.AddSymKey(ctx, randomKey)
+	symKey, err := api.w.GetSymKey(symKey_id)
+
+	log.Info("sumkeyid: " + string(symKey_id))
+	//log.Info(string(symKey))
+	_message.SymKeyID = symKey_id
+
+
+	// post example
+	//shh.sendMessage('boohoo','tooopic', '')
+	_, err = api.Post(ctx, _message)
+
+	return hex.EncodeToString(symKey), err
+}
+
+func (api *PublicWhisperAPI) MessageRead(ctx context.Context, topic string, hexKey string , messagefilterid string){
+	messages, err := api.MessageReceive(ctx,topic, hexKey,messagefilterid)
+	if err == nil{
+			for _, msg := range messages {
+				msg.ActualMessage = BytesToString(msg.Payload)
+				log.Info(msg.ActualMessage)
+			}
+	}else{
+		log.Warn("FilterID not found, new filter will be created now: ")
+		api.MessageReceive(ctx,topic, hexKey,"")
+		 }
+}
+
+
+func (api *PublicWhisperAPI) MessageReceive(ctx context.Context, topic string, hexKey string , messagefilterid string) ([]*Message, error) {
+	// Allowed number of topics
+	const topicNum = 1
+
+	var _filter Filter
+	var _criteria Criteria
+
+	if hexKey == "" {
+		hexKey = "7c8d019192c24224e2cafccae3a61fb586b14323a6bc8f9e7df1d929333ff993"
+	} //TODO: do something smarter here
+	if topic == "" {
+		topic = "Xenio"
+	}
+	randomKey, err := hex.DecodeString(hexKey)
+	//log.Info(hex.EncodeToString(randomKey))
+
+	symKey_id, err := api.AddSymKey(ctx, randomKey)
+	symKey, err := api.w.GetSymKey(symKey_id)
+
+	//log.Info(string(symKey_id))
+if messagefilterid == "" {
+		// Create a new Subscription
+		_filter.Topics = make([][]byte, topicNum)
+		log.Info("Topic String: " + topic)
+		for i := 0; i < topicNum; i++ {
+			_filter.Topics[i] = []byte(topic)
+		}
+		_filter.KeySym = symKey
+		_filter.AllowP2P = true
+
+		// Set a new filter in order to poll new messages
+		_criteria.Topics = make([]TopicType, 1)
+		_criteria.Topics[0] = BytesToTopic([]byte(topic))
+		_criteria.SymKeyID = symKey_id
+		log.Info("Topic: " + _criteria.Topics[0].String())
+
+		messagefilterID, err := api.NewMessageFilter(_criteria)
+		log.Info("Filter ID: " + messagefilterID)
+		if  err != nil {
+			log.Error(fmt.Sprintf("%v\n", err))
+		}
+	}
+	messages, err := api.GetFilterMessages(messagefilterid)
+	return messages, err
+}
+
+func BytesToString(data []byte) string {
+	return string(data[:])
+}
 // AddPrivateKey imports the given private key.
 func (api *PublicWhisperAPI) AddPrivateKey(ctx context.Context, privateKey hexutil.Bytes) (string, error) {
 	key, err := crypto.ToECDSA(privateKey)
@@ -441,6 +548,7 @@ type Message struct {
 	PoW       float64   `json:"pow"`
 	Hash      []byte    `json:"hash"`
 	Dst       []byte    `json:"recipientPublicKey,omitempty"`
+	ActualMessage string `json:"actualMessage,omitempty"`
 }
 
 type messageOverride struct {

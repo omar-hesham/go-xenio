@@ -192,3 +192,19 @@ func (ec *Client) FilterMessages(ctx context.Context, id string) ([]*whisper.Mes
 	var messages []*whisper.Message
 	return messages, ec.c.CallContext(ctx, &messages, "shh_getFilterMessages", id)
 }
+
+// Stavs Go function test
+func (sc *Client) StavsFunc(ctx context.Context, message string) (string, error) {
+	var response string
+	return response, sc.c.CallContext(ctx, &response, "shh_stavsFunc", message)
+}
+
+func (sc *Client) SendMessage(ctx context.Context, message string, topic string, hexKey string, targetPeer string) (string, error) {
+	var response string
+	return response, sc.c.CallContext(ctx, &response, "shh_sendMessage", message, topic, hexKey, targetPeer)
+}
+
+func (sc *Client) ReceiveMessage(ctx context.Context, topic string, hexKey string) ([]*whisper.Message, error) {
+	var response []*whisper.Message
+	return response, sc.c.CallContext(ctx, &response, "shh_receiveMessage", topic , hexKey)
+}
