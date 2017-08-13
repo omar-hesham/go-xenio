@@ -94,6 +94,10 @@ var (
 		XenioBlock:		 big.NewInt(0),
 
 		Ethash: new(EthashConfig),
+		Xenio: &XenioConfig{
+			Period: 	30,
+			SuperPeriod:60*30,
+		},
 	}
 	// AllProtocolChanges contains every protocol change (EIPs)
 	// introduced and accepted by the Ethereum core developers.
@@ -103,8 +107,8 @@ var (
 	// means that all fields must be set at all times. This forces
 	// anyone adding flags to the config to also have to set these
 	// fields.
-	AllProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(math.MaxInt64) /*disabled*/,big.NewInt(0), new(EthashConfig), nil}
-	TestChainConfig    = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), nil, big.NewInt(0),new(EthashConfig), nil}
+	AllProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(math.MaxInt64) /*disabled*/,big.NewInt(0), new(EthashConfig), nil, nil} //TODO: remove xenioblock
+	TestChainConfig    = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), nil, big.NewInt(0),new(EthashConfig), nil, nil}
 	TestRules          = TestChainConfig.Rules(new(big.Int))
 )
 
@@ -132,6 +136,7 @@ type ChainConfig struct {
 	// Various consensus engines
 	Ethash *EthashConfig `json:"ethash,omitempty"`
 	Clique *CliqueConfig `json:"clique,omitempty"`
+	Xenio *XenioConfig 	 `json:"xenio,omitempty"`
 }
 
 // EthashConfig is the consensus engine configs for proof-of-work based sealing.
@@ -146,6 +151,11 @@ func (c *EthashConfig) String() string {
 type CliqueConfig struct {
 	Period uint64 `json:"period"` // Number of seconds between blocks to enforce
 	Epoch  uint64 `json:"epoch"`  // Epoch length to reset votes and checkpoint
+}
+
+type XenioConfig struct {
+	Period uint64 		`json:"period"` // Number of seconds between blocks to enforce
+	SuperPeriod uint64	`json:"superperiod"` // Number of seconds between super blocks to enforce
 }
 
 // String implements the stringer interface, returning the consensus engine details.
