@@ -30,7 +30,7 @@ import (
 	"github.com/xenioplatform/go-xenio/common/hexutil"
 	"github.com/xenioplatform/go-xenio/consensus"
 	"github.com/xenioplatform/go-xenio/consensus/clique"
-	//"github.com/xenioplatform/go-xenio/consensus/xenio"
+	"github.com/xenioplatform/go-xenio/consensus/xenio"
 	"github.com/xenioplatform/go-xenio/consensus/ethash"
 	"github.com/xenioplatform/go-xenio/core"
 	"github.com/xenioplatform/go-xenio/core/types"
@@ -224,10 +224,10 @@ func CreateConsensusEngine(ctx *node.ServiceContext, config *Config, chainConfig
 	if chainConfig.Clique != nil {
 		return clique.New(chainConfig.Clique, db)
 	}
-	/*if chainConfig.Xenio != nil {
+	if chainConfig.Xenio != nil {
 		log.Info("xenio consensus") //TODO: remove line
 		return xenio.New(chainConfig.Xenio, db)
-	}*/
+	}
 	// Otherwise assume proof-of-work
 	switch {
 	case config.PowFake:
