@@ -155,6 +155,7 @@ type CliqueConfig struct {
 
 type XenioConfig struct {
 	Period uint64 		`json:"period"` // Number of seconds between blocks to enforce
+	Epoch  uint64 `json:"epoch"` // TODO: maybe remove that
 	SuperPeriod uint64	`json:"superperiod"` // Number of seconds between super blocks to enforce
 }
 
