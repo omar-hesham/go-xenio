@@ -10,8 +10,6 @@ import (
 	"github.com/xenioplatform/go-xenio/core/state"
 	"github.com/xenioplatform/go-xenio/rpc"
 	"github.com/xenioplatform/go-xenio/crypto"
-	"github.com/xenioplatform/go-xenio/log"
-	//"github.com/xenioplatform/go-xenio/crypto/sha3"
 	lru "github.com/hashicorp/golang-lru"
 	"math/big"
 	"sync"
