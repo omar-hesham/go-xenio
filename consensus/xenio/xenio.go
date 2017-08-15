@@ -10,6 +10,7 @@ import (
 	"github.com/xenioplatform/go-xenio/core/state"
 	"github.com/xenioplatform/go-xenio/rpc"
 	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/log"
 	//"github.com/xenioplatform/go-xenio/crypto/sha3"
 	lru "github.com/hashicorp/golang-lru"
 	"math/big"
@@ -178,6 +179,9 @@ func (c *Xenio) verifyHeader(chain consensus.ChainReader, header *types.Header, 
 		return consensus.ErrFutureBlock
 	}
 	// Checkpoint blocks need to enforce zero beneficiary
+	if c.config.Epoch == 0{
+		return errUnknownBlock
+	}
 	checkpoint := (number % c.config.Epoch) == 0
 	if checkpoint && header.Coinbase != (common.Address{}) {
 		return errInvalidCheckpointBeneficiary

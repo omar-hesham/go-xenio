@@ -225,7 +225,7 @@ func CreateConsensusEngine(ctx *node.ServiceContext, config *Config, chainConfig
 		return clique.New(chainConfig.Clique, db)
 	}
 	if chainConfig.Xenio != nil {
-		log.Info("xenio consensus") //TODO: remove line
+		log.Info("Xenio: PoN consensus selected") //TODO: remove line
 		return xenio.New(chainConfig.Xenio, db)
 	}
 	// Otherwise assume proof-of-work

@@ -289,8 +289,6 @@ func (ethash *Ethash) verifyHeader(chain consensus.ChainReader, header, parent *
 func CalcDifficulty(config *params.ChainConfig, time uint64, parent *types.Header) *big.Int {
 	next := new(big.Int).Add(parent.Number, big1)
 	switch {
-	//case config.IsXenio(next):
-	//	return calcDiffucultyXenio(time, parent)
 	case config.IsMetropolis(next):
 		return calcDifficultyMetropolis(time, parent)
 	case config.IsHomestead(next):

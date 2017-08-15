@@ -95,6 +95,7 @@ var (
 
 		Ethash: new(EthashConfig),
 		Xenio: &XenioConfig{
+			Epoch:      30000,
 			Period: 	30,
 			SuperPeriod:60*30,
 		},
