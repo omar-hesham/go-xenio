@@ -82,7 +82,7 @@ var (
 	}
 
 	XenioChainConfig = &ChainConfig{
-		ChainId:         big.NewInt(1),
+		ChainId:         big.NewInt(345),
 		HomesteadBlock:  big.NewInt(math.MaxInt64), // never enable
 		DAOForkBlock:    big.NewInt(math.MaxInt64), // never enable
 		DAOForkSupport:  false,

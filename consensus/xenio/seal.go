@@ -14,6 +14,7 @@ import (
 )
 
 func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-chan struct{}) (*types.Block, error) {
+	log.Warn("Seal: sealing")
 	header := block.Header()
 
 	// Sealing the genesis block is not supported

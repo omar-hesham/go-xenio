@@ -303,6 +303,7 @@ func (s *Snapshot) inturn(number uint64, signer common.Address) bool {
 // snapshot retrieves the authorization snapshot at a given point in time.
 func (c *Xenio) snapshot(chain consensus.ChainReader, number uint64, hash common.Hash, parents []*types.Header) (*Snapshot, error) {
 	// Search for a snapshot in memory or on disk for checkpoints
+	log.Warn("Snapshot: snapshot")
 	var (
 		headers []*types.Header
 		snap    *Snapshot

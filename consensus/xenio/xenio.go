@@ -17,6 +17,7 @@ import (
 	"time"
 	"bytes"
 	"errors"
+	"math/rand"
 )
 
 type Xenio struct {
@@ -68,16 +69,72 @@ func calcDiffucultyXenio(time uint64, parent *types.Header) *big.Int {
 
 }
 
-// Prepare implements consensus.Engine, initializing the difficulty field of a
-// header to conform to the ethash protocol. The changes are done inline.
-func (ethash *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error {
+// Prepare implements consensus.Engine, preparing all the consensus fields of the
+// header for running the transactions on top.
+func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error {
 	log.Warn("Consensus: prepare phase")
-	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+	// If the block isn't a checkpoint, cast a random vote (good enough for now)
+	header.Coinbase = common.Address{}
+	header.Nonce = types.BlockNonce{}
+
+	number := header.Number.Uint64()
+
+	// Assemble the voting snapshot to check which votes make sense
+	snap, err := c.snapshot(chain, number-1, header.ParentHash, nil)
+	if err != nil {
+		return err
+	}
+	if number%c.config.Epoch != 0 {
+		c.lock.RLock()
+
+		// Gather all the proposals that make sense voting on
+		addresses := make([]common.Address, 0, len(c.proposals))
+		for address, authorize := range c.proposals {
+			if snap.validVote(address, authorize) {
+				addresses = append(addresses, address)
+			}
+		}
+		// If there's pending proposals, cast a vote on them
+		if len(addresses) > 0 {
+			header.Coinbase = addresses[rand.Intn(len(addresses))]
+			if c.proposals[header.Coinbase] {
+				copy(header.Nonce[:], nonceAuthVote)
+			} else {
+				copy(header.Nonce[:], nonceDropVote)
+			}
+		}
+		c.lock.RUnlock()
+	}
+	// Set the correct difficulty
+	header.Difficulty = diffNoTurn
+	if snap.inturn(header.Number.Uint64(), c.signer) {
+		header.Difficulty = diffInTurn
+	}
+	// Ensure the extra data has all it's components
+	if len(header.Extra) < extraVanity {
+		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, extraVanity-len(header.Extra))...)
+	}
+	header.Extra = header.Extra[:extraVanity]
+
+	if number%c.config.Epoch == 0 {
+		for _, signer := range snap.signers() {
+			header.Extra = append(header.Extra, signer[:]...)
+		}
+	}
+	header.Extra = append(header.Extra, make([]byte, extraSeal)...)
+
+	// Mix digest is reserved for now, set to empty
+	header.MixDigest = common.Hash{}
+
+	// Ensure the timestamp has the correct delay
+	parent := chain.GetHeader(header.ParentHash, number-1)
 	if parent == nil {
 		return consensus.ErrUnknownAncestor
 	}
-	header.Difficulty = calcDiffucultyXenio(header.Time.Uint64(), parent)
-
+	header.Time = new(big.Int).Add(parent.Time, new(big.Int).SetUint64(c.config.Period))
+	if header.Time.Int64() < time.Now().Unix() {
+		header.Time = big.NewInt(time.Now().Unix())
+	}
 	return nil
 }
 
