@@ -49,6 +49,7 @@ import (
 	"github.com/xenioplatform/go-xenio/params"
 	"github.com/xenioplatform/go-xenio/rlp"
 	"github.com/xenioplatform/go-xenio/rpc"
+	"strconv"
 )
 
 type LesServer interface {
@@ -156,7 +157,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		config.TxPool.Journal = ctx.ResolvePath(config.TxPool.Journal)
 	}
 	eth.txPool = core.NewTxPool(config.TxPool, eth.chainConfig, eth.EventMux(), eth.blockchain.State, eth.blockchain.GasLimit)
-
+	log.Warn("Engine: maxpeers = " + strconv.Itoa(config.MaxPeers))
 	maxPeers := config.MaxPeers
 	if config.LightServ > 0 {
 		// if we are running a light server, limit the number of ETH peers so that we reserve some space for incoming LES connections
@@ -225,7 +226,7 @@ func CreateConsensusEngine(ctx *node.ServiceContext, config *Config, chainConfig
 		return clique.New(chainConfig.Clique, db)
 	}
 	if chainConfig.Xenio != nil {
-		log.Info("Xenio: PoN consensus selected") //TODO: remove line
+		log.Warn("Xenio: PoN consensus selected") //TODO: remove line
 		return xenio.New(chainConfig.Xenio, db)
 	}
 	// Otherwise assume proof-of-work

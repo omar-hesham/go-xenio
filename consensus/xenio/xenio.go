@@ -9,6 +9,7 @@ import (
 	"github.com/xenioplatform/go-xenio/consensus"
 	"github.com/xenioplatform/go-xenio/core/state"
 	"github.com/xenioplatform/go-xenio/rpc"
+	"github.com/xenioplatform/go-xenio/log"
 	"github.com/xenioplatform/go-xenio/crypto"
 	lru "github.com/hashicorp/golang-lru"
 	"math/big"
@@ -26,6 +27,7 @@ type Xenio struct {
 	signatures *lru.ARCCache // Signatures of recent blocks to speed up mining
 	stakers map[common.Address]bool // Current list of stakers
 
+	proposals map[common.Address]bool // Current list of proposals we are pushing
 	signer common.Address // Ethereum address of the signing key
 	signFn SignerFn
 	lock   sync.RWMutex   // its a mutex
@@ -38,19 +40,22 @@ type SignerFn func(accounts.Account, []byte) ([]byte, error)
 func New(config *params.XenioConfig, db ethdb.Database) *Xenio {
 	// Set any missing consensus parameters to their defaults
 	conf := *config
-	if conf.SuperPeriod == 0 {
-		conf.SuperPeriod = superBlockPeriod
+	if conf.Epoch == 0 {
+		conf.Epoch = epochLength
 	}
 	if conf.Period == 0 {
 		conf.Period = blockPeriod
 	}
+	// Allocate the snapshot caches and create the engine
+	recents, _ := lru.NewARC(inmemorySnapshots)
+	signatures, _ := lru.NewARC(inmemorySignatures)
 
 	return &Xenio{
 		config:     &conf,
 		db:         db,
-		//recents:    recents,
-		//signatures: signatures,
-		//proposals:  make(map[common.Address]bool),
+		recents:    recents,
+		signatures: signatures,
+		proposals:  make(map[common.Address]bool),
 	}
 }
 
@@ -66,6 +71,7 @@ func calcDiffucultyXenio(time uint64, parent *types.Header) *big.Int {
 // Prepare implements consensus.Engine, initializing the difficulty field of a
 // header to conform to the ethash protocol. The changes are done inline.
 func (ethash *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error {
+	log.Warn("Consensus: prepare phase")
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 	if parent == nil {
 		return consensus.ErrUnknownAncestor
@@ -78,6 +84,7 @@ func (ethash *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) 
 // Finalize implements consensus.Engine, accumulating the block and uncle rewards,
 // setting the final state and assembling the block.
 func (ethash *Xenio) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
+	log.Warn("Consensus: finalize phase")
 	// Accumulate any block and uncle rewards and commit the final state root
 	AccumulateRewards(state, header, uncles)
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
@@ -90,7 +97,9 @@ func (ethash *Xenio) Finalize(chain consensus.ChainReader, header *types.Header,
 // reward. The total reward consists of the static block reward and rewards for
 // included uncles. The coinbase of each uncle block is also rewarded.
 func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*types.Header) {
+	log.Warn("Consensus: AccumulateRewards phase")
 	reward := new(big.Int).Set(blockReward)
+	log.Warn("AccumulateRewards: " + reward.String())
 	r := new(big.Int)
 	for _, uncle := range uncles {
 		r.Add(uncle.Number, big8)
@@ -118,6 +127,7 @@ func (c *Xenio) APIs(chain consensus.ChainReader) []rpc.API {
 
 // ecrecover extracts the Ethereum account address from a signed header.
 func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, error) {
+	log.Warn("Consensus: ecrecover phase")
 	// If the signature's already cached, return that
 	hash := header.Hash()
 	if address, known := sigcache.Get(hash); known {
@@ -142,6 +152,7 @@ func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, er
 }
 
 func (c *Xenio) VerifyHeaders(chain consensus.ChainReader, headers []*types.Header, seals []bool) (chan<- struct{}, <-chan error) {
+	log.Warn("Consensus: VerifyHeaders phase")
 	abort := make(chan struct{})
 	results := make(chan error, len(headers))
 

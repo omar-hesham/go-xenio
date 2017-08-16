@@ -5,9 +5,11 @@ import (
 "encoding/json"
 
 "github.com/xenioplatform/go-xenio/common"
+"github.com/xenioplatform/go-xenio/consensus"
 "github.com/xenioplatform/go-xenio/core/types"
 "github.com/xenioplatform/go-xenio/ethdb"
 "github.com/xenioplatform/go-xenio/params"
+"github.com/xenioplatform/go-xenio/log"
 lru "github.com/hashicorp/golang-lru"
 )
 
@@ -44,6 +46,7 @@ type Snapshot struct {
 // method does not initialize the set of recent signers, so only ever use if for
 // the genesis block.
 func newSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, number uint64, hash common.Hash, signers []common.Address) *Snapshot {
+	log.Warn("Snapshot: new")
 	snap := &Snapshot{
 		config:   config,
 		sigcache: sigcache,
@@ -61,6 +64,7 @@ func newSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, number uint
 
 // loadSnapshot loads an existing snapshot from the database.
 func loadSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, db ethdb.Database, hash common.Hash) (*Snapshot, error) {
+	log.Warn("Snapshot: load")
 	blob, err := db.Get(append([]byte("clique-"), hash[:]...))
 	if err != nil {
 		return nil, err
@@ -77,6 +81,7 @@ func loadSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, db ethdb.D
 
 // store inserts the snapshot into the database.
 func (s *Snapshot) store(db ethdb.Database) error {
+	log.Warn("Snapshot: store")
 	blob, err := json.Marshal(s)
 	if err != nil {
 		return err
@@ -86,6 +91,7 @@ func (s *Snapshot) store(db ethdb.Database) error {
 
 // copy creates a deep copy of the snapshot, though not the individual votes.
 func (s *Snapshot) copy() *Snapshot {
+	log.Warn("Snapshot: copy")
 	cpy := &Snapshot{
 		config:   s.config,
 		sigcache: s.sigcache,
@@ -157,6 +163,7 @@ func (s *Snapshot) uncast(address common.Address, authorize bool) bool {
 // apply creates a new authorization snapshot by applying the given headers to
 // the original one.
 func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
+	log.Warn("Snapshot: apply")
 	// Allow passing in no headers for cleaner code
 	if len(headers) == 0 {
 		return s, nil
@@ -291,4 +298,81 @@ func (s *Snapshot) inturn(number uint64, signer common.Address) bool {
 		offset++
 	}
 	return (number % uint64(len(signers))) == uint64(offset)
+}
+
+// snapshot retrieves the authorization snapshot at a given point in time.
+func (c *Xenio) snapshot(chain consensus.ChainReader, number uint64, hash common.Hash, parents []*types.Header) (*Snapshot, error) {
+	// Search for a snapshot in memory or on disk for checkpoints
+	var (
+		headers []*types.Header
+		snap    *Snapshot
+	)
+	for snap == nil {
+		// If an in-memory snapshot was found, use that
+		if s, ok := c.recents.Get(hash); ok {
+			snap = s.(*Snapshot)
+			break
+		}
+		// If an on-disk checkpoint snapshot can be found, use that
+		if number%checkpointInterval == 0 {
+			if s, err := loadSnapshot(c.config, c.signatures, c.db, hash); err == nil {
+				log.Trace("Loaded voting snapshot form disk", "number", number, "hash", hash)
+				snap = s
+				break
+			}
+		}
+		// If we're at block zero, make a snapshot
+		if number == 0 {
+			genesis := chain.GetHeaderByNumber(0)
+			if err := c.VerifyHeader(chain, genesis, false); err != nil {
+				return nil, err
+			}
+			signers := make([]common.Address, (len(genesis.Extra)-extraVanity-extraSeal)/common.AddressLength)
+			for i := 0; i < len(signers); i++ {
+				copy(signers[i][:], genesis.Extra[extraVanity+i*common.AddressLength:])
+			}
+			snap = newSnapshot(c.config, c.signatures, 0, genesis.Hash(), signers)
+			if err := snap.store(c.db); err != nil {
+				return nil, err
+			}
+			log.Trace("Stored genesis voting snapshot to disk")
+			break
+		}
+		// No snapshot for this header, gather the header and move backward
+		var header *types.Header
+		if len(parents) > 0 {
+			// If we have explicit parents, pick from there (enforced)
+			header = parents[len(parents)-1]
+			if header.Hash() != hash || header.Number.Uint64() != number {
+				return nil, consensus.ErrUnknownAncestor
+			}
+			parents = parents[:len(parents)-1]
+		} else {
+			// No explicit parents (or no more left), reach out to the database
+			header = chain.GetHeader(hash, number)
+			if header == nil {
+				return nil, consensus.ErrUnknownAncestor
+			}
+		}
+		headers = append(headers, header)
+		number, hash = number-1, header.ParentHash
+	}
+	// Previous snapshot found, apply any pending headers on top of it
+	for i := 0; i < len(headers)/2; i++ {
+		headers[i], headers[len(headers)-1-i] = headers[len(headers)-1-i], headers[i]
+	}
+	snap, err := snap.apply(headers)
+	if err != nil {
+		return nil, err
+	}
+	c.recents.Add(snap.Hash, snap)
+
+	// If we've generated a new checkpoint snapshot, save to disk
+	if snap.Number%checkpointInterval == 0 && len(headers) > 0 {
+		if err = snap.store(c.db); err != nil {
+			return nil, err
+		}
+		log.Trace("Stored voting snapshot to disk", "number", snap.Number, "hash", snap.Hash)
+	}
+	return snap, err
 }
