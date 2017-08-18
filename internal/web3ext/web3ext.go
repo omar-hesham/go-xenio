@@ -31,6 +31,7 @@ var Modules = map[string]string{
 	"shh":        Shh_JS,
 	"swarmfs":    SWARMFS_JS,
 	"txpool":     TxPool_JS,
+	"xenio":	  Xenio_JS,
 }
 
 const Chequebook_JS = `
@@ -108,6 +109,53 @@ web3._extend({
 		new web3._extend.Property({
 			name: 'proposals',
 			getter: 'clique_proposals'
+		}),
+	]
+});
+`
+const Xenio_JS = `
+web3._extend({
+  property: 'xenio',
+  methods:
+  [
+		new web3._extend.Method({
+			name: 'getSnapshot',
+			call: 'xenio_getSnapshot',
+			params: 1,
+      inputFormatter: [null]
+		}),
+		new web3._extend.Method({
+			name: 'getSnapshotAtHash',
+			call: 'xenio_getSnapshotAtHash',
+			params: 1
+		}),
+    new web3._extend.Method({
+      name: 'getSigners',
+      call: 'xenio_getSigners',
+      params: 1,
+      inputFormatter: [null]
+    }),
+		new web3._extend.Method({
+			name: 'getSignersAtHash',
+			call: 'xenio_getSignersAtHash',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'propose',
+			call: 'xenio_propose',
+			params: 2
+		}),
+		new web3._extend.Method({
+			name: 'discard',
+			call: 'xenio_discard',
+			params: 1
+		})
+  ],
+	properties:
+	[
+		new web3._extend.Property({
+			name: 'proposals',
+			getter: 'xenio_proposals'
 		}),
 	]
 });

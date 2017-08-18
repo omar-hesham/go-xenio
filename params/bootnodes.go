@@ -60,6 +60,6 @@ var DiscoveryV5Bootnodes = []string{
 }
 
 var XenioBootNodes = []string{
-	"enode://e0aae8b73bf7735c0860a1bdf2fb88a1bd4d9afd446dd3a5833b8325e33a004a148d10979c1afd5570a12dee9f23105c8578b1baabeda2cfd7b1d1d653e2318c@45.76.85.77:30666",
+	"enode://19be6f96320c413eb19dea3fc5c360ffcaf55df17070ff6e6eec08a1a8fc6888420559ad0e3b2b65717146ee548fe65845ddd80ac7cb62b29d4a359cdd620cd4@45.76.85.77:30666",
 
 }
