@@ -93,7 +93,7 @@ var (
 		MetropolisBlock: big.NewInt(math.MaxInt64), // never enable
 		XenioBlock:		 big.NewInt(0),
 
-		Ethash: new(EthashConfig),
+		//Ethash: new(EthashConfig),
 		Xenio: &XenioConfig{
 			Epoch:      30000,
 			Period: 	30,
