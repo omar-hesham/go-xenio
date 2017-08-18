@@ -83,13 +83,13 @@ var (
 
 	XenioChainConfig = &ChainConfig{
 		ChainId:         big.NewInt(345),
-		HomesteadBlock:  big.NewInt(math.MaxInt64), // never enable
-		DAOForkBlock:    big.NewInt(math.MaxInt64), // never enable
+		HomesteadBlock:  big.NewInt(1), // never enable
+		DAOForkBlock:    nil, // never enable
 		DAOForkSupport:  false,
-		EIP150Block:     big.NewInt(math.MaxInt64), // never enable
+		EIP150Block:     big.NewInt(2), // never enable
 		EIP150Hash:      common.HexToHash("0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0"),
-		EIP155Block:     big.NewInt(math.MaxInt64), // never enable
-		EIP158Block:     big.NewInt(math.MaxInt64), // never enable
+		EIP155Block:     big.NewInt(3), // never enable
+		EIP158Block:     big.NewInt(3), // never enable
 		MetropolisBlock: big.NewInt(math.MaxInt64), // never enable
 		XenioBlock:		 big.NewInt(0),
 
