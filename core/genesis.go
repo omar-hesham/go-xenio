@@ -308,11 +308,12 @@ func GenesisBlockForTesting(db ethdb.Database, addr common.Address, balance *big
 
 // DefaultGenesisBlock returns the Ethereum main net genesis block.
 func DefaultGenesisBlock() *Genesis {
+	log.Warn("Genesis: generating for default xenio network")
 	return &Genesis{
 		Config:     params.XenioChainConfig,
-		Nonce:      0,
+		//Nonce:      0,
 		Timestamp:  1492009146,
-		ExtraData:  hexutil.MustDecode("0x52657370656374206d7920617574686f7269746168207e452e436172746d616e42eb768f2244c8811c63729a21a3569731535f06d3a954dbf9b246ce46f8bac5bb804f92bd46f26bb279182d99e65703f0076e4812653aab85fca0f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),//("0x11bbe8db4e347b4e8c937c1c8370e4b5ed33adb3db69cbdb7a38e1e50b1b82fa"),
+		ExtraData:  hexutil.MustDecode("0x52657370656374206d7920617574686f7269746168207e452e436172746d616efad68b9988bc7c33482c3f60a8f2af134c348df6d3a954dbf9b246ce46f8bac5bb804f92bd46f26bb279182d99e65703f0076e4812653aab85fca0f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),//("0x11bbe8db4e347b4e8c937c1c8370e4b5ed33adb3db69cbdb7a38e1e50b1b82fa"),
 		GasLimit:   4700000,
 		Difficulty: big.NewInt(1),
 		Alloc:      decodePrealloc(xenioAllocData),
@@ -321,6 +322,7 @@ func DefaultGenesisBlock() *Genesis {
 
 // DefaultTestnetGenesisBlock returns the Ropsten network genesis block.
 func DefaultTestnetGenesisBlock() *Genesis {
+	log.Warn("Genesis: generating for default TEST network")
 	return &Genesis{
 		Config:     params.TestnetChainConfig,
 		Nonce:      56742,
@@ -331,8 +333,9 @@ func DefaultTestnetGenesisBlock() *Genesis {
 	}
 }
 
-// DefaultRinkebyGenesisBlock returns the Rinkeby network genesis block.
+// Default42eb768f2244c8811c63729a21a3569731535f06GenesisBlock returns the Rinkeby network genesis block.
 func DefaultRinkebyGenesisBlock() *Genesis {
+	log.Warn("Genesis: generating for Rinkeby network")
 	return &Genesis{
 		Config:     params.RinkebyChainConfig,
 		Timestamp:  1492009146,
