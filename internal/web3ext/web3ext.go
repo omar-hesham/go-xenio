@@ -727,6 +727,11 @@ web3._extend({
 			params: 4
 		}),
 		new web3._extend.Method({
+			name: 'messageGenerateTopic',
+			call: 'shh_messageGenerateTopic',
+			params: 1
+		}),
+		new web3._extend.Method({
 			name: 'messageReceive',
 			call: 'shh_messageReceive',
 			params: 3

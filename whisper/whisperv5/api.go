@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	"strings"
 	//mrand "math/rand"
 	"encoding/hex"
 
@@ -149,22 +150,19 @@ func (api *PublicWhisperAPI) MessageSend(ctx context.Context,  message string,  
 	if hexKey == "" {
 		hexKey = "7c8d019192c24224e2cafccae3a61fb586b14323a6bc8f9e7df1d929333ff993"
 	}
-	if topic == "" {
-		topic = "Xenio"
-	}
+
 	randomKey, err := hex.DecodeString(hexKey)
 	var _message NewMessage
 	_message.Payload = []byte(message)
 	_message.PowTarget = 2
 	_message.PowTime = 3
 	_message.TTL = 600
-	_message.Topic = BytesToTopic([]byte(topic))
+	_message.Topic, err = api.MessageGenerateTopic(ctx, topic)
 
 	if targetPeer != ""{
 		_message.TargetPeer = targetPeer
 	}
 	log.Info("key: " + hex.EncodeToString(randomKey))
-	log.Info("Topic String: " + topic)
 	log.Info("topic: " + _message.Topic.String())
 	symKey_id, err := api.AddSymKey(ctx, randomKey)
 	symKey, err := api.w.GetSymKey(symKey_id)
@@ -181,21 +179,20 @@ func (api *PublicWhisperAPI) MessageSend(ctx context.Context,  message string,  
 	return hex.EncodeToString(symKey), err
 }
 
-func (api *PublicWhisperAPI) MessageRead(ctx context.Context, topic string, hexKey string , messagefilterid string){
-	messages, err := api.MessageReceive(ctx,topic, hexKey,messagefilterid)
-	if err == nil{
-			for _, msg := range messages {
-				msg.ActualMessage = BytesToString(msg.Payload)
-				log.Info(msg.ActualMessage)
-			}
-	}else{
+func (api *PublicWhisperAPI) MessageRead(ctx context.Context, topic string, hexKey string, messageFilterID string) {
+	messages, err := api.MessageReceive(ctx, topic, hexKey, messageFilterID)
+	if err == nil {
+		for _, msg := range messages {
+			msg.ActualMessage = BytesToString(msg.Payload)
+			log.Info(msg.ActualMessage)
+		}
+	} else {
 		log.Warn("FilterID not found, new filter will be created now: ")
-		api.MessageReceive(ctx,topic, hexKey,"")
-		 }
+		api.MessageReceive(ctx, topic, hexKey, "")
+	}
 }
 
-
-func (api *PublicWhisperAPI) MessageReceive(ctx context.Context, topic string, hexKey string , messagefilterid string) ([]*Message, error) {
+func (api *PublicWhisperAPI) MessageReceive(ctx context.Context, topic string, hexKey string, messageFilterID string) ([]*Message, error) {
 	// Allowed number of topics
 	const topicNum = 1
 
@@ -204,10 +201,9 @@ func (api *PublicWhisperAPI) MessageReceive(ctx context.Context, topic string, h
 
 	if hexKey == "" {
 		hexKey = "7c8d019192c24224e2cafccae3a61fb586b14323a6bc8f9e7df1d929333ff993"
-	} //TODO: do something smarter here
-	if topic == "" {
-		topic = "Xenio"
 	}
+
+	topicHex, err := api.MessageGenerateTopic(ctx, topic)
 	randomKey, err := hex.DecodeString(hexKey)
 	//log.Info(hex.EncodeToString(randomKey))
 
@@ -215,30 +211,53 @@ func (api *PublicWhisperAPI) MessageReceive(ctx context.Context, topic string, h
 	symKey, err := api.w.GetSymKey(symKey_id)
 
 	//log.Info(string(symKey_id))
-if messagefilterid == "" {
+	if messageFilterID == "" {
 		// Create a new Subscription
 		_filter.Topics = make([][]byte, topicNum)
 		log.Info("Topic String: " + topic)
 		for i := 0; i < topicNum; i++ {
-			_filter.Topics[i] = []byte(topic)
+			_filter.Topics[i] = []byte(topicHex.String())
+			log.Info("Topic Filter: " + string(_filter.Topics[i]))
 		}
 		_filter.KeySym = symKey
 		_filter.AllowP2P = true
 
 		// Set a new filter in order to poll new messages
 		_criteria.Topics = make([]TopicType, 1)
-		_criteria.Topics[0] = BytesToTopic([]byte(topic))
+		_criteria.Topics[0] = topicHex
 		_criteria.SymKeyID = symKey_id
 		log.Info("Topic: " + _criteria.Topics[0].String())
 
-		messagefilterID, err := api.NewMessageFilter(_criteria)
-		log.Info("Filter ID: " + messagefilterID)
-		if  err != nil {
+		messageFilterID, err = api.NewMessageFilter(_criteria)
+		log.Info("Filter ID: " + messageFilterID)
+		if err != nil {
 			log.Error(fmt.Sprintf("%v\n", err))
 		}
 	}
-	messages, err := api.GetFilterMessages(messagefilterid)
+
+	messages, err := api.GetFilterMessages(messageFilterID)
 	return messages, err
+}
+
+// Expects topic string in plain text or in hex format
+func (api *PublicWhisperAPI) MessageGenerateTopic(ctx context.Context, topic string) (TopicType, error) {
+	// Handle topic string that is already in hex format
+	if strings.HasPrefix(topic, "0x") {
+		topic = strings.Replace(topic, "0x", "", 1)
+		topicHex, err := hex.DecodeString(topic)
+		log.Info("Topic given recognised as already in hex format")
+		return BytesToTopic(topicHex), err
+	} else {
+		// Set default topic
+		if topic == "" {
+			topic = "Xenio"
+			log.Info("Topic not given, using default topic: \"" + topic + "\"")
+		}
+
+		topicHex := BytesToTopic([]byte(topic))
+		log.Info("Generated topic \"" + topicHex.String() + "\" from value \"" + topic +"\"")
+		return topicHex, nil
+	}
 }
 
 func BytesToString(data []byte) string {
