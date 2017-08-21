@@ -39,6 +39,7 @@ import (
 	"github.com/xenioplatform/go-xenio/rlp"
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
+	"encoding/json"
 )
 
 const (
@@ -53,6 +54,7 @@ const (
 var (
 	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
 	blockPeriod = uint64(15)    // Default minimum difference between two consecutive block's timestamps
+	superPeriod = uint64(20*60)
 
 	extraVanity = 32 // Fixed number of extra-data prefix bytes reserved for signer vanity
 	extraSeal   = 65 // Fixed number of extra-data suffix bytes reserved for signer seal
@@ -212,6 +214,9 @@ func New(config *params.XenioConfig, db ethdb.Database) *Xenio {
 	}
 	if conf.Period == 0 {
 		conf.Period = blockPeriod
+	}
+	if conf.SuperPeriod == 0 {
+		conf.SuperPeriod = superPeriod
 	}
 	// Allocate the snapshot caches and create the engine
 	recents, _ := lru.NewARC(inmemorySnapshots)
@@ -604,7 +609,15 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	if err != nil {
 		return nil, err
 	}
+	ca := common.Address{}
+	if signer == ca{
+		log.Error("signer account is nil")
+		return nil, errUnauthorized
+	}
+
 	if _, authorized := snap.Signers[signer]; !authorized {
+		dump, _ := json.Marshal(signer)
+		log.Error("cannot find account: " + string(dump)+ " inside array")
 		return nil, errUnauthorized
 	}
 	// If we're amongst the recent signers, wait for the next block

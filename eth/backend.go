@@ -368,6 +368,9 @@ func (s *Ethereum) StartMining(local bool) error {
 		log.Error("Cannot start staking without xeniobase", "err", err)
 		return fmt.Errorf("xeniobase missing: %v", err)
 	}
+	if _, ok := s.engine.(*xenio.Xenio); ok {
+		return s.StartStaking(local)
+	}
 	if clique, ok := s.engine.(*clique.Clique); ok {
 		wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
 		if wallet == nil || err != nil {
@@ -393,13 +396,13 @@ func (s *Ethereum) StartStaking(local bool) error {
 		log.Error("Cannot start staking without xeniobase", "err", err)
 		return fmt.Errorf("xeniobase missing: %v", err)
 	}
-	if clique, ok := s.engine.(*clique.Clique); ok {
+	if xenio, ok := s.engine.(*xenio.Xenio); ok {
 		wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
 		if wallet == nil || err != nil {
 			log.Error("Xeniobase account unavailable locally", "err", err)
 			return fmt.Errorf("singer missing: %v", err)
 		}
-		clique.Authorize(eb, wallet.SignHash)
+		xenio.Authorize(eb, wallet.SignHash)
 	}
 	if local {
 		// If local (CPU) mining is started, we can disable the transaction rejection

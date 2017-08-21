@@ -196,7 +196,7 @@ func (api *PrivateMinerAPI) Start(threads *int) error {
 		th.SetThreads(*threads)
 	}
 	// Start the miner and return
-	if !api.e.IsMining() {
+	if !api.e.IsStaking() {
 		// Propagate the initial price point to the transaction pool
 		api.e.lock.RLock()
 		price := api.e.gasPrice

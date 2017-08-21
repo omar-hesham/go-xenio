@@ -82,22 +82,21 @@ var (
 	}
 
 	XenioChainConfig = &ChainConfig{
-		ChainId:         big.NewInt(345),
+		ChainId:         big.NewInt(7497),
 		HomesteadBlock:  big.NewInt(1), // never enable
 		DAOForkBlock:    nil, // never enable
-		DAOForkSupport:  false,
+		DAOForkSupport:  true,
 		EIP150Block:     big.NewInt(2), // never enable
-		EIP150Hash:      common.HexToHash("0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0"),
+		EIP150Hash:      common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000"),
 		EIP155Block:     big.NewInt(3), // never enable
 		EIP158Block:     big.NewInt(3), // never enable
 		MetropolisBlock: big.NewInt(math.MaxInt64), // never enable
-		XenioBlock:		 big.NewInt(0),
+		XenioBlock:		 big.NewInt(math.MaxInt64),
 
-		//Ethash: new(EthashConfig),
 		Xenio: &XenioConfig{
 			Epoch:      30000,
-			Period: 	30,
-			SuperPeriod:60*30,
+			Period: 	60,
+			//SuperPeriod:60*30,
 		},
 	}
 	// AllProtocolChanges contains every protocol change (EIPs)
@@ -164,7 +163,9 @@ type XenioConfig struct {
 func (c *CliqueConfig) String() string {
 	return "clique"
 }
-
+func (c *XenioConfig) String() string {
+	return "xenio"
+}
 // String implements the fmt.Stringer interface.
 func (c *ChainConfig) String() string {
 	var engine interface{}
@@ -172,6 +173,8 @@ func (c *ChainConfig) String() string {
 	case c.Ethash != nil:
 		engine = c.Ethash
 	case c.Clique != nil:
+		engine = c.Clique
+	case c.Xenio != nil:
 		engine = c.Clique
 	default:
 		engine = "unknown"

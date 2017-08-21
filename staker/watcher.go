@@ -134,9 +134,8 @@ func newWatcher(config *params.ChainConfig, engine consensus.Engine, coinbase co
 		proc:           eth.BlockChain().Validator(),
 		possibleUncles: make(map[common.Hash]*types.Block),
 		coinbase:       coinbase,
-		txQueue:        make(map[common.Hash]*types.Transaction),
 		agents:         make(map[Agent]struct{}),
-		unconfirmed:    newUnconfirmedBlocks(eth.BlockChain(), 5),
+		unconfirmed:    newUnconfirmedBlocks(eth.BlockChain(), miningLogAtDepth),
 		fullValidation: false,
 	}
 	watcher.events = watcher.mux.Subscribe(core.ChainHeadEvent{}, core.ChainSideEvent{}, core.TxPreEvent{})
