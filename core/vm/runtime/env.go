@@ -19,13 +19,13 @@ package runtime
 import (
 	"math/big"
 
+	"github.com/xenioplatform/go-ethereum/core/vm"
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/core"
 	"github.com/xenioplatform/go-xenio/core/state"
-	"github.com/xenioplatform/go-xenio/core/vm"
 )
 
-func NewEnv(cfg *Config, state *state.StateDB) *vm.EVM {
+func NewEnv(cfg *Config) *vm.EVM {
 	context := vm.Context{
 		CanTransfer: core.CanTransfer,
 		Transfer:    core.Transfer,

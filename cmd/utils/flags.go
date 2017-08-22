@@ -53,6 +53,30 @@ import (
 	"github.com/xenioplatform/go-xenio/p2p/netutil"
 	"github.com/xenioplatform/go-xenio/params"
 	whisper "github.com/xenioplatform/go-xenio/whisper/whisperv5"
+	"github.com/xenioplatform/go-xenio/accounts"
+	"github.com/xenioplatform/go-xenio/accounts/keystore"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/consensus/ethash"
+	"github.com/xenioplatform/go-xenio/core"
+	"github.com/xenioplatform/go-xenio/core/state"
+	"github.com/xenioplatform/go-xenio/core/vm"
+	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/eth"
+	"github.com/xenioplatform/go-xenio/eth/downloader"
+	"github.com/xenioplatform/go-xenio/eth/gasprice"
+	"github.com/xenioplatform/go-xenio/ethdb"
+	"github.com/xenioplatform/go-xenio/ethstats"
+	"github.com/xenioplatform/go-xenio/les"
+	"github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/metrics"
+	"github.com/xenioplatform/go-xenio/node"
+	"github.com/xenioplatform/go-xenio/p2p"
+	"github.com/xenioplatform/go-xenio/p2p/discover"
+	"github.com/xenioplatform/go-xenio/p2p/discv5"
+	"github.com/xenioplatform/go-xenio/p2p/nat"
+	"github.com/xenioplatform/go-xenio/p2p/netutil"
+	"github.com/xenioplatform/go-xenio/params"
+	whisper "github.com/xenioplatform/go-xenio/whisper/whisperv5"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -1111,7 +1135,7 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 		Fatalf("%v", err)
 	}
 	vmcfg := vm.Config{EnablePreimageRecording: ctx.GlobalBool(VMEnableDebugFlag.Name)}
-	chain, err = core.NewBlockChain(chainDb, config, engine, new(event.TypeMux), vmcfg)
+	chain, err = core.NewBlockChain(chainDb, config, engine, vmcfg)
 	if err != nil {
 		Fatalf("Can't create BlockChain: %v", err)
 	}

@@ -8,6 +8,8 @@ import (
 	"github.com/xenioplatform/go-xenio/common/hexutil"
 )
 
+var _ = (*newMessageOverride)(nil)
+
 func (n NewMessage) MarshalJSON() ([]byte, error) {
 	type NewMessage struct {
 		SymKeyID   string        `json:"symKeyID"`

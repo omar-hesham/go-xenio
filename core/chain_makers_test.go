@@ -1,18 +1,18 @@
-// Copyright 2015 The go-xenio Authors
-// This file is part of the go-xenio library.
+// Copyright 2015 The go-ethereum Authors
+// This file is part of the go-ethereum library.
 //
-// The go-xenio library is free software: you can redistribute it and/or modify
+// The go-ethereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-xenio library is distributed in the hope that it will be useful,
+// The go-ethereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-xenio library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package core
 
@@ -26,6 +26,12 @@ import (
 	"github.com/xenioplatform/go-xenio/crypto"
 	"github.com/xenioplatform/go-xenio/ethdb"
 	"github.com/xenioplatform/go-xenio/event"
+	"github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/consensus/ethash"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/core/vm"
+	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/ethdb"
 	"github.com/xenioplatform/go-xenio/params"
 )
 
@@ -80,9 +86,7 @@ func ExampleGenerateChain() {
 	})
 
 	// Import the chain. This runs all block validation rules.
-	evmux := &event.TypeMux{}
-
-	blockchain, _ := NewBlockChain(db, gspec.Config, ethash.NewFaker(), evmux, vm.Config{})
+	blockchain, _ := NewBlockChain(db, gspec.Config, ethash.NewFaker(), vm.Config{})
 	defer blockchain.Stop()
 
 	if i, err := blockchain.InsertChain(chain); err != nil {

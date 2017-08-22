@@ -8,6 +8,8 @@ import (
 	"github.com/xenioplatform/go-xenio/common/hexutil"
 )
 
+var _ = (*criteriaOverride)(nil)
+
 func (c Criteria) MarshalJSON() ([]byte, error) {
 	type Criteria struct {
 		SymKeyID     string        `json:"symKeyID"`
