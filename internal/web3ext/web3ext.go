@@ -750,7 +750,7 @@ web3._extend({
 		new web3._extend.Method({
 			name: 'messageSetupListener',
 			call: 'shh_messageSetupListener',
-			params: 3
+			params: 2
 		}),
 	],
 	properties:

@@ -195,7 +195,7 @@ func (api *PublicWhisperAPI) MessageReceive(ctx context.Context, messageFilterID
 	return messages, err
 }
 
-func (api *PublicWhisperAPI) MessageSetupListener(ctx context.Context, topic string, hexKey string, messageFilterID string) (string, error) {
+func (api *PublicWhisperAPI) MessageSetupListener(ctx context.Context, topic string, hexKey string) (string, error) {
 	// Allowed number of topics
 	const topicNum = 1
 
@@ -231,7 +231,7 @@ func (api *PublicWhisperAPI) MessageSetupListener(ctx context.Context, topic str
 	_criteria.SymKeyID = symKey_id
 	log.Info("Topic: " + _criteria.Topics[0].String())
 
-	messageFilterID, err = api.NewMessageFilter(_criteria)
+	messageFilterID, err := api.NewMessageFilter(_criteria)
 	log.Info("Filter ID: " + messageFilterID)
 	if err != nil {
 		log.Error(fmt.Sprintf("%v\n", err))
