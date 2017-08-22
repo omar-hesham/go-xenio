@@ -19,10 +19,9 @@ package runtime
 import (
 	"math/big"
 
-	"github.com/xenioplatform/go-ethereum/core/vm"
+	"github.com/xenioplatform/go-xenio/core/vm"
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/core"
-	"github.com/xenioplatform/go-xenio/core/state"
 )
 
 func NewEnv(cfg *Config) *vm.EVM {
