@@ -739,12 +739,17 @@ web3._extend({
 		new web3._extend.Method({
 			name: 'messageReceive',
 			call: 'shh_messageReceive',
-			params: 3
+			params: 1
 		}),
 		,
 		new web3._extend.Method({
 			name: 'messageRead',
 			call: 'shh_messageRead',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'messageSetupListener',
+			call: 'shh_messageSetupListener',
 			params: 3
 		}),
 	],

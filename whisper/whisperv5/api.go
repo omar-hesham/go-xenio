@@ -179,20 +179,23 @@ func (api *PublicWhisperAPI) MessageSend(ctx context.Context,  message string,  
 	return hex.EncodeToString(symKey), err
 }
 
-func (api *PublicWhisperAPI) MessageRead(ctx context.Context, topic string, hexKey string, messageFilterID string) {
-	messages, err := api.MessageReceive(ctx, topic, hexKey, messageFilterID)
-	if err == nil {
+func (api *PublicWhisperAPI) MessageRead(ctx context.Context, messages []*Message) {
+	if len(messages) > 0 {
 		for _, msg := range messages {
 			msg.ActualMessage = BytesToString(msg.Payload)
 			log.Info(msg.ActualMessage)
 		}
 	} else {
-		log.Warn("FilterID not found, new filter will be created now: ")
-		api.MessageReceive(ctx, topic, hexKey, "")
+		log.Warn("read failed")
 	}
 }
 
-func (api *PublicWhisperAPI) MessageReceive(ctx context.Context, topic string, hexKey string, messageFilterID string) ([]*Message, error) {
+func (api *PublicWhisperAPI) MessageReceive(ctx context.Context, messageFilterID string) ([]*Message, error) {
+	messages, err := api.GetFilterMessages(messageFilterID)
+	return messages, err
+}
+
+func (api *PublicWhisperAPI) MessageSetupListener(ctx context.Context, topic string, hexKey string, messageFilterID string) (string, error) {
 	// Allowed number of topics
 	const topicNum = 1
 
@@ -211,32 +214,30 @@ func (api *PublicWhisperAPI) MessageReceive(ctx context.Context, topic string, h
 	symKey, err := api.w.GetSymKey(symKey_id)
 
 	//log.Info(string(symKey_id))
-	if messageFilterID == "" {
-		// Create a new Subscription
-		_filter.Topics = make([][]byte, topicNum)
-		log.Info("Topic String: " + topic)
-		for i := 0; i < topicNum; i++ {
-			_filter.Topics[i] = []byte(topicHex.String())
-			log.Info("Topic Filter: " + string(_filter.Topics[i]))
-		}
-		_filter.KeySym = symKey
-		_filter.AllowP2P = true
 
-		// Set a new filter in order to poll new messages
-		_criteria.Topics = make([]TopicType, 1)
-		_criteria.Topics[0] = topicHex
-		_criteria.SymKeyID = symKey_id
-		log.Info("Topic: " + _criteria.Topics[0].String())
+	// Create a new Subscription
+	_filter.Topics = make([][]byte, topicNum)
+	log.Info("Topic String: " + topic)
+	for i := 0; i < topicNum; i++ {
+		_filter.Topics[i] = []byte(topicHex.String())
+		log.Info("Topic Filter: " + string(_filter.Topics[i]))
+	}
+	_filter.KeySym = symKey
+	_filter.AllowP2P = true
 
-		messageFilterID, err = api.NewMessageFilter(_criteria)
-		log.Info("Filter ID: " + messageFilterID)
-		if err != nil {
-			log.Error(fmt.Sprintf("%v\n", err))
-		}
+	// Set a new filter in order to poll new messages
+	_criteria.Topics = make([]TopicType, 1)
+	_criteria.Topics[0] = topicHex
+	_criteria.SymKeyID = symKey_id
+	log.Info("Topic: " + _criteria.Topics[0].String())
+
+	messageFilterID, err = api.NewMessageFilter(_criteria)
+	log.Info("Filter ID: " + messageFilterID)
+	if err != nil {
+		log.Error(fmt.Sprintf("%v\n", err))
 	}
 
-	messages, err := api.GetFilterMessages(messageFilterID)
-	return messages, err
+	return messageFilterID, err
 }
 
 // Expects topic string in plain text or in hex format
