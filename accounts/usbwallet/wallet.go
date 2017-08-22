@@ -25,11 +25,11 @@ import (
 	"sync"
 	"time"
 
-	ethereum "github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
+	ethereum "github.com/xenioplatform/go-xenio"
+	"github.com/xenioplatform/go-xenio/accounts"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/log"
 	"github.com/karalabe/hid"
 )
 

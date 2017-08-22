@@ -22,13 +22,10 @@ import (
 	"math/big"
 
 	"github.com/xenioplatform/go-xenio/common"
-	"github.com/xenioplatform/go-xenio/crypto"
 	"github.com/xenioplatform/go-xenio/params"
-	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/common/math"
 	"github.com/xenioplatform/go-xenio/crypto"
 	"github.com/xenioplatform/go-xenio/crypto/bn256"
-	"github.com/xenioplatform/go-xenio/params"
 	"golang.org/x/crypto/ripemd160"
 )
 

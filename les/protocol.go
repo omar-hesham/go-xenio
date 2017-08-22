@@ -22,8 +22,8 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/rlp"
 )
 
 // Constants to match up protocol versions and messages

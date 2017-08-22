@@ -26,8 +26,6 @@ import (
 	"github.com/xenioplatform/go-xenio/log"
 	"github.com/xenioplatform/go-xenio/rpc"
 	"github.com/xenioplatform/go-xenio/accounts/usbwallet"
-	"github.com/xenioplatform/go-xenio/log"
-	"github.com/xenioplatform/go-xenio/rpc"
 	"github.com/robertkrimen/otto"
 )
 

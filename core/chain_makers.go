@@ -27,15 +27,6 @@ import (
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/core/vm"
 	"github.com/xenioplatform/go-xenio/ethdb"
-	"github.com/xenioplatform/go-xenio/event"
-	"github.com/xenioplatform/go-xenio/params"
-	"github.com/xenioplatform/go-xenio/common"
-	"github.com/xenioplatform/go-xenio/consensus/ethash"
-	"github.com/xenioplatform/go-xenio/consensus/misc"
-	"github.com/xenioplatform/go-xenio/core/state"
-	"github.com/xenioplatform/go-xenio/core/types"
-	"github.com/xenioplatform/go-xenio/core/vm"
-	"github.com/xenioplatform/go-xenio/ethdb"
 	"github.com/xenioplatform/go-xenio/params"
 )
 
