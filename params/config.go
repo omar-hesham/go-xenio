@@ -175,7 +175,7 @@ func (c *ChainConfig) String() string {
 	case c.Clique != nil:
 		engine = c.Clique
 	case c.Xenio != nil:
-		engine = c.Clique
+		engine = c.Xenio
 	default:
 		engine = "unknown"
 	}
