@@ -250,7 +250,7 @@ func (api *PublicWhisperAPI) MessageGenerateTopic(ctx context.Context, topic str
 	} else {
 		// Set default topic
 		if topic == "" {
-			topic = "Xenio"
+			topic = DefaultTopic
 			log.Info("Topic not given, using default topic: \"" + topic + "\"")
 		}
 

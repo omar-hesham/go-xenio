@@ -67,6 +67,7 @@ const (
 
 	DefaultTTL     = 50 // seconds
 	SynchAllowance = 10 // seconds
+	DefaultTopic = "Xenio"
 )
 
 type unknownVersionError uint64
