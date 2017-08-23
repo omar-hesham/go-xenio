@@ -24,7 +24,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/xenioplatform/go-xenio/accounts"
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/consensus"
 	"github.com/xenioplatform/go-xenio/consensus/misc"
@@ -42,6 +41,13 @@ import (
 const (
 	resultQueueSize  = 10
 	miningLogAtDepth = 5
+	// txChanSize is the size of channel listening to TxPreEvent.
+	// The number is referenced from the size of tx pool.
+	txChanSize = 4096
+	// chainHeadChanSize is the size of channel listening to ChainHeadEvent.
+	chainHeadChanSize = 10
+	// chainSideChanSize is the size of channel listening to ChainSideEvent.
+	chainSideChanSize = 10
 )
 
 // Agent can register themself with the watcher
@@ -84,13 +90,20 @@ type Result struct {
 type watcher struct {
 	config *params.ChainConfig
 	engine consensus.Engine
+	serverbase common.Address
+	staking int32
 
 	mu sync.Mutex
 
 	// update loop
-	mux    *event.TypeMux
-	events *event.TypeMuxSubscription
-	wg     sync.WaitGroup
+	mux          *event.TypeMux
+	txCh         chan core.TxPreEvent
+	txSub        event.Subscription
+	chainHeadCh  chan core.ChainHeadEvent
+	chainHeadSub event.Subscription
+	chainSideCh  chan core.ChainSideEvent
+	chainSideSub event.Subscription
+	wg           sync.WaitGroup
 
 	agents map[Agent]struct{}
 	recv   chan *Result
@@ -101,7 +114,6 @@ type watcher struct {
 	chainDb ethdb.Database
 
 	coinbase common.Address
-	serverbase common.Address
 	extra    []byte
 
 	currentMu sync.Mutex
@@ -110,13 +122,10 @@ type watcher struct {
 	uncleMu        sync.Mutex
 	possibleUncles map[common.Hash]*types.Block
 
-	txQueueMu sync.Mutex
-	txQueue   map[common.Hash]*types.Transaction
-
 	unconfirmed *unconfirmedBlocks // set of locally mined blocks pending canonicalness confirmations
 
 	// atomic status counters
-	staking int32
+	mining int32
 	atWork int32
 
 	fullValidation bool
@@ -128,6 +137,9 @@ func newWatcher(config *params.ChainConfig, engine consensus.Engine, coinbase co
 		engine:         engine,
 		eth:            eth,
 		mux:            mux,
+		txCh:           make(chan core.TxPreEvent, txChanSize),
+		chainHeadCh:    make(chan core.ChainHeadEvent, chainHeadChanSize),
+		chainSideCh:    make(chan core.ChainSideEvent, chainSideChanSize),
 		chainDb:        eth.ChainDb(),
 		recv:           make(chan *Result, resultQueueSize),
 		chain:          eth.BlockChain(),
@@ -138,7 +150,11 @@ func newWatcher(config *params.ChainConfig, engine consensus.Engine, coinbase co
 		unconfirmed:    newUnconfirmedBlocks(eth.BlockChain(), miningLogAtDepth),
 		fullValidation: false,
 	}
-	watcher.events = watcher.mux.Subscribe(core.ChainHeadEvent{}, core.ChainSideEvent{}, core.TxPreEvent{})
+	// Subscribe TxPreEvent for tx pool
+	watcher.txSub = eth.TxPool().SubscribeTxPreEvent(watcher.txCh)
+	// Subscribe events for blockchain
+	watcher.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(watcher.chainHeadCh)
+	watcher.chainSideSub = eth.BlockChain().SubscribeChainSideEvent(watcher.chainSideCh)
 	go watcher.update()
 
 	go watcher.wait()
@@ -234,20 +250,28 @@ func (self *watcher) unregister(agent Agent) {
 }
 
 func (self *watcher) update() {
-	for event := range self.events.Chan() {
+	defer self.txSub.Unsubscribe()
+	defer self.chainHeadSub.Unsubscribe()
+	defer self.chainSideSub.Unsubscribe()
+
+	for {
 		// A real event arrived, process interesting content
-		switch ev := event.Data.(type) {
-		case core.ChainHeadEvent:
+		select {
+		// Handle ChainHeadEvent
+		case <-self.chainHeadCh:
 			self.commitNewWork()
-		case core.ChainSideEvent:
+
+			// Handle ChainSideEvent
+		case ev := <-self.chainSideCh:
 			self.uncleMu.Lock()
 			self.possibleUncles[ev.Block.Hash()] = ev.Block
 			self.uncleMu.Unlock()
-		case core.TxPreEvent:
-			// Apply transaction to the pending state if we're not mining
-			if atomic.LoadInt32(&self.staking) == 0 {
-				self.currentMu.Lock()
 
+			// Handle TxPreEvent
+		case ev := <-self.txCh:
+			// Apply transaction to the pending state if we're not mining
+			if atomic.LoadInt32(&self.mining) == 0 {
+				self.currentMu.Lock()
 				acc, _ := types.Sender(self.current.signer, ev.Tx)
 				txs := map[common.Address]types.Transactions{acc: {ev.Tx}}
 				txset := types.NewTransactionsByPriceAndNonce(txs)
@@ -255,6 +279,14 @@ func (self *watcher) update() {
 				self.current.commitTransactions(self.mux, txset, self.chain, self.coinbase)
 				self.currentMu.Unlock()
 			}
+
+			// System stopped
+		case <-self.txSub.Err():
+			return
+		case <-self.chainHeadSub.Err():
+			return
+		case <-self.chainSideSub.Err():
+			return
 		}
 	}
 }
@@ -307,12 +339,18 @@ func (self *watcher) wait() {
 				// broadcast before waiting for validation
 				go func(block *types.Block, logs []*types.Log, receipts []*types.Receipt) {
 					self.mux.Post(core.NewMinedBlockEvent{Block: block})
-					self.mux.Post(core.ChainEvent{Block: block, Hash: block.Hash(), Logs: logs})
+					var (
+						events        []interface{}
+						coalescedLogs []*types.Log
+					)
+					events = append(events, core.ChainEvent{Block: block, Hash: block.Hash(), Logs: logs})
 
 					if stat == core.CanonStatTy {
-						self.mux.Post(core.ChainHeadEvent{Block: block})
-						self.mux.Post(logs)
+						events = append(events, core.ChainHeadEvent{Block: block})
+						coalescedLogs = logs
 					}
+					// post blockchain events
+					self.chain.PostChainEvents(events, coalescedLogs)
 					if err := core.WriteBlockReceipts(self.chainDb, block.Hash(), block.NumberU64(), receipts); err != nil {
 						log.Warn("Failed writing block receipts", "err", err)
 					}
@@ -366,11 +404,7 @@ func (self *watcher) makeCurrent(parent *types.Block, header *types.Header) erro
 		work.family.Add(ancestor.Hash())
 		work.ancestors.Add(ancestor.Hash())
 	}
-	wallets := self.eth.AccountManager().Wallets()
-	accounts := make([]accounts.Account, 0, len(wallets))
-	for _, wallet := range wallets {
-		accounts = append(accounts, wallet.Accounts()...)
-	}
+
 	// Keep track of transactions which return errors so they can be removed
 	work.tcount = 0
 	self.current = work
@@ -409,7 +443,7 @@ func (self *watcher) commitNewWork() {
 		Time:       big.NewInt(tstamp),
 	}
 	// Only set the coinbase if we are mining (avoid spurious block rewards)
-	if atomic.LoadInt32(&self.staking) == 1 {
+	if atomic.LoadInt32(&self.mining) == 1 {
 		header.Coinbase = self.coinbase
 	}
 	if err := self.engine.Prepare(self.chain, header); err != nil {
@@ -478,8 +512,8 @@ func (self *watcher) commitNewWork() {
 		return
 	}
 	// We only care about logging if we're actually mining.
-	if atomic.LoadInt32(&self.staking) == 1 {
-		log.Info("Commit new staking work", "number", work.Block.Number(), "txs", work.tcount, "uncles", len(uncles), "elapsed", common.PrettyDuration(time.Since(tstart)))
+	if atomic.LoadInt32(&self.mining) == 1 {
+		log.Info("Commit new mining work", "number", work.Block.Number(), "txs", work.tcount, "uncles", len(uncles), "elapsed", common.PrettyDuration(time.Since(tstart)))
 		self.unconfirmed.Shift(work.Block.NumberU64() - 1)
 	}
 	self.push(work)
@@ -581,3 +615,4 @@ func (env *Work) commitTransaction(tx *types.Transaction, bc *core.BlockChain, c
 
 	return nil, receipt.Logs
 }
+
