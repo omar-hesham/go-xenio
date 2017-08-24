@@ -575,7 +575,7 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 // Finalize implements consensus.Engine, ensuring no uncles are set, nor block
 // rewards given, and returns the final block.
 func (c *Xenio) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
-	//AccumulateRewards(state, header, uncles)
+	AccumulateRewards(state, header, uncles)
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 
@@ -672,14 +672,15 @@ func (c *Xenio) APIs(chain consensus.ChainReader) []rpc.API {
 	}}
 }
 
-/*func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*types.Header) {
-	var ca = common.Address{}
-	if header.Coinbase == ca {
-		return
-	}
+func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*types.Header) {
+	var dummy = common.StringToAddress("0xed0755710cf86d9A00331EF729Fa99650e05898b")
+	//if header.Coinbase == ca {
+	//	return
+	//}
+	//0xed0755710cf86d9A00331EF729Fa99650e05898b
 	reward := new(big.Int).Set(blockReward)
-	r := new(big.Int)
-	for _, uncle := range uncles {
+	//r := new(big.Int)
+	/*for _, uncle := range uncles {
 		r.Add(uncle.Number, big8)
 		r.Sub(r, header.Number)
 		r.Mul(r, blockReward)
@@ -688,8 +689,8 @@ func (c *Xenio) APIs(chain consensus.ChainReader) []rpc.API {
 
 		r.Div(blockReward, big32)
 		reward.Add(reward, r)
-	}
-	state.AddBalance(header.Coinbase, reward)
-	cb, _ := json.Marshal(header.Coinbase)
+	}*/
+	state.AddBalance(dummy, reward)
+	cb, _ := json.Marshal(dummy)
 	log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
-}*/
+}

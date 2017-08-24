@@ -443,7 +443,7 @@ func (self *watcher) commitNewWork() {
 		Time:       big.NewInt(tstamp),
 	}
 	// Only set the coinbase if we are mining (avoid spurious block rewards)
-	if atomic.LoadInt32(&self.mining) == 1 {
+	if atomic.LoadInt32(&self.staking) == 1 {
 		header.Coinbase = self.coinbase
 	}
 	if err := self.engine.Prepare(self.chain, header); err != nil {
