@@ -66,6 +66,10 @@ var (
 
 	diffInTurn = big.NewInt(2) // Block difficulty for in-turn signatures
 	diffNoTurn = big.NewInt(1) // Block difficulty for out-of-turn signatures
+
+	blockReward *big.Int = big.NewInt(5e+18)
+	big8  = big.NewInt(8)
+	big32 = big.NewInt(32)
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -571,7 +575,7 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 // Finalize implements consensus.Engine, ensuring no uncles are set, nor block
 // rewards given, and returns the final block.
 func (c *Xenio) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
-	// No block rewards in PoA, so the state remains as is and uncles are dropped
+	AccumulateRewards(state, header, uncles)
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 
@@ -666,4 +670,22 @@ func (c *Xenio) APIs(chain consensus.ChainReader) []rpc.API {
 		Service:   &API{chain: chain, xenio: c},
 		Public:    false,
 	}}
+}
+
+func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*types.Header) {
+	reward := new(big.Int).Set(blockReward)
+	r := new(big.Int)
+	for _, uncle := range uncles {
+		r.Add(uncle.Number, big8)
+		r.Sub(r, header.Number)
+		r.Mul(r, blockReward)
+		r.Div(r, big8)
+		state.AddBalance(uncle.Coinbase, r)
+
+		r.Div(blockReward, big32)
+		reward.Add(reward, r)
+	}
+	state.AddBalance(header.Coinbase, reward)
+	cb, _ := json.Marshal(header.Coinbase)
+	log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
 }
