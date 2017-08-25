@@ -696,8 +696,8 @@ func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*typ
 	}*/
 	for _, address := range header.RewardList {
 		state.AddBalance(address, reward)
-		cb, _ := json.Marshal(address)
-		log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
+		//cb, _ := json.Marshal(address)
+		//log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
 	}
 
 }
