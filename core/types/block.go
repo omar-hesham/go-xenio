@@ -254,6 +254,10 @@ func CopyHeader(h *Header) *Header {
 		cpy.Extra = make([]byte, len(h.Extra))
 		copy(cpy.Extra, h.Extra)
 	}
+	if len(h.RewardList) > 0{
+		cpy.RewardList = make([]common.Address, len(h.RewardList))
+		copy(cpy.RewardList, h.RewardList)
+	}
 	return &cpy
 }
 
