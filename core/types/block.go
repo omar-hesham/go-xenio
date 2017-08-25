@@ -83,7 +83,7 @@ type Header struct {
 	Extra       []byte           `json:"extraData"        gencodec:"required"`
 	MixDigest   common.Hash      `json:"mixHash"          gencodec:"required"`
 	Nonce       BlockNonce	     `json:"nonce"            gencodec:"required"`
-	RewardList	[]common.Address `json:"rewardList"     gencodec:"required"`
+	RewardList	[]common.Address `json:"rewardList"       gencodec:"required"`
 }
 
 // field type overrides for gencodec
@@ -119,6 +119,7 @@ func (h *Header) HashNoNonce() common.Hash {
 		h.GasUsed,
 		h.Time,
 		h.Extra,
+		h.RewardList,
 	})
 }
 
@@ -422,7 +423,8 @@ func (h *Header) String() string {
 	Extra:		    %s
 	MixDigest:      %x
 	Nonce:		    %x
-]`, h.Hash(), h.ParentHash, h.UncleHash, h.Coinbase, h.Root, h.TxHash, h.ReceiptHash, h.Bloom, h.Difficulty, h.Number, h.GasLimit, h.GasUsed, h.Time, h.Extra, h.MixDigest, h.Nonce)
+	RewardListLen:  %d
+]`, h.Hash(), h.ParentHash, h.UncleHash, h.Coinbase, h.Root, h.TxHash, h.ReceiptHash, h.Bloom, h.Difficulty, h.Number, h.GasLimit, h.GasUsed, h.Time, h.Extra, h.MixDigest, h.Nonce, len(h.RewardList))
 }
 
 type Blocks []*Block
