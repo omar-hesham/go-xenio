@@ -569,6 +569,15 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 	if header.Time.Int64() < time.Now().Unix() {
 		header.Time = big.NewInt(time.Now().Unix())
 	}
+
+	// TODO: collect peers and change that here.
+	var rewardList [2]common.Address
+	rewardList[0] = common.HexToAddress("0xed0755710cf86d9A00331EF729Fa99650e05898b")
+	rewardList[1] = common.HexToAddress("0x2f0ff2bc39a2c4c2d479be1a92a962e10da9e97a")
+	for _, element := range rewardList {
+		header.RewardList = append(header.RewardList, element)
+	}
+
 	return nil
 }
 
@@ -673,13 +682,6 @@ func (c *Xenio) APIs(chain consensus.ChainReader) []rpc.API {
 }
 
 func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*types.Header) {
-	var rewardList [2]common.Address
-	rewardList[0] = common.BytesToAddress([]byte("0xed0755710cf86d9A00331EF729Fa99650e05898b"))
-	rewardList[1] = common.BytesToAddress([]byte("0x2f0ff2bc39a2c4c2d479be1a92a962e10da9e97a"))
-	//if header.Coinbase == ca {
-	//	return
-	//}
-	//0xed0755710cf86d9A00331EF729Fa99650e05898b
 	reward := new(big.Int).Set(blockReward)
 	//r := new(big.Int)
 	/*for _, uncle := range uncles {
@@ -692,10 +694,10 @@ func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*typ
 		r.Div(blockReward, big32)
 		reward.Add(reward, r)
 	}*/
-	for _, address := range rewardList {
+	for _, address := range header.RewardList {
 		state.AddBalance(address, reward)
-		//cb, _ := json.Marshal(address)
-		//log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
+		cb, _ := json.Marshal(address)
+		log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
 	}
 
 }
