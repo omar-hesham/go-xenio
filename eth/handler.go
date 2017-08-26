@@ -25,7 +25,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
+	"strings"
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/consensus"
 	"github.com/xenioplatform/go-xenio/consensus/misc"
@@ -252,8 +252,10 @@ func (pm *ProtocolManager) handle(p *peer) error {
 	if pm.peers.Len() >= pm.maxPeers {
 		return p2p.DiscTooManyPeers
 	}
-	p.Log().Debug("Xenio peer connected", "name", p.Name())
-
+	p.Log().Debug("peer connected", "name", p.Name())
+	if strings.Contains(p.Name(),"xenio"){
+		p.Log().Info("Xenio peer connected", "name", p.Name())
+	}
 	// Execute the Ethereum handshake
 	td, head, genesis := pm.blockchain.Status()
 	if err := p.Handshake(pm.networkId, td, head, genesis); err != nil {

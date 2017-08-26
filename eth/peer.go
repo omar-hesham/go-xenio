@@ -45,9 +45,10 @@ const (
 // PeerInfo represents a short summary of the Ethereum sub-protocol metadata known
 // about a connected peer.
 type PeerInfo struct {
-	Version    int      `json:"version"`    // Ethereum protocol version negotiated
-	Difficulty *big.Int `json:"difficulty"` // Total difficulty of the peer's blockchain
-	Head       string   `json:"head"`       // SHA3 hash of the peer's best owned block
+	Version    int            `json:"version"`    // Ethereum protocol version negotiated
+	Difficulty *big.Int       `json:"difficulty"` // Total difficulty of the peer's blockchain
+	Head       string         `json:"head"`       // SHA3 hash of the peer's best owned block
+	Coinbase   common.Address `json:"coinbase"`
 }
 
 type peer struct {
@@ -65,6 +66,7 @@ type peer struct {
 
 	knownTxs    *set.Set // Set of transaction hashes known to be known by this peer
 	knownBlocks *set.Set // Set of block hashes known to be known by this peer
+	coinbase	common.Address // the address of this peer, will be used for staking rewards
 }
 
 func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
@@ -88,6 +90,7 @@ func (p *peer) Info() *PeerInfo {
 		Version:    p.version,
 		Difficulty: td,
 		Head:       hash.Hex(),
+		Coinbase:   p.coinbase,
 	}
 }
 
