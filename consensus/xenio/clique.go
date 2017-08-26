@@ -206,6 +206,9 @@ type Xenio struct {
 	signer common.Address // Ethereum address of the signing key
 	signFn SignerFn       // Signer function to authorize hashes with
 	lock   sync.RWMutex   // Protects the signer fields
+
+	stakerSnapshot *common.StakerSnapshot
+
 }
 
 // New creates a Clique proof-of-authority consensus engine with the initial

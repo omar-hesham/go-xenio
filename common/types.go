@@ -243,3 +243,8 @@ func (a *UnprefixedAddress) UnmarshalText(input []byte) error {
 func (a UnprefixedAddress) MarshalText() ([]byte, error) {
 	return []byte(hex.EncodeToString(a[:])), nil
 }
+
+type StakerSnapshot struct {
+	Stakers 		[]Address   			`json:"stakers"` 		 // Set of ppl that stake at the current moment
+	BlockNumber		*big.Int					`json:"blocknumber"`	 // the block number that this staker list will be effective
+}

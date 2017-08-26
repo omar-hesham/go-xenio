@@ -149,6 +149,16 @@ web3._extend({
 			name: 'discard',
 			call: 'xenio_discard',
 			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'getStakerSnapshot',
+			call: 'xenio_getStakerSnapshot',
+			params: 0
+		}),
+		new web3._extend.Method({
+			name: 'addStakerToSnapshot',
+			call: 'xenio_addStakerToSnapshot',
+			params: 1
 		})
   ],
 	properties:
