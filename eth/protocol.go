@@ -32,13 +32,14 @@ import (
 const (
 	eth62 = 62
 	eth63 = 63
+	//xen1   = 1
 )
 
 // Official short name of the protocol used during capability negotiation.
 var ProtocolName = "eth"
 
 // Supported versions of the eth protocol (first is primary).
-var ProtocolVersions = []uint{eth63, eth62}
+var ProtocolVersions = []uint{eth63, eth62/*, xen1*/}
 
 // Number of implemented message corresponding to different protocol versions.
 var ProtocolLengths = []uint64{17, 8}
@@ -62,6 +63,9 @@ const (
 	NodeDataMsg    = 0x0e
 	GetReceiptsMsg = 0x0f
 	ReceiptsMsg    = 0x10
+
+	//protocol messages belonging to xen/1
+	GetNodeCoinbase = 0x4096 // should start from a high number so we don't collide with geth future additions
 )
 
 type errCode int

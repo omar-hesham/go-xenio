@@ -667,7 +667,8 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 			p.MarkTransaction(tx.Hash())
 		}
 		pm.txpool.AddRemotes(txs)
-
+	case msg.Code == GetNodeCoinbase:
+		log.Warn("coinbase requested from remote peer")
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
 	}
@@ -751,6 +752,7 @@ type EthNodeInfo struct {
 	Difficulty *big.Int    `json:"difficulty"` // Total difficulty of the host's blockchain
 	Genesis    common.Hash `json:"genesis"`    // SHA3 hash of the host's genesis block
 	Head       common.Hash `json:"head"`       // SHA3 hash of the host's best owned block
+
 }
 
 // NodeInfo retrieves some protocol metadata about the running host node.
