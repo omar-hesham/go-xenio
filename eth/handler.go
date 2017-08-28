@@ -676,6 +676,8 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		p.TransmitCoinbase(common.Address{})
 	case msg.Code == GetNodeStakeList:
 		log.Warn("stake list requested from remote peer")
+	case msg.Code == SendCoinbase:
+		log.Warn("coinbase received")
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
 	}
