@@ -27,8 +27,6 @@ import (
 	"sync/atomic"
 	"time"
 	"github.com/xenioplatform/go-xenio/rlp"
-	"github.com/xenioplatform/go-xenio/log"
-	"strconv"
 )
 
 // Msg defines the structure of a p2p message.
