@@ -682,6 +682,11 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		}
 		address_Json, _ := json.Marshal(address)
 		log.Warn("coinbase " + string(address_Json) + " received")
+		if common.StakerSnapShot != nil  || common.StakerSnapShot.Stakers != nil{
+			common.StakerSnapShot.Stakers = append(common.StakerSnapShot.Stakers, address)
+
+		}
+
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
 	}

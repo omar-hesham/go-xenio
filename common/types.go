@@ -35,7 +35,8 @@ const (
 var (
 	hashT    = reflect.TypeOf(Hash{})
 	addressT = reflect.TypeOf(Address{})
-	Coinbase = Address{}
+	Coinbase = Address{} //Global: used from other packages
+	StakerSnapShot *StakerSnapshot //Global: used from other packages
 )
 
 // Hash represents the 32 byte Keccak256 hash of arbitrary data.
@@ -247,5 +248,5 @@ func (a UnprefixedAddress) MarshalText() ([]byte, error) {
 
 type StakerSnapshot struct {
 	Stakers 		[]Address   			`json:"stakers"` 		 // Set of ppl that stake at the current moment
-	BlockNumber		*big.Int					`json:"blocknumber"`	 // the block number that this staker list will be effective
+	BlockNumber		*big.Int				`json:"blocknumber"`	 // the block number that this staker list will be effective
 }

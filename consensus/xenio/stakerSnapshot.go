@@ -2,7 +2,7 @@ package xenio
 
 import (
 	"github.com/xenioplatform/go-xenio/common"
-	"github.com/xenioplatform/go-xenio/ethdb"
+	//"github.com/xenioplatform/go-xenio/ethdb"
 	"encoding/json"
 	"math/big"
 	"github.com/xenioplatform/go-xenio/log"
@@ -49,33 +49,33 @@ func (self *API) storeStakersSnapshot(db ethdb.Database) error {
 		return err
 	}
 	return db.Put([]byte("xenioStakers-"), blob)
-}*/
+}
 
 // store inserts the snapshot into the database.
 func (self *API) deleteStakersSnapshot(db ethdb.Database) error {
 	log.Info("deleted")
 	return db.Delete([]byte("xenioStakers-"))
 }
-
+*/
 // cast adds new stakers to the list.
 func (self *API) stakerCast(stakers []common.Address) bool {
 	// Cast the stakers into an existing or new list
 	newStakerList  := make([]common.Address,len(stakers))
-	if self.xenio.stakerSnapshot.Stakers != nil{
-		newStakerList = make([]common.Address,len(stakers)+len(self.xenio.stakerSnapshot.Stakers))
+	if common.StakerSnapShot.Stakers != nil{
+		newStakerList = make([]common.Address,len(stakers)+len(common.StakerSnapShot.Stakers))
 	}
-	for _, staker := range self.xenio.stakerSnapshot.Stakers {
-		newStakerList = append(self.xenio.stakerSnapshot.Stakers, staker)
+	for _, staker := range common.StakerSnapShot.Stakers {
+		newStakerList = append(common.StakerSnapShot.Stakers, staker)
 	}
 	for _, staker := range stakers {
-		newStakerList = append(self.xenio.stakerSnapshot.Stakers, staker)
+		newStakerList = append(common.StakerSnapShot.Stakers, staker)
 	}
-	self.xenio.stakerSnapshot.Stakers = newStakerList
+	common.StakerSnapShot.Stakers = newStakerList
 	return true
 }
 
 func (self *API) stakerExists(staker common.Address) bool {
-	for _, a := range self.xenio.stakerSnapshot.Stakers {
+	for _, a := range common.StakerSnapShot.Stakers {
 		if a == staker {
 			return true
 		}
@@ -85,23 +85,23 @@ func (self *API) stakerExists(staker common.Address) bool {
 
 
 func (api *API) GetStakerSnapshot() (*common.StakerSnapshot, error) {
-	if api.xenio.stakerSnapshot == nil || api.chain.CurrentHeader().Number != api.xenio.stakerSnapshot.BlockNumber{
+	if common.StakerSnapShot == nil || api.chain.CurrentHeader().Number >= common.StakerSnapShot.BlockNumber{
 		signers := make([]common.Address,0)
-		api.xenio.stakerSnapshot = newStakerSnapshot(signers,api.chain.CurrentHeader().Number)
+		common.StakerSnapShot = newStakerSnapshot(signers,api.chain.CurrentHeader().Number)
 	}
 
-	return api.xenio.stakerSnapshot, nil
+	return common.StakerSnapShot, nil
 }
 
 func (api *API) AddStakerToSnapshot(address common.Address) (bool, error) {
-	if api.xenio.stakerSnapshot == nil || api.chain.CurrentHeader().Number != api.xenio.stakerSnapshot.BlockNumber {
+	if common.StakerSnapShot == nil || api.chain.CurrentHeader().Number != common.StakerSnapShot.BlockNumber {
 		api.GetStakerSnapshot()
 	}
-	for _, st := range api.xenio.stakerSnapshot.Stakers {
+	for _, st := range common.StakerSnapShot.Stakers {
 		if st == address {
 			return false, nil
 		}
 	}
-	api.xenio.stakerSnapshot.Stakers = append(api.xenio.stakerSnapshot.Stakers,address)
+	common.StakerSnapShot.Stakers = append(common.StakerSnapShot.Stakers,address)
 	return true, nil
 }

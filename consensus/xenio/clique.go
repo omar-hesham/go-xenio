@@ -207,7 +207,7 @@ type Xenio struct {
 	signFn SignerFn       // Signer function to authorize hashes with
 	lock   sync.RWMutex   // Protects the signer fields
 
-	stakerSnapshot *common.StakerSnapshot
+	//stakerSnapshot *common.StakerSnapshot
 
 }
 
