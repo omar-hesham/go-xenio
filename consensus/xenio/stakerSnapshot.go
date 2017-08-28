@@ -12,11 +12,11 @@ import (
 
 func newStakerSnapshot(stakers []common.Staker, blockNumber *big.Int) *common.StakerSnapshot {
 	snap := &common.StakerSnapshot{
-		Stakers:  make([]common.Staker, len(stakers)),
+		Stakers: make([]common.Staker, len(stakers)),
 	}
 	for _, staker := range stakers {
 		var ca common.Address
-		if staker.Address == ca{
+		if staker.Address == ca {
 			continue
 		}
 		st, _ := json.Marshal(staker.Address)
@@ -27,7 +27,6 @@ func newStakerSnapshot(stakers []common.Staker, blockNumber *big.Int) *common.St
 	snap.BlockNumber = blockNumber
 	return snap
 }
-
 
 // loadSnapshot loads an existing snapshot from the database.
 // we might don't need this, only memory snapshots might be enough
@@ -63,8 +62,8 @@ func (self *API) deleteStakersSnapshot(db ethdb.Database) error {
 func (self *API) stakerCast(stakers []common.Staker) bool {
 	// Cast the stakers into an existing or new list
 	newStakerList := make([]common.Staker, len(stakers))
-	if common.StakerSnapShot.Stakers != nil{
-		newStakerList = make([]common.Staker, len(stakers) + len(common.StakerSnapShot.Stakers))
+	if common.StakerSnapShot.Stakers != nil {
+		newStakerList = make([]common.Staker, len(stakers)+len(common.StakerSnapShot.Stakers))
 	}
 	for _, staker := range common.StakerSnapShot.Stakers {
 		newStakerList = append(common.StakerSnapShot.Stakers, staker)
@@ -85,21 +84,12 @@ func (self *API) stakerExists(staker common.Staker) bool {
 	return false
 }
 
-func (api *API) GetStakerSnapshot() (*common.StakerSnapshot, error) {
-	//var currentHeaderNumber *big.Int
-	//
-	//if api.chain.CurrentHeader() != nil {
-	//	//currentHeaderNumber = api.chain.CurrentHeader().Number.Add(api.chain.CurrentHeader().Number, big.NewInt(20))
-	//	currentHeaderNumber = api.chain.CurrentHeader().Number
-	//}addStakerToSnapshot
-
-	if common.StakerSnapShot == nil || api.chain.CurrentHeader().Number.Cmp(common.StakerSnapShot.BlockNumber) != -1 {
+func (api *API) GetStakerSnapshot() *common.StakerSnapshot {
+	if common.StakerSnapShot == nil {
 		signers := make([]common.Staker, 0)
-
 		common.StakerSnapShot = newStakerSnapshot(signers, api.chain.CurrentHeader().Number)
 	}
-
-	return common.StakerSnapShot, nil
+	return common.StakerSnapShot
 }
 
 func (api *API) AddStakerToSnapshot(address common.Address) (bool, error) {

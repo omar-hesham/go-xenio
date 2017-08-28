@@ -686,7 +686,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		log.Warn("coinbase " + string(address_Json) + " received")
 		if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
 			staker.Address = address
-			staker.LastSeen = time.Now() // TODO ask nick
+			staker.LastSeen = time.Now()
 			common.StakerSnapShot.Stakers = append(common.StakerSnapShot.Stakers, staker)
 		}
 
