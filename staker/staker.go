@@ -108,6 +108,7 @@ func (self *Staker) Start(coinbase common.Address) {
 	atomic.StoreInt32(&self.shouldStart, 1)
 	self.watcher.setEtherbase(coinbase)
 	self.coinbase = coinbase
+	common.Coinbase = coinbase
 	dbs, _:=self.eth.BlockChain().State()
 
 	if atomic.LoadInt32(&self.canStart) == 0 {

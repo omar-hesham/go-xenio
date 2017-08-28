@@ -35,6 +35,7 @@ const (
 var (
 	hashT    = reflect.TypeOf(Hash{})
 	addressT = reflect.TypeOf(Address{})
+	Coinbase = Address{}
 )
 
 // Hash represents the 32 byte Keccak256 hash of arbitrary data.

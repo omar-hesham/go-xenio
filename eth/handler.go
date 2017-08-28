@@ -672,7 +672,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		pm.txpool.AddRemotes(txs)
 	case msg.Code == GetNodeCoinbase:
 		log.Warn("coinbase requested from remote peer")
-		p.TransmitCoinbase(common.Address{})
+		p.TransmitCoinbase(common.Coinbase)
 	case msg.Code == GetNodeStakeList:
 		log.Warn("stake list requested from remote peer")
 	case msg.Code == TransmitCoinbase:
