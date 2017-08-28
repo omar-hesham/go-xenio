@@ -93,11 +93,7 @@ type MsgReadWriter interface {
 func Send(w MsgWriter, msgcode uint64, data interface{}) error {
 	size, r, err := rlp.EncodeToReader(data)
 	if err != nil {
-		log.Error("send message error")
 		return err
-	}
-	if msgcode == 0x11 {
-		log.Warn("writting message: " + strconv.Itoa(int(msgcode)))
 	}
 	return w.WriteMsg(Msg{Code: msgcode, Size: uint32(size), Payload: r})
 }
