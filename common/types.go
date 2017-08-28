@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"math/rand"
 	"reflect"
-	"time"
+	//"time"
 
 	"github.com/xenioplatform/go-xenio/common/hexutil"
 	"github.com/xenioplatform/go-xenio/crypto/sha3"
@@ -248,11 +248,11 @@ func (a UnprefixedAddress) MarshalText() ([]byte, error) {
 }
 
 type StakerSnapshot struct {
-	Stakers 		[]Staker   			`json:"stakers"` 		 // Set of ppl that stake at the current moment
+	Stakers 		[]Address   			`json:"stakers"` 		 // Set of ppl that stake at the current moment
 	BlockNumber		*big.Int			`json:"blocknumber"`	 // the block number that this staker list will be effective
 }
 
-type Staker struct {
-	Address 		Address				`json:"address"`
-	LastSeen		time.Time			`json:"datetime"`
-}
+//type Staker struct {
+//	Address 		Address				`json:"address"`
+//	LastSeen		time.Time			`json:"datetime"`
+//}
