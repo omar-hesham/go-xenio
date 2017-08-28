@@ -83,11 +83,18 @@ func (self *API) stakerExists(staker common.Address) bool {
 	return false
 }
 
-
 func (api *API) GetStakerSnapshot() (*common.StakerSnapshot, error) {
-	if common.StakerSnapShot == nil || api.chain.CurrentHeader().Number >= common.StakerSnapShot.BlockNumber{
-		signers := make([]common.Address,0)
-		common.StakerSnapShot = newStakerSnapshot(signers,api.chain.CurrentHeader().Number)
+	//var currentHeaderNumber *big.Int
+	//
+	//if api.chain.CurrentHeader() != nil {
+	//	//currentHeaderNumber = api.chain.CurrentHeader().Number.Add(api.chain.CurrentHeader().Number, big.NewInt(20))
+	//	currentHeaderNumber = api.chain.CurrentHeader().Number
+	//}
+
+	if common.StakerSnapShot == nil || api.chain.CurrentHeader().Number.Cmp(common.StakerSnapShot.BlockNumber) != -1 {
+		signers := make([]common.Address, 0)
+
+		common.StakerSnapShot = newStakerSnapshot(signers, api.chain.CurrentHeader().Number)
 	}
 
 	return common.StakerSnapShot, nil
