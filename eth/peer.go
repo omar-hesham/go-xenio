@@ -235,7 +235,7 @@ func (p *peer) RequestCoinbase(adr common.Address) error {
 // TransmitCoinbase transmits our coinbase to the remote node.
 func (p *peer) TransmitCoinbase(adr common.Address) error {
 	p.Log().Warn("Transmitting Coinbase")
-	return p2p.Send(p.rw, SendCoinbase, adr)
+	return p2p.Send(p.rw, TransmitCoinbase, adr)
 }
 
 // Handshake executes the eth protocol handshake, negotiating version number,

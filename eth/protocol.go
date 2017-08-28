@@ -67,7 +67,7 @@ const (
 	//protocol messages belonging to xen/1
 	GetNodeCoinbase  = 0x11
 	GetNodeStakeList = 0x12
-	SendCoinbase = 0x13
+	TransmitCoinbase = 0x13
 )
 
 type errCode int

@@ -315,9 +315,8 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 
 	// Read the next message from the remote peer, and ensure it's fully consumed
 	msg, err := p.rw.ReadMsg()
-	p.Log().Warn("Message received: " +  strconv.Itoa(int(msg.Code)))
+	//p.Log().Warn("Message received: " +  strconv.Itoa(int(msg.Code)))
 	if err != nil {
-		p.Log().Error("Message receive failed: ")
 		return err
 	}
 	if msg.Size > ProtocolMaxMsgSize {
@@ -676,8 +675,13 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		p.TransmitCoinbase(common.Address{})
 	case msg.Code == GetNodeStakeList:
 		log.Warn("stake list requested from remote peer")
-	case msg.Code == SendCoinbase:
-		log.Warn("coinbase received")
+	case msg.Code == TransmitCoinbase:
+		var address common.Address
+		if err := msg.Decode(&address); err != nil {
+			return errResp(ErrDecode, "msg %v: %v", msg, err)
+		}
+		address_Json, _ := json.Marshal(address)
+		log.Warn("coinbase " + string(address_Json) + " received")
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
 	}
