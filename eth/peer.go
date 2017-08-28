@@ -48,7 +48,6 @@ type PeerInfo struct {
 	Version    int            `json:"version"`    // Ethereum protocol version negotiated
 	Difficulty *big.Int       `json:"difficulty"` // Total difficulty of the peer's blockchain
 	Head       string         `json:"head"`       // SHA3 hash of the peer's best owned block
-	Coinbase   common.Address `json:"coinbase"`
 }
 
 type peer struct {
@@ -66,7 +65,6 @@ type peer struct {
 
 	knownTxs    *set.Set // Set of transaction hashes known to be known by this peer
 	knownBlocks *set.Set // Set of block hashes known to be known by this peer
-	coinbase	common.Address // the address of this peer, will be used for staking rewards
 }
 
 func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
@@ -90,7 +88,6 @@ func (p *peer) Info() *PeerInfo {
 		Version:    p.version,
 		Difficulty: td,
 		Head:       hash.Hex(),
-		Coinbase:   p.coinbase,
 	}
 }
 
@@ -235,6 +232,11 @@ func (p *peer) RequestCoinbase(adr common.Address) error {
 	p.Log().Warn("Fetching remote nodes Coinbase")
 	return p2p.Send(p.rw, GetNodeCoinbase, adr)
 }
+// TransmitCoinbase transmits our coinbase to the remote node.
+func (p *peer) TransmitCoinbase(adr common.Address) error {
+	p.Log().Warn("Transmitting Coinbase")
+	return p2p.Send(p.rw, SendCoinbase, adr)
+}
 
 // Handshake executes the eth protocol handshake, negotiating version number,
 // network IDs, difficulties, head and genesis blocks.
@@ -268,8 +270,6 @@ func (p *peer) Handshake(network uint64, td *big.Int, head common.Hash, genesis 
 		}
 	}
 	p.td, p.head = status.TD, status.CurrentBlock
-	ca := common.Address{}
-	p.RequestCoinbase(ca)
 	return nil
 }
 
@@ -325,6 +325,7 @@ func newPeerSet() *peerSet {
 // Register injects a new peer into the working set, or returns an error if the
 // peer is already known.
 func (ps *peerSet) Register(p *peer) error {
+
 	ps.lock.Lock()
 	defer ps.lock.Unlock()
 
@@ -335,6 +336,7 @@ func (ps *peerSet) Register(p *peer) error {
 		return errAlreadyRegistered
 	}
 	ps.peers[p.id] = p
+	p.RequestCoinbase(common.Address{})
 	return nil
 }
 

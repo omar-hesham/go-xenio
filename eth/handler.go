@@ -40,6 +40,7 @@ import (
 	"github.com/xenioplatform/go-xenio/p2p/discover"
 	"github.com/xenioplatform/go-xenio/params"
 	"github.com/xenioplatform/go-xenio/rlp"
+	"strconv"
 )
 
 const (
@@ -311,9 +312,12 @@ func (pm *ProtocolManager) handle(p *peer) error {
 // handleMsg is invoked whenever an inbound message is received from a remote
 // peer. The remote connection is torn down upon returning any error.
 func (pm *ProtocolManager) handleMsg(p *peer) error {
+
 	// Read the next message from the remote peer, and ensure it's fully consumed
 	msg, err := p.rw.ReadMsg()
+	p.Log().Warn("Message received: " +  strconv.Itoa(int(msg.Code)))
 	if err != nil {
+		p.Log().Error("Message receive failed: ")
 		return err
 	}
 	if msg.Size > ProtocolMaxMsgSize {
@@ -669,6 +673,9 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		pm.txpool.AddRemotes(txs)
 	case msg.Code == GetNodeCoinbase:
 		log.Warn("coinbase requested from remote peer")
+		p.TransmitCoinbase(common.Address{})
+	case msg.Code == GetNodeStakeList:
+		log.Warn("stake list requested from remote peer")
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
 	}
