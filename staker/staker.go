@@ -108,7 +108,6 @@ func (self *Staker) Start(coinbase common.Address) {
 	atomic.StoreInt32(&self.shouldStart, 1)
 	self.watcher.setEtherbase(coinbase)
 	self.coinbase = coinbase
-	common.Coinbase = coinbase
 	dbs, _:=self.eth.BlockChain().State()
 
 	if atomic.LoadInt32(&self.canStart) == 0 {
@@ -117,7 +116,6 @@ func (self *Staker) Start(coinbase common.Address) {
 	}
 
 	atomic.StoreInt32(&self.staking, 1)
-	log.Info("Checking connection to server nodes")
 	coins := dbs.GetBalance(self.coinbase)
 
 	if areBigEqualNumbers(coins,big.NewInt(0)){

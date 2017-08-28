@@ -349,6 +349,7 @@ func (s *Ethereum) Serverbase() (eb common.Address, err error) {
 func (self *Ethereum) SetEtherbase(etherbase common.Address) {
 	self.lock.Lock()
 	self.etherbase = etherbase
+	common.Coinbase = etherbase
 	self.lock.Unlock()
 
 	//self.miner.SetEtherbase(etherbase)
