@@ -677,13 +677,17 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		log.Warn("stake list requested from remote peer")
 	case msg.Code == TransmitCoinbase:
 		var address common.Address
+		var staker common.Staker
+
 		if err := msg.Decode(&address); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
 		address_Json, _ := json.Marshal(address)
 		log.Warn("coinbase " + string(address_Json) + " received")
 		if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
-			common.StakerSnapShot.Stakers = append(common.StakerSnapShot.Stakers, address)
+			staker.Address = address
+			staker.LastSeen = time.Now() // TODO ask nick
+			common.StakerSnapShot.Stakers = append(common.StakerSnapShot.Stakers, staker)
 		}
 
 	default:

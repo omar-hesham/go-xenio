@@ -1,23 +1,25 @@
 package xenio
 
 import (
-	"github.com/xenioplatform/go-xenio/common"
-	//"github.com/xenioplatform/go-xenio/ethdb"
 	"encoding/json"
 	"math/big"
+	"time"
+
+	"github.com/xenioplatform/go-xenio/common"
+	//"github.com/xenioplatform/go-xenio/ethdb"
 	"github.com/xenioplatform/go-xenio/log"
 )
 
-func newStakerSnapshot(stakers []common.Address, blockNumber *big.Int) *common.StakerSnapshot {
+func newStakerSnapshot(stakers []common.Staker, blockNumber *big.Int) *common.StakerSnapshot {
 	snap := &common.StakerSnapshot{
-		Stakers:  make([]common.Address,len(stakers)),
+		Stakers:  make([]common.Staker, len(stakers)),
 	}
 	for _, staker := range stakers {
 		var ca common.Address
-		if staker == ca{
+		if staker.Address == ca{
 			continue
 		}
-		st, _ := json.Marshal(staker)
+		st, _ := json.Marshal(staker.Address)
 		log.Info("adding " + string(st) + " to snapshot")
 		snap.Stakers = append(snap.Stakers, staker)
 	}
@@ -58,11 +60,11 @@ func (self *API) deleteStakersSnapshot(db ethdb.Database) error {
 }
 */
 // cast adds new stakers to the list.
-func (self *API) stakerCast(stakers []common.Address) bool {
+func (self *API) stakerCast(stakers []common.Staker) bool {
 	// Cast the stakers into an existing or new list
-	newStakerList  := make([]common.Address,len(stakers))
+	newStakerList := make([]common.Staker, len(stakers))
 	if common.StakerSnapShot.Stakers != nil{
-		newStakerList = make([]common.Address,len(stakers)+len(common.StakerSnapShot.Stakers))
+		newStakerList = make([]common.Staker, len(stakers) + len(common.StakerSnapShot.Stakers))
 	}
 	for _, staker := range common.StakerSnapShot.Stakers {
 		newStakerList = append(common.StakerSnapShot.Stakers, staker)
@@ -74,9 +76,9 @@ func (self *API) stakerCast(stakers []common.Address) bool {
 	return true
 }
 
-func (self *API) stakerExists(staker common.Address) bool {
+func (self *API) stakerExists(staker common.Staker) bool {
 	for _, a := range common.StakerSnapShot.Stakers {
-		if a == staker {
+		if a.Address == staker.Address {
 			return true
 		}
 	}
@@ -89,10 +91,10 @@ func (api *API) GetStakerSnapshot() (*common.StakerSnapshot, error) {
 	//if api.chain.CurrentHeader() != nil {
 	//	//currentHeaderNumber = api.chain.CurrentHeader().Number.Add(api.chain.CurrentHeader().Number, big.NewInt(20))
 	//	currentHeaderNumber = api.chain.CurrentHeader().Number
-	//}
+	//}addStakerToSnapshot
 
 	if common.StakerSnapShot == nil || api.chain.CurrentHeader().Number.Cmp(common.StakerSnapShot.BlockNumber) != -1 {
-		signers := make([]common.Address, 0)
+		signers := make([]common.Staker, 0)
 
 		common.StakerSnapShot = newStakerSnapshot(signers, api.chain.CurrentHeader().Number)
 	}
@@ -105,10 +107,13 @@ func (api *API) AddStakerToSnapshot(address common.Address) (bool, error) {
 		api.GetStakerSnapshot()
 	}
 	for _, st := range common.StakerSnapShot.Stakers {
-		if st == address {
+		if st.Address == address {
 			return false, nil
 		}
 	}
-	common.StakerSnapShot.Stakers = append(common.StakerSnapShot.Stakers,address)
+	var staker common.Staker
+	staker.Address = address
+	staker.LastSeen = time.Now()
+	common.StakerSnapShot.Stakers = append(common.StakerSnapShot.Stakers, staker)
 	return true, nil
 }
