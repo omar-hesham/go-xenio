@@ -672,7 +672,8 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 	case msg.Code == GetNodeCoinbase:
 		p.TransmitCoinbase(common.Coinbase)
 	case msg.Code == GetNodeStakeList:
-		log.Warn("stake list requested from remote peer")
+		p.Log().Warn("stake list requested from remote peer")
+		p.TransmitNodeList()
 	case msg.Code == TransmitCoinbase:
 		var address common.Address
 		var staker common.Staker
@@ -690,7 +691,23 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		staker.Address = address
 		staker.LastSeen = time.Now()
 		common.StakerSnapShot.Stakers = append(common.StakerSnapShot.Stakers, staker)
-		log.Info("coinbase " + string(address_Json) + " received")
+		p.Log().Info("coinbase " + string(address_Json) + " received")
+	case msg.Code == TransmitNodeList:
+		var stakers []common.Staker
+		p.Log().Warn("staker list received")
+
+		if err := msg.Decode(&stakers); err != nil {
+			return errResp(ErrDecode, "msg %v: %v", msg, err)
+		}
+		if common.StakerSnapShot == nil{
+			common.StakerSnapShot = &common.StakerSnapshot{
+				Stakers: make([]common.Staker, 0),
+				Created: time.Now(),
+			}
+		}
+		for _, staker := range stakers {
+			common.StakerSnapShot.Stakers = append(common.StakerSnapShot.Stakers, staker)
+		}
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
 	}
