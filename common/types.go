@@ -248,8 +248,8 @@ func (a UnprefixedAddress) MarshalText() ([]byte, error) {
 }
 
 type StakerSnapshot struct {
+	Created			time.Time			`json:"created"`	 // the block number that this staker list will be effective
 	Stakers 		[]Staker   			`json:"stakers"` 		 // Set of ppl that stake at the current moment
-	BlockNumber		*big.Int			`json:"blocknumber"`	 // the block number that this staker list will be effective
 }
 
 type Staker struct {

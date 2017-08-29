@@ -2,7 +2,6 @@ package xenio
 
 import (
 	"encoding/json"
-	"math/big"
 	"time"
 
 	"github.com/xenioplatform/go-xenio/common"
@@ -10,7 +9,7 @@ import (
 	"github.com/xenioplatform/go-xenio/log"
 )
 
-func newStakerSnapshot(stakers []common.Staker, blockNumber *big.Int) *common.StakerSnapshot {
+func newStakerSnapshot(stakers []common.Staker) *common.StakerSnapshot {
 	snap := &common.StakerSnapshot{
 		Stakers: make([]common.Staker, len(stakers)),
 	}
@@ -23,8 +22,7 @@ func newStakerSnapshot(stakers []common.Staker, blockNumber *big.Int) *common.St
 		log.Info("adding " + string(st) + " to snapshot")
 		snap.Stakers = append(snap.Stakers, staker)
 	}
-	//snap.BlockNumber.Add(blockNumber, big.NewInt(1))
-	snap.BlockNumber = blockNumber
+	snap.Created = time.Now()
 	return snap
 }
 
@@ -87,13 +85,13 @@ func (self *API) stakerExists(staker common.Staker) bool {
 func (api *API) GetStakerSnapshot() *common.StakerSnapshot {
 	if common.StakerSnapShot == nil {
 		signers := make([]common.Staker, 0)
-		common.StakerSnapShot = newStakerSnapshot(signers, api.chain.CurrentHeader().Number)
+		common.StakerSnapShot = newStakerSnapshot(signers)
 	}
 	return common.StakerSnapShot
 }
 
 func (api *API) AddStakerToSnapshot(address common.Address) (bool, error) {
-	if common.StakerSnapShot == nil || api.chain.CurrentHeader().Number != common.StakerSnapShot.BlockNumber {
+	if common.StakerSnapShot == nil{
 		api.GetStakerSnapshot()
 	}
 	for _, st := range common.StakerSnapShot.Stakers {

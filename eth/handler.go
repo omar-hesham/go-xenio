@@ -40,7 +40,6 @@ import (
 	"github.com/xenioplatform/go-xenio/p2p/discover"
 	"github.com/xenioplatform/go-xenio/params"
 	"github.com/xenioplatform/go-xenio/rlp"
-	//"strconv"
 )
 
 const (
@@ -671,7 +670,6 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		}
 		pm.txpool.AddRemotes(txs)
 	case msg.Code == GetNodeCoinbase:
-		log.Warn("coinbase requested from remote peer")
 		p.TransmitCoinbase(common.Coinbase)
 	case msg.Code == GetNodeStakeList:
 		log.Warn("stake list requested from remote peer")
@@ -683,13 +681,16 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
 		address_Json, _ := json.Marshal(address)
-		log.Warn("coinbase " + string(address_Json) + " received")
-		if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
-			staker.Address = address
-			staker.LastSeen = time.Now()
-			common.StakerSnapShot.Stakers = append(common.StakerSnapShot.Stakers, staker)
+		if common.StakerSnapShot == nil{
+			common.StakerSnapShot = &common.StakerSnapshot{
+				Stakers: make([]common.Staker, 0),
+				Created: time.Now(),
+			}
 		}
-
+		staker.Address = address
+		staker.LastSeen = time.Now()
+		common.StakerSnapShot.Stakers = append(common.StakerSnapShot.Stakers, staker)
+		log.Info("coinbase " + string(address_Json) + " received")
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
 	}
