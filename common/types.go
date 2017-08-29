@@ -254,5 +254,5 @@ type StakerSnapshot struct {
 
 type Staker struct {
 	Address 		Address				`json:"address"`
-	LastSeen		time.Time			`json:"datetime"`
+	LastSeen		time.Time			`json:"lastseen"`
 }
