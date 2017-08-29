@@ -236,7 +236,7 @@ func (p *peer) RequestCoinbase(adr common.Address) error {
 func (p *peer) TransmitCoinbase(adr common.Address) error {
 	p.Log().Warn("Transmitting Coinbase")
 	err := p2p.Send(p.rw, TransmitCoinbase, adr)
-	if err != nil {
+	if err == nil {
 		err = p.TransmitNodeList()
 	}
 	return err
