@@ -677,11 +677,14 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 	case msg.Code == TransmitCoinbase:
 		var address common.Address
 		var staker common.Staker
+		var commonAddress = common.Address{}
 
 		if err := msg.Decode(&address); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
-		address_Json, _ := json.Marshal(address)
+		if address == commonAddress{
+			break
+		}
 		if common.StakerSnapShot == nil{
 			common.StakerSnapShot = &common.StakerSnapshot{
 				Stakers: make([]common.Staker, 0),
@@ -691,6 +694,8 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		staker.Address = address
 		staker.LastSeen = time.Now()
 		common.StakerSnapShot.Stakers = append(common.StakerSnapShot.Stakers, staker)
+
+		address_Json, _ := json.Marshal(address)
 		p.Log().Info("coinbase " + string(address_Json) + " received")
 	case msg.Code == TransmitNodeList:
 		var stakers []common.Staker
