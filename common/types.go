@@ -31,6 +31,7 @@ import (
 const (
 	HashLength    = 32
 	AddressLength = 20
+	StakerTTL	  = 20*60
 )
 
 var (
@@ -248,11 +249,11 @@ func (a UnprefixedAddress) MarshalText() ([]byte, error) {
 }
 
 type StakerSnapshot struct {
-	Created			time.Time			`json:"created"`	 // the block number that this staker list will be effective
-	Stakers 		[]Staker   			`json:"stakers"` 		 // Set of ppl that stake at the current moment
+	Created			time.Time			`json:"created"`	// the block number that this staker list will be effective
+	Stakers 		map[Address]Staker  `json:"stakers"`	// Set of ppl that stake at the current moment
 }
 
 type Staker struct {
-	Address 		Address				`json:"address"`
+	//Address 		Address				`json:"address"`
 	LastSeen		time.Time			`json:"lastseen"`
 }

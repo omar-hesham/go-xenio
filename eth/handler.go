@@ -29,6 +29,7 @@ import (
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/consensus"
 	"github.com/xenioplatform/go-xenio/consensus/misc"
+	"github.com/xenioplatform/go-xenio/consensus/xenio"
 	"github.com/xenioplatform/go-xenio/core"
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/eth/downloader"
@@ -676,7 +677,6 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		p.TransmitNodeList()
 	case msg.Code == TransmitCoinbase:
 		var address common.Address
-		var staker common.Staker
 		var commonAddress = common.Address{}
 
 		if err := msg.Decode(&address); err != nil {
@@ -686,33 +686,25 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 			break
 		}
 		if common.StakerSnapShot == nil{
-			common.StakerSnapShot = &common.StakerSnapshot{
-				Stakers: make([]common.Staker, 0),
-				Created: time.Now(),
-			}
+			xenio.NewStakerSnapshot()
 		}
-		staker.Address = address
-		staker.LastSeen = time.Now()
-		common.StakerSnapShot.Stakers = append(common.StakerSnapShot.Stakers, staker)
+
+		xenioAPI := xenio.API{}
+		xenioAPI.AddStakerToSnapshot(address)
 
 		address_Json, _ := json.Marshal(address)
 		p.Log().Info("coinbase " + string(address_Json) + " received")
 	case msg.Code == TransmitNodeList:
-		var stakers []common.Staker
+		var stakers map[common.Address]common.Staker
 		p.Log().Warn("staker list received")
 
 		if err := msg.Decode(&stakers); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
 		if common.StakerSnapShot == nil{
-			common.StakerSnapShot = &common.StakerSnapshot{
-				Stakers: make([]common.Staker, 0),
-				Created: time.Now(),
-			}
+			xenio.NewStakerSnapshot()
 		}
-		for _, staker := range stakers {
-			common.StakerSnapShot.Stakers = append(common.StakerSnapShot.Stakers, staker)
-		}
+		xenio.StakerCast(stakers)
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
 	}

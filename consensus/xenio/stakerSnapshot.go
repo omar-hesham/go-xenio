@@ -1,30 +1,13 @@
 package xenio
 
 import (
-	"encoding/json"
+	//"encoding/json"
 	"time"
 
 	"github.com/xenioplatform/go-xenio/common"
 	//"github.com/xenioplatform/go-xenio/ethdb"
-	"github.com/xenioplatform/go-xenio/log"
+	//"github.com/xenioplatform/go-xenio/log"
 )
-
-func newStakerSnapshot(stakers []common.Staker) *common.StakerSnapshot {
-	snap := &common.StakerSnapshot{
-		Stakers: make([]common.Staker, len(stakers)),
-	}
-	for _, staker := range stakers {
-		var ca common.Address
-		if staker.Address == ca {
-			continue
-		}
-		st, _ := json.Marshal(staker.Address)
-		log.Info("adding " + string(st) + " to snapshot")
-		snap.Stakers = append(snap.Stakers, staker)
-	}
-	snap.Created = time.Now()
-	return snap
-}
 
 // loadSnapshot loads an existing snapshot from the database.
 // we might don't need this, only memory snapshots might be enough
@@ -55,53 +38,60 @@ func (self *API) deleteStakersSnapshot(db ethdb.Database) error {
 	log.Info("deleted")
 	return db.Delete([]byte("xenioStakers-"))
 }
-*/
+
 // cast adds new stakers to the list.
-func (self *API) stakerCast(stakers []common.Staker) bool {
+func StakerCast(stakers map[common.Address]common.Staker) bool {
 	// Cast the stakers into an existing or new list
-	newStakerList := make([]common.Staker, len(stakers))
-	if common.StakerSnapShot.Stakers != nil {
-		newStakerList = make([]common.Staker, len(stakers)+len(common.StakerSnapShot.Stakers))
+	newStakerList := make(map[common.Address]common.Staker, len(stakers))
+
+	for key, value := range common.StakerSnapShot.Stakers {
+		newStakerList[key] = value
 	}
-	for _, staker := range common.StakerSnapShot.Stakers {
-		newStakerList = append(common.StakerSnapShot.Stakers, staker)
-	}
-	for _, staker := range stakers {
-		newStakerList = append(common.StakerSnapShot.Stakers, staker)
+	for key, value := range stakers {
+		newStakerList[key] = value
 	}
 	common.StakerSnapShot.Stakers = newStakerList
 	return true
 }
+*/
 
-func (self *API) stakerExists(staker common.Staker) bool {
-	for _, a := range common.StakerSnapShot.Stakers {
-		if a.Address == staker.Address {
-			return true
-		}
+// cast adds new stakers to the list.
+func StakerCast(stakers map[common.Address]common.Staker) {
+	// Cast the stakers into an existing or new list
+	for key, value := range stakers {
+		common.StakerSnapShot.Stakers[key] = value
 	}
-	return false
+}
+
+func NewStakerSnapshot() *common.StakerSnapshot {
+	snap := &common.StakerSnapshot{
+		Created: time.Now(),
+		Stakers: make(map[common.Address]common.Staker),
+	}
+	return snap
+}
+
+func StakerExists(address common.Address) bool {
+	_, exists := common.StakerSnapShot.Stakers[address]
+	return exists
+}
+
+func DeleteStaker(address common.Address) {
+	delete(common.StakerSnapShot.Stakers, address)
 }
 
 func (api *API) GetStakerSnapshot() *common.StakerSnapshot {
 	if common.StakerSnapShot == nil {
-		signers := make([]common.Staker, 0)
-		common.StakerSnapShot = newStakerSnapshot(signers)
+		common.StakerSnapShot = NewStakerSnapshot()
 	}
 	return common.StakerSnapShot
 }
 
-func (api *API) AddStakerToSnapshot(address common.Address) (bool, error) {
-	if common.StakerSnapShot == nil{
+func (api *API) AddStakerToSnapshot(address common.Address) {
+	if common.StakerSnapShot == nil {
 		api.GetStakerSnapshot()
 	}
-	for _, st := range common.StakerSnapShot.Stakers {
-		if st.Address == address {
-			return false, nil
-		}
-	}
 	var staker common.Staker
-	staker.Address = address
 	staker.LastSeen = time.Now()
-	common.StakerSnapShot.Stakers = append(common.StakerSnapShot.Stakers, staker)
-	return true, nil
+	common.StakerSnapShot.Stakers[address] = staker
 }
