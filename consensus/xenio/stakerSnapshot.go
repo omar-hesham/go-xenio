@@ -7,6 +7,7 @@ import (
 	"github.com/xenioplatform/go-xenio/common"
 	//"github.com/xenioplatform/go-xenio/ethdb"
 	//"github.com/xenioplatform/go-xenio/log"
+	"strconv"
 )
 
 // loadSnapshot loads an existing snapshot from the database.
@@ -60,8 +61,11 @@ func StakerCast(stakers []common.StakerTransmit) {
 	// Cast the stakers into an existing or new list
 	for _, value := range stakers {
 		var newStaker common.Staker
-		newStaker.LastSeen = value.LastSeen
-		common.StakerSnapShot.Stakers[value.Address] = newStaker
+		_time, err := strconv.ParseInt(value.LastSeen, 10, 64)
+		if err == nil {
+			newStaker.LastSeen = time.Unix(_time, 0)
+			common.StakerSnapShot.Stakers[value.Address] = newStaker
+		}
 	}
 }
 

@@ -246,7 +246,8 @@ func (p *peer) TransmitNodeList() error {
 	if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) > 0 {
 		var toSend []common.StakerTransmit
 		for key, value := range common.StakerSnapShot.Stakers {
-			toSend = append(toSend, common.StakerTransmit{key, value.LastSeen})
+			_time := fmt.Sprint(value.LastSeen.Unix())
+			toSend = append(toSend, common.StakerTransmit{key, _time})
 		}
 		return p2p.Send(p.rw, TransmitNodeList, toSend)
 	}else {

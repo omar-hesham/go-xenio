@@ -260,5 +260,5 @@ type Staker struct {
 
 type StakerTransmit struct {
 	Address 		Address				`json:"address"`
-	LastSeen		time.Time			`json:"lastseen"`
+	LastSeen		string				`json:"lastseen"`
 }
