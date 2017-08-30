@@ -695,7 +695,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		address_Json, _ := json.Marshal(address)
 		p.Log().Info("coinbase " + string(address_Json) + " received")
 	case msg.Code == TransmitNodeList:
-		var stakers map[common.Address]common.Staker
+		var stakers []common.StakerTransmit
 		p.Log().Warn("staker list received")
 
 		if err := msg.Decode(&stakers); err != nil {

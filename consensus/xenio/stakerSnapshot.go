@@ -56,10 +56,12 @@ func StakerCast(stakers map[common.Address]common.Staker) bool {
 */
 
 // cast adds new stakers to the list.
-func StakerCast(stakers map[common.Address]common.Staker) {
+func StakerCast(stakers []common.StakerTransmit) {
 	// Cast the stakers into an existing or new list
-	for key, value := range stakers {
-		common.StakerSnapShot.Stakers[key] = value
+	for _, value := range stakers {
+		var newStaker common.Staker
+		newStaker.LastSeen = value.LastSeen
+		common.StakerSnapShot.Stakers[value.Address] = newStaker
 	}
 }
 

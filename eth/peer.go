@@ -244,7 +244,11 @@ func (p *peer) TransmitCoinbase(adr common.Address) error {
 func (p *peer) TransmitNodeList() error {
 	p.Log().Warn("Transmitting NodeList")
 	if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) > 0 {
-		return p2p.Send(p.rw, TransmitNodeList, common.StakerSnapShot.Stakers)
+		var toSend []common.StakerTransmit
+		for key, value := range common.StakerSnapShot.Stakers {
+			toSend = append(toSend, common.StakerTransmit{key, value.LastSeen})
+		}
+		return p2p.Send(p.rw, TransmitNodeList, toSend)
 	}else {
 		return nil
 	}
