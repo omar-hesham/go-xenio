@@ -686,7 +686,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 			break
 		}
 		if common.StakerSnapShot == nil{
-			xenio.NewStakerSnapshot()
+			common.StakerSnapShot = xenio.NewStakerSnapshot()
 		}
 
 		xenioAPI := xenio.API{}
@@ -702,7 +702,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
 		}
 		if common.StakerSnapShot == nil{
-			xenio.NewStakerSnapshot()
+			common.StakerSnapShot = xenio.NewStakerSnapshot()
 		}
 		xenio.StakerCast(stakers)
 	default:
