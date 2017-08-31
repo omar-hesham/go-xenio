@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/consensus/xenio"
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/p2p"
 	"github.com/xenioplatform/go-xenio/rlp"
@@ -246,11 +247,13 @@ func (p *peer) TransmitNodeList() error {
 	if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) > 0 {
 		var toSend []common.StakerTransmit
 		for key, value := range common.StakerSnapShot.Stakers {
-			_time := fmt.Sprint(value.LastSeen.Unix())
-			toSend = append(toSend, common.StakerTransmit{key, _time})
+			if xenio.StakerExpired(key) == false {
+				_time := fmt.Sprint(value.LastSeen.Unix())
+				toSend = append(toSend, common.StakerTransmit{key, _time})
+			}
 		}
 		return p2p.Send(p.rw, TransmitNodeList, toSend)
-	}else {
+	} else {
 		return nil
 	}
 }

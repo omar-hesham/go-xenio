@@ -31,7 +31,7 @@ import (
 const (
 	HashLength    = 32
 	AddressLength = 20
-	StakerTTL	  = 20*60
+	StakerTTL	  = 1200 // seconds
 )
 
 var (

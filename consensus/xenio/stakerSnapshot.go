@@ -63,15 +63,16 @@ func StakerCast(stakers []common.StakerTransmit) {
 		var newStaker common.Staker
 		_time, err := strconv.ParseInt(value.LastSeen, 10, 64)
 		if err == nil {
-			newStaker.LastSeen = time.Unix(_time, 0)
+			newStaker.LastSeen = time.Unix(_time, 0).UTC()
 			common.StakerSnapShot.Stakers[value.Address] = newStaker
 		}
 	}
+	//DeleteAllExpiredStakers()
 }
 
 func NewStakerSnapshot() *common.StakerSnapshot {
 	snap := &common.StakerSnapshot{
-		Created: time.Now(),
+		Created: time.Now().UTC(),
 		Stakers: make(map[common.Address]common.Staker),
 	}
 	return snap
@@ -82,8 +83,34 @@ func StakerExists(address common.Address) bool {
 	return exists
 }
 
+func StakerExpired(address common.Address) bool {
+	stakerData, exists := common.StakerSnapShot.Stakers[address]
+	if exists == true {
+		delta := time.Now().Sub(stakerData.LastSeen)
+		if delta.Seconds() >= common.StakerTTL {
+			return true
+		}
+	}
+	return false
+}
+
 func DeleteStaker(address common.Address) {
 	delete(common.StakerSnapShot.Stakers, address)
+}
+
+func DeleteExpiredStaker(address common.Address) {
+	expired := StakerExpired(address)
+	if expired {
+		delete(common.StakerSnapShot.Stakers, address)
+	}
+}
+
+func DeleteAllExpiredStakers() {
+	for address := range common.StakerSnapShot.Stakers {
+		if StakerExpired(address) == true {
+			delete(common.StakerSnapShot.Stakers, address)
+		}
+	}
 }
 
 func (api *API) GetStakerSnapshot() *common.StakerSnapshot {
@@ -98,6 +125,6 @@ func (api *API) AddStakerToSnapshot(address common.Address) {
 		api.GetStakerSnapshot()
 	}
 	var staker common.Staker
-	staker.LastSeen = time.Now()
+	staker.LastSeen = time.Now().UTC()
 	common.StakerSnapShot.Stakers[address] = staker
 }
