@@ -58,16 +58,19 @@ func StakerCast(stakers map[common.Address]common.Staker) bool {
 
 // cast adds new stakers to the list.
 func StakerCast(stakers []common.StakerTransmit) {
-	// Cast the stakers into an existing or new list
+	now := time.Now().UTC()
 	for _, value := range stakers {
 		var newStaker common.Staker
 		_time, err := strconv.ParseInt(value.LastSeen, 10, 64)
 		if err == nil {
 			newStaker.LastSeen = time.Unix(_time, 0).UTC()
-			common.StakerSnapShot.Stakers[value.Address] = newStaker
+			delta := now.Sub(newStaker.LastSeen)
+			// only add non expired stakers to list
+			if delta.Seconds() <= common.StakerTTL {
+				common.StakerSnapShot.Stakers[value.Address] = newStaker
+			}
 		}
 	}
-	//DeleteAllExpiredStakers()
 }
 
 func NewStakerSnapshot() *common.StakerSnapshot {
