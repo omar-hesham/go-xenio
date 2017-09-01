@@ -573,10 +573,13 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 		header.Time = big.NewInt(time.Now().Unix())
 	}
 
+	//PoN Rewards
 	if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
 		if len(common.StakerSnapShot.Stakers) >= 0 {
 			for key := range common.StakerSnapShot.Stakers {
-				header.RewardList = append(header.RewardList, key)
+				if !StakerExpired(key) {
+					header.RewardList = append(header.RewardList, key)
+				}
 			}
 		}
 	}
