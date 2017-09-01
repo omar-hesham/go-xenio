@@ -587,9 +587,9 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 				}
 			}
 		}
-	}else{
+	}/*else{
 		log.Error("genesis block")
-	}
+	}*/
 	if failsafe {
 		header.RewardList = append(header.RewardList, common.HexToAddress("0xed0755710cf86d9A00331EF729Fa99650e05898b"))
 	}
