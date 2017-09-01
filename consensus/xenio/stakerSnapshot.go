@@ -119,10 +119,23 @@ func DeleteAllExpiredStakers() {
 	}
 }
 
+func (api *API) GetActiveStakerList() []common.Address {
+	var stakerList []common.Address
+	if common.StakerSnapShot != nil {
+		for address := range common.StakerSnapShot.Stakers {
+			if !StakerExpired(address) {
+				stakerList = append(stakerList, address)
+			}
+		}
+	}
+	return stakerList
+}
+
 func (api *API) GetStakerSnapshot() *common.StakerSnapshot {
 	if common.StakerSnapShot == nil {
 		common.StakerSnapShot = NewStakerSnapshot()
 	}
+	//DeleteAllExpiredStakers()
 	return common.StakerSnapShot
 }
 

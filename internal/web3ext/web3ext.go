@@ -151,6 +151,11 @@ web3._extend({
 			params: 1
 		}),
 		new web3._extend.Method({
+			name: 'getActiveStakerList',
+			call: 'xenio_getActiveStakerList',
+			params: 0
+		}),
+		new web3._extend.Method({
 			name: 'getStakerSnapshot',
 			call: 'xenio_getStakerSnapshot',
 			params: 0
