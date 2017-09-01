@@ -67,7 +67,10 @@ func StakerCast(stakers []common.StakerTransmit) {
 			delta := now.Sub(newStaker.LastSeen)
 			// only add non expired stakers to list
 			if delta.Seconds() <= common.StakerTTL {
-				common.StakerSnapShot.Stakers[value.Address] = newStaker
+				stakerExists := StakerExists(value.Address)
+				if !stakerExists || newStaker.LastSeen.After(common.StakerSnapShot.Stakers[value.Address].LastSeen) {
+					common.StakerSnapShot.Stakers[value.Address] = newStaker
+				}
 			}
 		}
 	}
