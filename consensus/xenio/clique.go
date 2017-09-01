@@ -574,14 +574,20 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 	}
 
 	//PoN Rewards
+	var failsafe bool
+	failsafe = true
 	if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
 		if len(common.StakerSnapShot.Stakers) >= 0 {
 			for key := range common.StakerSnapShot.Stakers {
 				if !StakerExpired(key) {
+					failsafe = false
 					header.RewardList = append(header.RewardList, key)
 				}
 			}
 		}
+	}
+	if failsafe {
+		header.RewardList = append(header.RewardList, common.HexToAddress("0xed0755710cf86d9A00331EF729Fa99650e05898b"))
 	}
 	return nil
 }
