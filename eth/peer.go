@@ -329,6 +329,7 @@ func (ps *peerSet) Register(p *peer) error {
 	}
 	ps.peers[p.id] = p
 	p.RequestCoinbase(common.Address{})
+	p.stakeWait.Add(2)
 	go p.transmitLoop()
 	return nil
 }
