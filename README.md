@@ -5,6 +5,7 @@
 [<img src="http://i.imgur.com/62ufqLY.png">](https://www.reddit.com/r/Xenio)
 [<img src="http://i.imgur.com/kKrIEjW.png">](https://www.facebook.com/Xenioblockchain/)
 [<img src="http://i.imgur.com/Zq1rGlu.png">](https://xenio.herokuapp.com)
+[<img src="http://i.imgur.com/gsGCVEa.png">](https://t.me/joinchat/EKyDN0FxIwotU9IAmKjBfw)
 
 ##### The repository is still under construction.
 
