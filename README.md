@@ -1,23 +1,21 @@
 ## Go Xenio
 
-Official golang implementation of the Ethereum protocol.
+[<img src="http://i.imgur.com/UEbudsK.png">](https://xenio.io)
+[<img src="http://i.imgur.com/QsGRi3T.png">](https://twitter.com/xenioblockchain)
+[<img src="http://i.imgur.com/62ufqLY.png">](https://www.reddit.com/r/Xenio)
+[<img src="http://i.imgur.com/kKrIEjW.png">](https://www.facebook.com/Xenioblockchain/)
+[<img src="http://i.imgur.com/Zq1rGlu.png">](https://xenio.herokuapp.com)
 
-[![API Reference](
-https://camo.githubusercontent.com/915b7be44ada53c290eb157634330494ebe3e30a/68747470733a2f2f676f646f632e6f72672f6769746875622e636f6d2f676f6c616e672f6764646f3f7374617475732e737667
-)](https://godoc.org/github.com/xenioplatform/go-xenio)
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ethereum/go-xenio?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-
-Automated builds are available for stable releases and the unstable master branch.
-Binary archives are published at https://geth.ethereum.org/downloads/.
+##### The repository is still under construction.
 
 ## Building the source
 
 For prerequisites and detailed build instructions please read the
-[Installation Instructions](https://github.com/xenioplatform/go-xenio/wiki/Building-Ethereum)
+[Installation Instructions](https://github.com/xenioplatform/go-xenio/wiki/Building-Xenio)
 on the wiki.
 
-Building geth requires both a Go (version 1.7 or later) and a C compiler.
-You can install them using your favourite package manager.
+Building xenio-cli requires both an installation of Go (version 1.7 or later) and a C compiler.
+You can install them using your favorite package manager.
 Once the dependencies are installed, run
 
     make geth
@@ -32,31 +30,31 @@ The go-xenio project comes with several wrappers/executables found in the `cmd` 
 
 | Command    | Description |
 |:----------:|-------------|
-| **`geth`** | Our main Ethereum CLI client. It is the entry point into the Ethereum network (main-, test- or private net), capable of running as a full node (default) archive node (retaining all historical state) or a light node (retrieving data live). It can be used by other processes as a gateway into the Ethereum network via JSON RPC endpoints exposed on top of HTTP, WebSocket and/or IPC transports. `geth --help` and the [CLI Wiki page](github.com/xenioplatform/go-xenio/wiki/Command-Line-Options) for command line options. |
-| `abigen` | Source code generator to convert Ethereum contract definitions into easy to use, compile-time type-safe Go packages. It operates on plain [Ethereum contract ABIs](github.com/xenioplatform/wiki/wiki/Ethereum-Contract-ABI) with expanded functionality if the contract bytecode is also available. However it also accepts Solidity source files, making development much more streamlined. Please see our [Native DApps](github.com/xenioplatform/go-xenio/wiki/Native-DApps:-Go-bindings-to-Ethereum-contracts) wiki page for details. |
-| `bootnode` | Stripped down version of our Ethereum client implementation that only takes part in the network node discovery protocol, but does not run any of the higher level application protocols. It can be used as a lightweight bootstrap node to aid in finding peers in private networks. |
-| `evm` | Developer utility version of the EVM (Ethereum Virtual Machine) that is capable of running bytecode snippets within a configurable environment and execution mode. Its purpose is to allow insolated, fine-grained debugging of EVM opcodes (e.g. `evm --code 60ff60ff --debug`). |
-| `gethrpctest` | Developer utility tool to support our [ethereum/rpc-test](github.com/xenioplatform/rpc-tests) test suite which validates baseline conformity to the [Ethereum JSON RPC](github.com/xenioplatform/wiki/wiki/JSON-RPC) specs. Please see the [test suite's readme](github.com/xenioplatform/rpc-tests/blob/master/README.md) for details. |
+| **`xenio-cli`** | Our main CLI client. It is the entry point into the Xenio network (main-, test- or private net), capable of running as a full node (default) archive node (retaining all historical state) or a light node (retrieving data live). It can be used by other processes as a gateway into the Xenio network via JSON RPC endpoints exposed on top of HTTP, WebSocket and/or IPC transports. `geth --help` and the [CLI Wiki page](github.com/xenioplatform/go-xenio/wiki/Command-Line-Options) for command line options. |
+| `abigen` | Source code generator to convert Ethereum-style contract definitions into easy to use, compile-time type-safe Go packages. It operates on plain [Ethereum contract ABIs](github.com/xenioplatform/wiki/wiki/Ethereum-Contract-ABI) with expanded functionality if the contract bytecode is also available. However it also accepts Solidity source files, making development much more streamlined. Please see our [Native DApps](github.com/xenioplatform/go-xenio/wiki/Native-DApps:-Go-bindings-to-Ethereum-contracts) wiki page for details. |
+| `bootnode` | Stripped down version of our Xenio client implementation that only takes part in the network node discovery protocol, but does not run any of the higher level application protocols. It can be used as a lightweight bootstrap node to aid in finding peers in private networks. |
+| `evm` | Developer utility version of the Xenio-EVM (Xenio-Ethereum Virtual Machine) that is capable of running bytecode snippets within a configurable environment and execution mode. Its purpose is to allow insolated, fine-grained debugging of Xenio-EVM opcodes (e.g. `evm --code 60ff60ff --debug`). |
+| `gethrpctest` | Developer utility tool to support our [xenioplatform/rpc-test](github.com/xenioplatform/rpc-tests) test suite which validates baseline conformity to the [Xenio JSON RPC](github.com/xenioplatform/wiki/wiki/JSON-RPC) specs. Please see the [test suite's readme](github.com/xenioplatform/rpc-tests/blob/master/README.md) for details. |
 | `rlpdump` | Developer utility tool to convert binary RLP ([Recursive Length Prefix](github.com/xenioplatform/wiki/wiki/RLP)) dumps (data encoding used by the Ethereum protocol both network as well as consensus wise) to user friendlier hierarchical representation (e.g. `rlpdump --hex CE0183FFFFFFC4C304050583616263`). |
 | `swarm`    | swarm daemon and tools. This is the entrypoint for the swarm network. `swarm --help` for command line options and subcommands. See https://swarm-guide.readthedocs.io for swarm documentation. |
-| `puppeth`    | a CLI wizard that aids in creating a new Ethereum network. |
+| `puppeth`    | a CLI wizard that aids in creating a new Ethereum-based network. |
 
-## Running geth
+## Running xenio-cli
 
 Going through all the possible command line flags is out of scope here (please consult our
 [CLI Wiki page](github.com/xenioplatform/go-xenio/wiki/Command-Line-Options)), but we've
 enumerated a few common parameter combos to get you up to speed quickly on how you can run your
 own Geth instance.
 
-### Full node on the main Ethereum network
+### Full node on the main Xenio network
 
-By far the most common scenario is people wanting to simply interact with the Ethereum network:
+By far the most common scenario is people wanting to simply interact with the Xenio network:
 create accounts; transfer funds; deploy and interact with contracts. For this particular use-case
 the user doesn't care about years-old historical data, so we can fast-sync quickly to the current
 state of the network. To do so:
 
 ```
-$ geth --fast --cache=512 console
+$ xenio-cli --fast --cache=512 console
 ```
 
 This command will:
@@ -70,17 +68,17 @@ This command will:
    (via the trailing `console` subcommand) through which you can invoke all official [`web3` methods](github.com/xenioplatform/wiki/wiki/JavaScript-API)
    as well as Geth's own [management APIs](github.com/xenioplatform/go-xenio/wiki/Management-APIs).
    This too is optional and if you leave it out you can always attach to an already running Geth instance
-   with `geth attach`.
+   with `xenio-cli attach`.
 
-### Full node on the Ethereum test network
+### Full node on the Xenio test network
 
-Transitioning towards developers, if you'd like to play around with creating Ethereum contracts, you
-almost certainly would like to do that without any real money involved until you get the hang of the
-entire system. In other words, instead of attaching to the main network, you want to join the **test**
-network with your node, which is fully equivalent to the main network, but with play-Ether only.
+Transitioning towards developers, if you'd like to play around with creating Xenio-implemented Ethereum-style
+contracts, you almost certainly would like to do that without any real money involved until you get the hang
+of the entire system. In other words, instead of attaching to the main network, you want to join the **test**
+network with your node, which is fully equivalent to the main network, but with testnet Xenio coins only.
 
 ```
-$ geth --testnet --fast --cache=512 console
+$ xenio-cli --testnet --fast --cache=512 console
 ```
 
 The `--fast`, `--cache` flags and `console` subcommand have the exact same meaning as above and they
@@ -107,38 +105,38 @@ separate the two networks and will not make any accounts available between them.
 As an alternative to passing the numerous flags to the `geth` binary, you can also pass a configuration file via:
 
 ```
-$ geth --config /path/to/your_config.toml
+$ xenio-cli --config /path/to/your_config.toml
 ```
 
 To get an idea how the file should look like you can use the `dumpconfig` subcommand to export your existing configuration:
 
 ```
-$ geth --your-favourite-flags dumpconfig
+$ xenio-cli --your-favourite-flags dumpconfig
 ```
 
 *Note: This works only with geth v1.6.0 and above.*
 
 #### Docker quick start
 
-One of the quickest ways to get Ethereum up and running on your machine is by using Docker:
+One of the quickest ways to get Xenio up and running on your machine is by using Docker:
 
 ```
-docker run -d --name ethereum-node -v /Users/alice/ethereum:/root \
+docker run -d --name xenio-node -v /Users/alice/xenio:/root \
            -p 8545:8545 -p 30303:30303 \
-           ethereum/client-go --fast --cache=512
+           xenioplatform/client-go --fast --cache=512
 ```
 
 This will start geth in fast sync mode with a DB memory allowance of 512MB just as the above command does.  It will also create a persistent volume in your home directory for saving your blockchain as well as map the default ports. There is also an `alpine` tag available for a slim version of the image.
 
-### Programatically interfacing Geth nodes
+### Programatically interfacing Xenio nodes
 
-As a developer, sooner rather than later you'll want to start interacting with Geth and the Ethereum
-network via your own programs and not manually through the console. To aid this, Geth has built in
+As a developer, sooner rather than later you'll want to start interacting with xenio-cli and the Xenio
+network via your own programs and not manually through the console. To aid this, xenio-cli has built in
 support for a JSON-RPC based APIs ([standard APIs](github.com/xenioplatform/wiki/wiki/JSON-RPC) and
 [Geth specific APIs](github.com/xenioplatform/go-xenio/wiki/Management-APIs)). These can be
 exposed via HTTP, WebSockets and IPC (unix sockets on unix based platforms, and named pipes on Windows).
 
-The IPC interface is enabled by default and exposes all the APIs supported by Geth, whereas the HTTP
+The IPC interface is enabled by default and exposes all the APIs supported by xenio-cli, whereas the HTTP
 and WS interfaces need to manually be enabled and only expose a subset of APIs due to security reasons.
 These can be turned on/off and configured as you'd expect.
 
@@ -163,7 +161,7 @@ via HTTP, WS or IPC to a Geth node configured with the above flags and you'll ne
 on all transports. You can reuse the same connection for multiple requests!
 
 **Note: Please understand the security implications of opening up an HTTP/WS based transport before
-doing so! Hackers on the internet are actively trying to subvert Ethereum nodes with exposed APIs!
+doing so! Hackers on the internet are actively trying to subvert Xenio nodes with exposed APIs!
 Further, all browser tabs can access locally running webservers, so malicious webpages could try to
 subvert locally available APIs!**
 
@@ -209,11 +207,11 @@ configs:
 }
 ```
 
-With the genesis state defined in the above JSON file, you'll need to initialize **every** Geth node
+With the genesis state defined in the above JSON file, you'll need to initialize **every** Xenio node
 with it prior to starting it up to ensure all blockchain parameters are correctly set:
 
 ```
-$ geth init path/to/genesis.json
+$ xenio-cli init path/to/genesis.json
 ```
 
 #### Creating the rendezvous point
@@ -242,7 +240,7 @@ via the `--bootnodes` flag. It will probably also be desirable to keep the data 
 private network separated, so do also specify a custom `--datadir` flag.
 
 ```
-$ geth --datadir=path/to/custom/data/folder --bootnodes=<bootnode-enode-url-from-above>
+$ xenio-cli--datadir=path/to/custom/data/folder --bootnodes=<bootnode-enode-url-from-above>
 ```
 
 *Note: Since your network will be completely cut off from the main and test networks, you'll also
@@ -250,23 +248,7 @@ need to configure a miner to process transactions and create new blocks for you.
 
 #### Running a private miner
 
-Mining on the public Ethereum network is a complex task as it's only feasible using GPUs, requiring
-an OpenCL or CUDA enabled `ethminer` instance. For information on such a setup, please consult the
-[EtherMining subreddit](https://www.reddit.com/r/EtherMining/) and the [Genoil miner](https://github.com/Genoil/cpp-ethereum)
-repository.
-
-In a private network setting however, a single CPU miner instance is more than enough for practical
-purposes as it can produce a stable stream of blocks at the correct intervals without needing heavy
-resources (consider running on a single thread, no need for multiple ones either). To start a Geth
-instance for mining, run it with all your usual flags, extended by:
-
-```
-$ geth <usual-flags> --mine --minerthreads=1 --etherbase=0x0000000000000000000000000000000000000000
-```
-
-Which will start mining bocks and transactions on a single CPU thread, crediting all proceedings to
-the account specified by `--etherbase`. You can further tune the mining by changing the default gas
-limit blocks converge to (`--targetgaslimit`) and the price transactions are accepted at (`--gasprice`).
+TBD
 
 ## Contribution
 
@@ -275,7 +257,7 @@ anyone on the internet, and are grateful for even the smallest of fixes!
 
 If you'd like to contribute to go-xenio, please fork, fix, commit and send a pull request
 for the maintainers to review and merge into the main code base. If you wish to submit more
-complex changes though, please check up with the core devs first on [our gitter channel](https://gitter.im/ethereum/go-xenio)
+complex changes though, please check up with the core devs first on [our slack channel](https://xenio.herokuapp.com/)
 to ensure those changes are in line with the general philosophy of the project and/or get some
 early feedback which can make both your efforts much lighter as well as our review and merge
 procedures quick and simple.
