@@ -6,8 +6,12 @@ import (
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/consensus/xenio"
 	"github.com/xenioplatform/go-xenio/p2p"
+	//"github.com/xenioplatform/go-xenio/log"
+	"time"
 )
-
+const (
+	stakeInterval = 120 * time.Second // 15 for dev tests
+)
 // RequestCoinbase fetches the coinbase of the remote node, if the node wants to share it.
 func (p *peer) RequestCoinbase(adr common.Address) error {
 	p.Log().Warn("Fetching remote nodes Coinbase")
@@ -36,5 +40,22 @@ func (p *peer) TransmitNodeList() error {
 		return p2p.Send(p.rw, TransmitNodeList, toSend)
 	} else {
 		return nil
+	}
+}
+
+func (p *peer) transmitLoop() {
+	ping := time.NewTicker(stakeInterval)
+	defer p.stakeWait.Done()
+	defer ping.Stop()
+	for {
+		select {
+		case <-ping.C:
+			if err := p.TransmitCoinbase(common.Address{}); err != nil {
+				p.Peer.ProtoErr <- err
+				return
+			}
+		case <-p.Peer.Closed:
+			return
+		}
 	}
 }

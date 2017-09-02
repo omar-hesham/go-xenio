@@ -36,8 +36,6 @@ const (
 	baseProtocolMaxMsgSize = 2 * 1024
 
 	pingInterval = 15 * time.Second
-	stakeInterval = 15 * time.Second // 15 for dev tests
-	GetNodeCoinbase  = 0x11
 )
 
 const (
@@ -70,8 +68,8 @@ type Peer struct {
 	created mclock.AbsTime
 
 	wg       sync.WaitGroup
-	protoErr chan error
-	closed   chan struct{}
+	ProtoErr chan error
+	Closed   chan struct{}
 	disc     chan DiscReason
 }
 
@@ -80,7 +78,7 @@ func NewPeer(id discover.NodeID, name string, caps []Cap) *Peer {
 	pipe, _ := net.Pipe()
 	conn := &conn{fd: pipe, transport: nil, id: id, caps: caps, name: name}
 	peer := newPeer(conn, nil)
-	close(peer.closed) // ensures Disconnect doesn't block
+	close(peer.Closed) // ensures Disconnect doesn't block
 	return peer
 }
 
@@ -115,7 +113,7 @@ func (p *Peer) LocalAddr() net.Addr {
 func (p *Peer) Disconnect(reason DiscReason) {
 	select {
 	case p.disc <- reason:
-	case <-p.closed:
+	case <-p.Closed:
 	}
 }
 
@@ -131,8 +129,8 @@ func newPeer(conn *conn, protocols []Protocol) *Peer {
 		running:  protomap,
 		created:  mclock.Now(),
 		disc:     make(chan DiscReason),
-		protoErr: make(chan error, len(protomap)+1), // protocols + pingLoop
-		closed:   make(chan struct{}),
+		ProtoErr: make(chan error, len(protomap)+1), // protocols + pingLoop + stakeLoop
+		Closed:   make(chan struct{}),
 		log:      log.New("id", conn.id, "conn", conn.flags),
 	}
 	return p
@@ -176,7 +174,7 @@ loop:
 				reason = DiscNetworkError
 			}
 			break loop
-		case err = <-p.protoErr:
+		case err = <-p.ProtoErr:
 			reason = discReasonForError(err)
 			break loop
 		case err = <-p.disc:
@@ -184,7 +182,7 @@ loop:
 		}
 	}
 
-	close(p.closed)
+	close(p.Closed)
 	p.rw.close(reason)
 	p.wg.Wait()
 	return remoteRequested, err
@@ -198,11 +196,10 @@ func (p *Peer) pingLoop() {
 		select {
 		case <-ping.C:
 			if err := SendItems(p.rw, pingMsg); err != nil {
-				p.protoErr <- err
+				p.ProtoErr <- err
 				return
 			}
-			//SendItems(p.rw,GetNodeCoinbase,common.Address{})
-		case <-p.closed:
+		case <-p.Closed:
 			return
 		}
 	}
@@ -247,7 +244,7 @@ func (p *Peer) handle(msg Msg) error {
 		select {
 		case proto.in <- msg:
 			return nil
-		case <-p.closed:
+		case <-p.Closed:
 			return io.EOF
 		}
 	}
@@ -295,7 +292,7 @@ func (p *Peer) startProtocols(writeStart <-chan struct{}, writeErr chan<- error)
 	p.wg.Add(len(p.running))
 	for _, proto := range p.running {
 		proto := proto
-		proto.closed = p.closed
+		proto.closed = p.Closed
 		proto.wstart = writeStart
 		proto.werr = writeErr
 		p.log.Trace(fmt.Sprintf("Starting protocol %s/%d", proto.Name, proto.Version))
@@ -307,7 +304,7 @@ func (p *Peer) startProtocols(writeStart <-chan struct{}, writeErr chan<- error)
 			} else if err != io.EOF {
 				p.log.Trace(fmt.Sprintf("Protocol %s/%d failed", proto.Name, proto.Version), "err", err)
 			}
-			p.protoErr <- err
+			p.ProtoErr <- err
 			p.wg.Done()
 		}()
 	}
