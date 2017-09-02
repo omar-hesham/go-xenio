@@ -1,6 +1,12 @@
 ## Go Xenio
 
-Official Xenio repository.
+[<img src="http://i.imgur.com/UEbudsK.png">](https://xenio.io)
+[<img src="http://i.imgur.com/QsGRi3T.png">](https://twitter.com/xenioblockchain)
+[<img src="http://i.imgur.com/62ufqLY.png">](https://www.reddit.com/r/Xenio)
+[<img src="http://i.imgur.com/kKrIEjW.png">](https://www.facebook.com/Xenio-1989196268021756)
+[<img src="http://i.imgur.com/Zq1rGlu.png">](https://xenio.herokuapp.com)
+
+##### The repository is still under construction.
 
 ## Building the source
 
