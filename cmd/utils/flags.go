@@ -41,7 +41,6 @@ import (
 	"github.com/xenioplatform/go-xenio/eth/gasprice"
 	"github.com/xenioplatform/go-xenio/ethdb"
 	"github.com/xenioplatform/go-xenio/ethstats"
-	"github.com/xenioplatform/go-xenio/event"
 	"github.com/xenioplatform/go-xenio/les"
 	"github.com/xenioplatform/go-xenio/log"
 	"github.com/xenioplatform/go-xenio/metrics"
@@ -53,6 +52,7 @@ import (
 	"github.com/xenioplatform/go-xenio/p2p/netutil"
 	"github.com/xenioplatform/go-xenio/params"
 	whisper "github.com/xenioplatform/go-xenio/whisper/whisperv5"
+
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -121,7 +121,7 @@ var (
 	}
 	NoUSBFlag = cli.BoolFlag{
 		Name:  "nousb",
-		Usage: "Disables monitoring for and managine USB hardware wallets",
+		Usage: "Disables monitoring for and managing USB hardware wallets",
 	}
 	NetworkIdFlag = cli.Uint64Flag{
 		Name:  "networkid",
@@ -274,6 +274,10 @@ var (
 		Name:  "mine",
 		Usage: "Enable mining",
 	}
+	StakingEnabledFlag = cli.BoolFlag{
+		Name:  "stake",
+		Usage: "Enable staking",
+	}
 	MinerThreadsFlag = cli.IntFlag{
 		Name:  "minerthreads",
 		Usage: "Number of CPU threads to use for mining",
@@ -297,6 +301,10 @@ var (
 	ExtraDataFlag = cli.StringFlag{
 		Name:  "extradata",
 		Usage: "Block extra data set by the miner (default = client version)",
+	}
+	SetServerBase = cli.StringFlag{
+		Name:  "setServerBase",
+		Usage: "Sets the server that the staker should connected for the staking to be enabled",
 	}
 	// Account settings
 	UnlockedAccountFlag = cli.StringFlag{
@@ -541,7 +549,7 @@ func setNodeUserIdent(ctx *cli.Context, cfg *node.Config) {
 // setBootstrapNodes creates a list of bootstrap nodes from the command line
 // flags, reverting to pre-configured ones if none have been specified.
 func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
-	urls := params.MainnetBootnodes
+	urls := params.XenioBootNodes
 	switch {
 	case ctx.GlobalIsSet(BootnodesFlag.Name) || ctx.GlobalIsSet(BootnodesV4Flag.Name):
 		if ctx.GlobalIsSet(BootnodesV4Flag.Name) {
@@ -1093,14 +1101,17 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 
 	engine := ethash.NewFaker()
 	if !ctx.GlobalBool(FakePoWFlag.Name) {
-		engine = ethash.New("", 1, 0, "", 1, 0)
+		engine = ethash.New(
+			stack.ResolvePath(eth.DefaultConfig.EthashCacheDir), eth.DefaultConfig.EthashCachesInMem, eth.DefaultConfig.EthashCachesOnDisk,
+			stack.ResolvePath(eth.DefaultConfig.EthashDatasetDir), eth.DefaultConfig.EthashDatasetsInMem, eth.DefaultConfig.EthashDatasetsOnDisk,
+		)
 	}
 	config, _, err := core.SetupGenesisBlock(chainDb, MakeGenesis(ctx))
 	if err != nil {
 		Fatalf("%v", err)
 	}
 	vmcfg := vm.Config{EnablePreimageRecording: ctx.GlobalBool(VMEnableDebugFlag.Name)}
-	chain, err = core.NewBlockChain(chainDb, config, engine, new(event.TypeMux), vmcfg)
+	chain, err = core.NewBlockChain(chainDb, config, engine, vmcfg)
 	if err != nil {
 		Fatalf("Can't create BlockChain: %v", err)
 	}

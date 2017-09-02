@@ -1,18 +1,18 @@
-// Copyright 2016 The go-xenio Authors
-// This file is part of the go-xenio library.
+// Copyright 2016 The go-ethereum Authors
+// This file is part of the go-ethereum library.
 //
-// The go-xenio library is free software: you can redistribute it and/or modify
+// The go-ethereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-xenio library is distributed in the hope that it will be useful,
+// The go-ethereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-xenio library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Package les implements the Light Ethereum Subprotocol.
 package les
@@ -23,7 +23,6 @@ import (
 	"math/big"
 
 	"github.com/xenioplatform/go-xenio/common"
-	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/rlp"
 )
 
@@ -105,12 +104,6 @@ var errorToString = map[int]string{
 	ErrHandshakeMissingKey:     "Key missing from handshake message",
 }
 
-type chainManager interface {
-	GetBlockHashesFromHash(hash common.Hash, amount uint64) (hashes []common.Hash)
-	GetBlock(hash common.Hash) (block *types.Block)
-	Status() (td *big.Int, currentBlock common.Hash, genesisBlock common.Hash)
-}
-
 // announceData is the network packet for the block announcements.
 type announceData struct {
 	Hash       common.Hash // Hash of one particular block being announced
@@ -118,23 +111,12 @@ type announceData struct {
 	Td         *big.Int    // Total difficulty of one particular block being announced
 	ReorgDepth uint64
 	Update     keyValueList
-
-	haveHeaders uint64 // we have the headers of the remote peer's chain up to this number
-	headKnown   bool
-	requested   bool
-	next        *announceData
 }
 
 type blockInfo struct {
 	Hash   common.Hash // Hash of one particular block being announced
 	Number uint64      // Number of one particular block being announced
 	Td     *big.Int    // Total difficulty of one particular block being announced
-}
-
-// getBlockHashesData is the network packet for the hash based hash retrieval.
-type getBlockHashesData struct {
-	Hash   common.Hash
-	Amount uint64
 }
 
 // getBlockHeadersData represents a block header query.
@@ -180,15 +162,6 @@ func (hn *hashOrNumber) DecodeRLP(s *rlp.Stream) error {
 	}
 	return err
 }
-
-// newBlockData is the network packet for the block propagation message.
-type newBlockData struct {
-	Block *types.Block
-	TD    *big.Int
-}
-
-// blockBodiesData is the network packet for block content distribution.
-type blockBodiesData []*types.Body
 
 // CodeData is the network response packet for a node data retrieval.
 type CodeData []struct {

@@ -26,7 +26,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
 	"github.com/xenioplatform/go-xenio/rlp"
 )
 

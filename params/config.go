@@ -40,6 +40,7 @@ var (
 		EIP150Hash:      common.HexToHash("0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0"),
 		EIP155Block:     big.NewInt(2675000),
 		EIP158Block:     big.NewInt(2675000),
+		XenioBlock:      big.NewInt(math.MaxInt64), // never enable
 		MetropolisBlock: big.NewInt(math.MaxInt64), // Don't enable yet
 
 		Ethash: new(EthashConfig),
@@ -55,6 +56,7 @@ var (
 		EIP150Hash:      common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d"),
 		EIP155Block:     big.NewInt(10),
 		EIP158Block:     big.NewInt(10),
+		XenioBlock:      big.NewInt(math.MaxInt64), // never enable
 		MetropolisBlock: big.NewInt(math.MaxInt64), // Don't enable yet
 
 		Ethash: new(EthashConfig),
@@ -70,6 +72,7 @@ var (
 		EIP150Hash:      common.HexToHash("0x9b095b36c15eaf13044373aef8ee0bd3a382a5abb92e402afa44b8249c3a90e9"),
 		EIP155Block:     big.NewInt(3),
 		EIP158Block:     big.NewInt(3),
+		XenioBlock:      big.NewInt(math.MaxInt64), // never enable
 		MetropolisBlock: big.NewInt(math.MaxInt64), // Don't enable yet
 
 		Clique: &CliqueConfig{
@@ -78,6 +81,24 @@ var (
 		},
 	}
 
+	XenioChainConfig = &ChainConfig{
+		ChainId:         big.NewInt(7497),
+		HomesteadBlock:  big.NewInt(1), // never enable
+		DAOForkBlock:    nil, // never enable
+		DAOForkSupport:  true,
+		EIP150Block:     big.NewInt(2), // never enable
+		EIP150Hash:      common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000"),
+		EIP155Block:     big.NewInt(3), // never enable
+		EIP158Block:     big.NewInt(3), // never enable
+		MetropolisBlock: big.NewInt(math.MaxInt64), // never enable
+		XenioBlock:		 big.NewInt(math.MaxInt64),
+
+		Xenio: &XenioConfig{
+			Epoch:      30000,
+			Period: 	60,
+			//SuperPeriod:60*30,
+		},
+	}
 	// AllProtocolChanges contains every protocol change (EIPs)
 	// introduced and accepted by the Ethereum core developers.
 	//
@@ -86,8 +107,8 @@ var (
 	// means that all fields must be set at all times. This forces
 	// anyone adding flags to the config to also have to set these
 	// fields.
-	AllProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(math.MaxInt64) /*disabled*/, new(EthashConfig), nil}
-	TestChainConfig    = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil}
+	AllProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(math.MaxInt64) /*disabled*/,big.NewInt(0), new(EthashConfig), nil, nil} //TODO: remove xenioblock
+	TestChainConfig    = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), nil, big.NewInt(0),new(EthashConfig), nil, nil}
 	TestRules          = TestChainConfig.Rules(new(big.Int))
 )
 
@@ -110,11 +131,12 @@ type ChainConfig struct {
 	EIP155Block *big.Int `json:"eip155Block,omitempty"` // EIP155 HF block
 	EIP158Block *big.Int `json:"eip158Block,omitempty"` // EIP158 HF block
 
-	MetropolisBlock *big.Int `json:"metropolisBlock,omitempty"` // Metropolis switch block (nil = no fork, 0 = alraedy on homestead)
-
+	MetropolisBlock *big.Int `json:"metropolisBlock,omitempty"` // Metropolis switch block (nil = no fork, 0 = already on homestead)
+	XenioBlock *big.Int `json:"xenioBlock,omitempty"`
 	// Various consensus engines
 	Ethash *EthashConfig `json:"ethash,omitempty"`
 	Clique *CliqueConfig `json:"clique,omitempty"`
+	Xenio *XenioConfig 	 `json:"xenio,omitempty"`
 }
 
 // EthashConfig is the consensus engine configs for proof-of-work based sealing.
@@ -131,11 +153,19 @@ type CliqueConfig struct {
 	Epoch  uint64 `json:"epoch"`  // Epoch length to reset votes and checkpoint
 }
 
+type XenioConfig struct {
+	Period uint64 		`json:"period"` // Number of seconds between blocks to enforce
+	Epoch  uint64 `json:"epoch"` // TODO: maybe remove that
+	SuperPeriod uint64	`json:"superperiod"` // Number of seconds between super blocks to enforce
+}
+
 // String implements the stringer interface, returning the consensus engine details.
 func (c *CliqueConfig) String() string {
 	return "clique"
 }
-
+func (c *XenioConfig) String() string {
+	return "xenio"
+}
 // String implements the fmt.Stringer interface.
 func (c *ChainConfig) String() string {
 	var engine interface{}
@@ -144,10 +174,12 @@ func (c *ChainConfig) String() string {
 		engine = c.Ethash
 	case c.Clique != nil:
 		engine = c.Clique
+	case c.Xenio != nil:
+		engine = c.Xenio
 	default:
 		engine = "unknown"
 	}
-	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Metropolis: %v Engine: %v}",
+	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Metropolis: %v  Xenio: %v Engine: %v}",
 		c.ChainId,
 		c.HomesteadBlock,
 		c.DAOForkBlock,
@@ -156,6 +188,7 @@ func (c *ChainConfig) String() string {
 		c.EIP155Block,
 		c.EIP158Block,
 		c.MetropolisBlock,
+		c.XenioBlock,
 		engine,
 	)
 }
@@ -185,7 +218,9 @@ func (c *ChainConfig) IsEIP158(num *big.Int) bool {
 func (c *ChainConfig) IsMetropolis(num *big.Int) bool {
 	return isForked(c.MetropolisBlock, num)
 }
-
+func (c *ChainConfig) IsXenio(num *big.Int) bool {
+	return isForked(c.XenioBlock, num)
+}
 // GasTable returns the gas table corresponding to the current phase (homestead or homestead reprice).
 //
 // The returned GasTable's fields shouldn't, under any circumstances, be changed.

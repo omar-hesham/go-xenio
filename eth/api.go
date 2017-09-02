@@ -37,6 +37,7 @@ import (
 	"github.com/xenioplatform/go-xenio/internal/ethapi"
 	"github.com/xenioplatform/go-xenio/log"
 	"github.com/xenioplatform/go-xenio/miner"
+	"github.com/xenioplatform/go-xenio/staker"
 	"github.com/xenioplatform/go-xenio/params"
 	"github.com/xenioplatform/go-xenio/rlp"
 	"github.com/xenioplatform/go-xenio/rpc"
@@ -58,6 +59,7 @@ func NewPublicEthereumAPI(e *Ethereum) *PublicEthereumAPI {
 
 // Etherbase is the address that mining rewards will be send to
 func (api *PublicEthereumAPI) Etherbase() (common.Address, error) {
+	common.Coinbase, _ = api.e.Etherbase()
 	return api.e.Etherbase()
 }
 
@@ -78,6 +80,13 @@ type PublicMinerAPI struct {
 	agent *miner.RemoteAgent
 }
 
+// PublicStakerAPI provides an API to control the staker.
+// It offers only methods that operate on data that pose no security risk when it is publicly accessible.
+type PublicStakerAPI struct {
+	e     *Ethereum
+	agent *staker.RemoteAgent
+}
+
 // NewPublicMinerAPI create a new PublicMinerAPI instance.
 func NewPublicMinerAPI(e *Ethereum) *PublicMinerAPI {
 	agent := miner.NewRemoteAgent(e.BlockChain(), e.Engine())
@@ -86,17 +95,31 @@ func NewPublicMinerAPI(e *Ethereum) *PublicMinerAPI {
 	return &PublicMinerAPI{e, agent}
 }
 
+// NewPublicStakerAPI create a new PublicStakerAPI instance.
+func NewPublicStakerAPI(e *Ethereum) *PublicStakerAPI {
+	agent := staker.NewRemoteAgent(e.BlockChain(), e.Engine())
+	e.Staker().Register(agent)
+
+	return &PublicStakerAPI{e, agent}
+}
+
 // Mining returns an indication if this node is currently mining.
 func (api *PublicMinerAPI) Mining() bool {
 	return api.e.IsMining()
 }
-
+func (api *PublicStakerAPI) Staking() bool {
+	return api.e.IsStaking()
+}
 // SubmitWork can be used by external miner to submit their POW solution. It returns an indication if the work was
 // accepted. Note, this is not an indication if the provided work was valid!
 func (api *PublicMinerAPI) SubmitWork(nonce types.BlockNonce, solution, digest common.Hash) bool {
 	return api.agent.SubmitWork(nonce, digest, solution)
 }
-
+// SubmitWork can be used by external miner to submit their POW solution. It returns an indication if the work was
+// accepted. Note, this is not an indication if the provided work was valid!
+func (api *PublicStakerAPI) SubmitWork(nonce types.BlockNonce, solution, digest common.Hash) bool {
+	return api.agent.SubmitWork(nonce, digest, solution)
+}
 // GetWork returns a work package for external miner. The work package consists of 3 strings
 // result[0], 32 bytes hex encoded current block header pow-hash
 // result[1], 32 bytes hex encoded seed hash used for DAG
@@ -113,7 +136,22 @@ func (api *PublicMinerAPI) GetWork() ([3]string, error) {
 	}
 	return work, nil
 }
-
+// GetWork returns a work package for external miner. The work package consists of 3 strings
+// result[0], 32 bytes hex encoded current block header pow-hash
+// result[1], 32 bytes hex encoded seed hash used for DAG
+// result[2], 32 bytes hex encoded boundary condition ("target"), 2^256/difficulty
+func (api *PublicStakerAPI) GetWork() ([3]string, error) {
+	if !api.e.IsStaking() {
+		if err := api.e.StartStaking(false); err != nil {
+			return [3]string{}, err
+		}
+	}
+	work, err := api.agent.GetWork()
+	if err != nil {
+		return work, fmt.Errorf("staking not ready: %v", err)
+	}
+	return work, nil
+}
 // SubmitHashrate can be used for remote miners to submit their hash rate. This enables the node to report the combined
 // hash rate of all miners which submit work through this node. It accepts the miner hash rate and an identifier which
 // must be unique between nodes.
@@ -127,12 +165,19 @@ func (api *PublicMinerAPI) SubmitHashrate(hashrate hexutil.Uint64, id common.Has
 type PrivateMinerAPI struct {
 	e *Ethereum
 }
-
+// PrivateMinerAPI provides private RPC methods to control the miner.
+// These methods can be abused by external users and must be considered insecure for use by untrusted users.
+type PrivateStakerAPI struct {
+	e *Ethereum
+}
 // NewPrivateMinerAPI create a new RPC service which controls the miner of this node.
 func NewPrivateMinerAPI(e *Ethereum) *PrivateMinerAPI {
 	return &PrivateMinerAPI{e: e}
 }
-
+// NewPrivateStakerAPI create a new RPC service which controls the Staker of this node.
+func NewPrivateStakerAPI(e *Ethereum) *PrivateStakerAPI {
+	return &PrivateStakerAPI{e: e}
+}
 // Start the miner with the given number of threads. If threads is nil the number
 // of workers started is equal to the number of logical CPUs that are usable by
 // this process. If mining is already running, this method adjust the number of
@@ -152,7 +197,7 @@ func (api *PrivateMinerAPI) Start(threads *int) error {
 		th.SetThreads(*threads)
 	}
 	// Start the miner and return
-	if !api.e.IsMining() {
+	if !api.e.IsStaking() {
 		// Propagate the initial price point to the transaction pool
 		api.e.lock.RLock()
 		price := api.e.gasPrice
@@ -160,6 +205,34 @@ func (api *PrivateMinerAPI) Start(threads *int) error {
 
 		api.e.txPool.SetGasPrice(price)
 		return api.e.StartMining(true)
+	}
+	return nil
+}
+
+// Start the staker
+func (api *PrivateStakerAPI) Start(threads *int) error {
+	// Set the number of threads if the seal engine supports it
+	if threads == nil {
+		threads = new(int)
+	} else if *threads == 0 {
+		*threads = -1 // Disable the miner from within
+	}
+	type threaded interface {
+		SetThreads(threads int)
+	}
+	if th, ok := api.e.engine.(threaded); ok {
+		log.Info("Updated staking threads", "threads", *threads)
+		th.SetThreads(*threads)
+	}
+	// Start the miner and return
+	if !api.e.IsStaking() {
+		// Propagate the initial price point to the transaction pool
+		api.e.lock.RLock()
+		price := api.e.gasPrice
+		api.e.lock.RUnlock()
+
+		api.e.txPool.SetGasPrice(price)
+		return api.e.StartStaking(true)
 	}
 	return nil
 }
@@ -176,9 +249,29 @@ func (api *PrivateMinerAPI) Stop() bool {
 	return true
 }
 
+// Stop the staker
+func (api *PrivateStakerAPI) Stop() bool {
+	type threaded interface {
+		SetThreads(threads int)
+	}
+	if th, ok := api.e.engine.(threaded); ok {
+		th.SetThreads(-1)
+	}
+	api.e.StopStaking()
+	return true
+}
+
 // SetExtra sets the extra data string that is included when this miner mines a block.
 func (api *PrivateMinerAPI) SetExtra(extra string) (bool, error) {
 	if err := api.e.Miner().SetExtra([]byte(extra)); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// SetExtra sets the extra data string that is included when this miner mines a block.
+func (api *PrivateStakerAPI) SetExtra(extra string) (bool, error) {
+	if err := api.e.Staker().SetExtra([]byte(extra)); err != nil {
 		return false, err
 	}
 	return true, nil
@@ -194,12 +287,31 @@ func (api *PrivateMinerAPI) SetGasPrice(gasPrice hexutil.Big) bool {
 	return true
 }
 
+// SetGasPrice sets the minimum accepted gas price for the miner.
+func (api *PrivateStakerAPI) SetGasPrice(gasPrice hexutil.Big) bool {
+	api.e.lock.Lock()
+	api.e.gasPrice = (*big.Int)(&gasPrice)
+	api.e.lock.Unlock()
+
+	api.e.txPool.SetGasPrice((*big.Int)(&gasPrice))
+	return true
+}
+
 // SetEtherbase sets the etherbase of the miner
 func (api *PrivateMinerAPI) SetEtherbase(etherbase common.Address) bool {
 	api.e.SetEtherbase(etherbase)
 	return true
 }
-
+// SetEtherbase sets the etherbase of the staker
+func (api *PrivateStakerAPI) SetEtherbase(etherbase common.Address) bool {
+	api.e.SetEtherbase(etherbase)
+	return true
+}
+// SetServerbase sets the serverbase of the staker
+func (api *PrivateStakerAPI) SetServerbase(serverbase common.Address) bool {
+	api.e.SetServerbase(serverbase)
+	return true
+}
 // GetHashrate returns the current hashrate of the miner.
 func (api *PrivateMinerAPI) GetHashrate() uint64 {
 	return uint64(api.e.miner.HashRate())
@@ -465,26 +577,6 @@ func (api *PrivateDebugAPI) traceBlock(block *types.Block, logConfig *vm.LogConf
 	return true, structLogger.StructLogs(), nil
 }
 
-// callmsg is the message type used for call transitions.
-type callmsg struct {
-	addr          common.Address
-	to            *common.Address
-	gas, gasPrice *big.Int
-	value         *big.Int
-	data          []byte
-}
-
-// accessor boilerplate to implement core.Message
-func (m callmsg) From() (common.Address, error)         { return m.addr, nil }
-func (m callmsg) FromFrontier() (common.Address, error) { return m.addr, nil }
-func (m callmsg) Nonce() uint64                         { return 0 }
-func (m callmsg) CheckNonce() bool                      { return false }
-func (m callmsg) To() *common.Address                   { return m.to }
-func (m callmsg) GasPrice() *big.Int                    { return m.gasPrice }
-func (m callmsg) Gas() *big.Int                         { return m.gas }
-func (m callmsg) Value() *big.Int                       { return m.value }
-func (m callmsg) Data() []byte                          { return m.data }
-
 // formatError formats a Go error into either an empty string or the data content
 // of the error itself.
 func formatError(err error) string {
@@ -543,7 +635,8 @@ func (api *PrivateDebugAPI) TraceTransaction(ctx context.Context, txHash common.
 
 	// Run the transaction with tracing enabled.
 	vmenv := vm.NewEVM(context, statedb, api.config, vm.Config{Debug: true, Tracer: tracer})
-	ret, gas, err := core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(tx.Gas()))
+	// TODO utilize failed flag
+	ret, gas, _, err := core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(tx.Gas()))
 	if err != nil {
 		return nil, fmt.Errorf("tracing failed: %v", err)
 	}
@@ -590,7 +683,7 @@ func (api *PrivateDebugAPI) computeTxEnv(blockHash common.Hash, txIndex int) (co
 
 		vmenv := vm.NewEVM(context, statedb, api.config, vm.Config{})
 		gp := new(core.GasPool).AddGas(tx.Gas())
-		_, _, err := core.ApplyMessage(vmenv, msg, gp)
+		_, _, _, err := core.ApplyMessage(vmenv, msg, gp)
 		if err != nil {
 			return nil, vm.Context{}, nil, fmt.Errorf("tx %x failed: %v", tx.Hash(), err)
 		}

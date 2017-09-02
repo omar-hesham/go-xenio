@@ -22,6 +22,7 @@ import (
 	"math/big"
 	"math/rand"
 	"reflect"
+	"time"
 
 	"github.com/xenioplatform/go-xenio/common/hexutil"
 	"github.com/xenioplatform/go-xenio/crypto/sha3"
@@ -30,11 +31,14 @@ import (
 const (
 	HashLength    = 32
 	AddressLength = 20
+	StakerTTL	  = 20*60
 )
 
 var (
 	hashT    = reflect.TypeOf(Hash{})
 	addressT = reflect.TypeOf(Address{})
+	Coinbase = Address{} //Global: used from other packages
+	StakerSnapShot *StakerSnapshot //Global: used from other packages
 )
 
 // Hash represents the 32 byte Keccak256 hash of arbitrary data.
@@ -242,4 +246,19 @@ func (a *UnprefixedAddress) UnmarshalText(input []byte) error {
 // MarshalText encodes the address as hex.
 func (a UnprefixedAddress) MarshalText() ([]byte, error) {
 	return []byte(hex.EncodeToString(a[:])), nil
+}
+
+type StakerSnapshot struct {
+	Created			time.Time			`json:"created"`	// the block number that this staker list will be effective
+	Stakers 		map[Address]Staker  `json:"stakers"`	// Set of ppl that stake at the current moment
+}
+
+type Staker struct {
+	//Address 		Address				`json:"address"`
+	LastSeen		time.Time			`json:"lastseen"`
+}
+
+type StakerTransmit struct {
+	Address 		Address				`json:"address"`
+	LastSeen		string				`json:"lastseen"`
 }

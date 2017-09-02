@@ -158,7 +158,7 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.NodeKeyHexFlag,
 		},
 	},
-	{
+	/*{
 		Name: "MINER",
 		Flags: []cli.Flag{
 			utils.MiningEnabledFlag,
@@ -167,6 +167,18 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.TargetGasLimitFlag,
 			utils.GasPriceFlag,
 			utils.ExtraDataFlag,
+		},
+	},*/
+	{
+		Name: "STAKER",
+		Flags: []cli.Flag{
+			utils.StakingEnabledFlag,
+			//utils.MinerThreadsFlag,
+			utils.EtherbaseFlag,
+			utils.TargetGasLimitFlag,
+			utils.GasPriceFlag,
+			utils.ExtraDataFlag,
+			utils.SetServerBase,
 		},
 	},
 	{

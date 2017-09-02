@@ -24,12 +24,14 @@ var Modules = map[string]string{
 	"debug":      Debug_JS,
 	"eth":        Eth_JS,
 	"miner":      Miner_JS,
+	"staker":     Staker_JS,
 	"net":        Net_JS,
 	"personal":   Personal_JS,
 	"rpc":        RPC_JS,
 	"shh":        Shh_JS,
 	"swarmfs":    SWARMFS_JS,
 	"txpool":     TxPool_JS,
+	"xenio":	  Xenio_JS,
 }
 
 const Chequebook_JS = `
@@ -107,6 +109,63 @@ web3._extend({
 		new web3._extend.Property({
 			name: 'proposals',
 			getter: 'clique_proposals'
+		}),
+	]
+});
+`
+const Xenio_JS = `
+web3._extend({
+  property: 'xenio',
+  methods:
+  [
+		new web3._extend.Method({
+			name: 'getSnapshot',
+			call: 'xenio_getSnapshot',
+			params: 1,
+      inputFormatter: [null]
+		}),
+		new web3._extend.Method({
+			name: 'getSnapshotAtHash',
+			call: 'xenio_getSnapshotAtHash',
+			params: 1
+		}),
+    new web3._extend.Method({
+      name: 'getSigners',
+      call: 'xenio_getSigners',
+      params: 1,
+      inputFormatter: [null]
+    }),
+		new web3._extend.Method({
+			name: 'getSignersAtHash',
+			call: 'xenio_getSignersAtHash',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'propose',
+			call: 'xenio_propose',
+			params: 2
+		}),
+		new web3._extend.Method({
+			name: 'discard',
+			call: 'xenio_discard',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'getStakerSnapshot',
+			call: 'xenio_getStakerSnapshot',
+			params: 0
+		}),
+		new web3._extend.Method({
+			name: 'addStakerToSnapshot',
+			call: 'xenio_addStakerToSnapshot',
+			params: 1
+		})
+  ],
+	properties:
+	[
+		new web3._extend.Property({
+			name: 'proposals',
+			getter: 'xenio_proposals'
 		}),
 	]
 });
@@ -456,6 +515,49 @@ web3._extend({
 	properties: []
 });
 `
+const Staker_JS = `
+web3._extend({
+	property: 'staker',
+	methods:
+	[
+		new web3._extend.Method({
+			name: 'start',
+			call: 'staker_start',
+			params: 1,
+			inputFormatter: [null]
+		}),
+		new web3._extend.Method({
+			name: 'stop',
+			call: 'staker_stop'
+		}),
+		new web3._extend.Method({
+			name: 'setEtherbase',
+			call: 'staker_setEtherbase',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'setExtra',
+			call: 'staker_setExtra',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'setGasPrice',
+			call: 'staker_setGasPrice',
+			params: 1,
+			inputFormatter: [web3._extend.utils.fromDecimal]
+		}),
+		new web3._extend.Method({
+			name: 'setServerBase',
+			call: 'staker_setServerbase',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		})
+	],
+	properties: []
+});
+`
+
 
 const Net_JS = `
 web3._extend({
@@ -490,6 +592,11 @@ web3._extend({
 		new web3._extend.Method({
 			name: 'ecRecover',
 			call: 'personal_ecRecover',
+			params: 2
+		}),
+		new web3._extend.Method({
+			name: 'openWallet',
+			call: 'personal_openWallet',
 			params: 2
 		}),
 		new web3._extend.Method({
@@ -628,7 +735,33 @@ web3._extend({
 			name: 'newMessageFilter',
 			call: 'shh_newMessageFilter',
 			params: 1
-		})
+		}),
+		new web3._extend.Method({
+			name: 'messageSend',
+			call: 'shh_messageSend',
+			params: 4
+		}),
+		new web3._extend.Method({
+			name: 'messageGenerateTopic',
+			call: 'shh_messageGenerateTopic',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'messageReceive',
+			call: 'shh_messageReceive',
+			params: 1
+		}),
+		,
+		new web3._extend.Method({
+			name: 'messageRead',
+			call: 'shh_messageRead',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'messageSetupListener',
+			call: 'shh_messageSetupListener',
+			params: 2
+		}),
 	],
 	properties:
 	[

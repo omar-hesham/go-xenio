@@ -212,7 +212,7 @@ func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 	case g != nil:
 		return g.Config
 	case ghash == params.MainnetGenesisHash:
-		return params.MainnetChainConfig
+		return params.XenioChainConfig
 	case ghash == params.TestnetGenesisHash:
 		return params.TestnetChainConfig
 	default:
@@ -308,18 +308,21 @@ func GenesisBlockForTesting(db ethdb.Database, addr common.Address, balance *big
 
 // DefaultGenesisBlock returns the Ethereum main net genesis block.
 func DefaultGenesisBlock() *Genesis {
+	log.Warn("Genesis: generating for default xenio network")
 	return &Genesis{
-		Config:     params.MainnetChainConfig,
-		Nonce:      56742,
-		ExtraData:  hexutil.MustDecode("0x2392c6c62d4780966bd4decfbbfdea1a61e987ff86b5906315a65b5c8d4bfbce"),//("0x11bbe8db4e347b4e8c937c1c8370e4b5ed33adb3db69cbdb7a38e1e50b1b82fa"),
-		GasLimit:   5000,
-		Difficulty: big.NewInt(17179/*869184*/),
-		Alloc:      decodePrealloc(mainnetAllocData),
+		Config:     params.XenioChainConfig,
+		Nonce:      0x0,
+		Timestamp:  0x59999fdf,
+		ExtraData:  hexutil.MustDecode("0x7369726e69636f6c6173206973206772656174000000000000000000000000003482ee7f62f3b4e80af5e1572b49310c5ce885f85ff37a3ef2eee196b8528828c7b35825faf58e8cd956e4b845b574c3519509b1c2cd3090b7eb97d40000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
+		GasLimit:   0x47b760,
+		Difficulty: big.NewInt(1),
+		Alloc:      decodePrealloc(xenioAllocData),
 	}
 }
 
 // DefaultTestnetGenesisBlock returns the Ropsten network genesis block.
 func DefaultTestnetGenesisBlock() *Genesis {
+	log.Warn("Genesis: generating for default TEST network")
 	return &Genesis{
 		Config:     params.TestnetChainConfig,
 		Nonce:      56742,
@@ -330,8 +333,9 @@ func DefaultTestnetGenesisBlock() *Genesis {
 	}
 }
 
-// DefaultRinkebyGenesisBlock returns the Rinkeby network genesis block.
+// Default42eb768f2244c8811c63729a21a3569731535f06GenesisBlock returns the Rinkeby network genesis block.
 func DefaultRinkebyGenesisBlock() *Genesis {
+	log.Warn("Genesis: generating for Rinkeby network")
 	return &Genesis{
 		Config:     params.RinkebyChainConfig,
 		Timestamp:  1492009146,

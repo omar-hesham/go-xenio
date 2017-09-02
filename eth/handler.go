@@ -25,10 +25,11 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
+	"strings"
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/consensus"
 	"github.com/xenioplatform/go-xenio/consensus/misc"
+	"github.com/xenioplatform/go-xenio/consensus/xenio"
 	"github.com/xenioplatform/go-xenio/core"
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/eth/downloader"
@@ -45,6 +46,10 @@ import (
 const (
 	softResponseLimit = 2 * 1024 * 1024 // Target maximum size of returned blocks, headers or node data.
 	estHeaderRlpSize  = 500             // Approximate size of an RLP encoded block header
+
+	// txChanSize is the size of channel listening to TxPreEvent.
+	// The number is referenced from the size of tx pool.
+	txChanSize = 4096
 )
 
 var (
@@ -78,7 +83,8 @@ type ProtocolManager struct {
 	SubProtocols []p2p.Protocol
 
 	eventMux      *event.TypeMux
-	txSub         *event.TypeMuxSubscription
+	txCh          chan core.TxPreEvent
+	txSub         event.Subscription
 	minedBlockSub *event.TypeMuxSubscription
 
 	// channels for fetcher, syncer, txsyncLoop
@@ -200,7 +206,8 @@ func (pm *ProtocolManager) removePeer(id string) {
 
 func (pm *ProtocolManager) Start() {
 	// broadcast transactions
-	pm.txSub = pm.eventMux.Subscribe(core.TxPreEvent{})
+	pm.txCh = make(chan core.TxPreEvent, txChanSize)
+	pm.txSub = pm.txpool.SubscribeTxPreEvent(pm.txCh)
 	go pm.txBroadcastLoop()
 	// broadcast mined blocks
 	pm.minedBlockSub = pm.eventMux.Subscribe(core.NewMinedBlockEvent{})
@@ -246,12 +253,14 @@ func (pm *ProtocolManager) handle(p *peer) error {
 	if pm.peers.Len() >= pm.maxPeers {
 		return p2p.DiscTooManyPeers
 	}
-	p.Log().Debug("Ethereum peer connected", "name", p.Name())
-
+	p.Log().Debug("peer connected", "name", p.Name())
+	if strings.Contains(p.Name(),"xenio"){
+		p.Log().Info("Xenio peer connected", "name", p.Name())
+	}
 	// Execute the Ethereum handshake
 	td, head, genesis := pm.blockchain.Status()
 	if err := p.Handshake(pm.networkId, td, head, genesis); err != nil {
-		p.Log().Debug("Ethereum handshake failed", "err", err)
+		p.Log().Debug("Xenio handshake failed", "err", err)
 		return err
 	}
 	if rw, ok := p.rw.(*meteredMsgReadWriter); ok {
@@ -259,7 +268,7 @@ func (pm *ProtocolManager) handle(p *peer) error {
 	}
 	// Register the peer locally
 	if err := pm.peers.Register(p); err != nil {
-		p.Log().Error("Ethereum peer registration failed", "err", err)
+		p.Log().Error("Xenio peer registration failed", "err", err)
 		return err
 	}
 	defer pm.removePeer(p.id)
@@ -294,7 +303,7 @@ func (pm *ProtocolManager) handle(p *peer) error {
 	// main loop. handle incoming messages.
 	for {
 		if err := pm.handleMsg(p); err != nil {
-			p.Log().Debug("Ethereum message handling failed", "err", err)
+			p.Log().Debug("Xenio message handling failed", "err", err)
 			return err
 		}
 	}
@@ -303,8 +312,10 @@ func (pm *ProtocolManager) handle(p *peer) error {
 // handleMsg is invoked whenever an inbound message is received from a remote
 // peer. The remote connection is torn down upon returning any error.
 func (pm *ProtocolManager) handleMsg(p *peer) error {
+
 	// Read the next message from the remote peer, and ensure it's fully consumed
 	msg, err := p.rw.ReadMsg()
+	//p.Log().Warn("Message received: " +  strconv.Itoa(int(msg.Code)))
 	if err != nil {
 		return err
 	}
@@ -659,7 +670,41 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 			p.MarkTransaction(tx.Hash())
 		}
 		pm.txpool.AddRemotes(txs)
+	case msg.Code == GetNodeCoinbase:
+		p.TransmitCoinbase(common.Coinbase)
+	case msg.Code == GetNodeStakeList:
+		p.Log().Warn("stake list requested from remote peer")
+		p.TransmitNodeList()
+	case msg.Code == TransmitCoinbase:
+		var address common.Address
+		var commonAddress = common.Address{}
 
+		if err := msg.Decode(&address); err != nil {
+			return errResp(ErrDecode, "msg %v: %v", msg, err)
+		}
+		if address == commonAddress{
+			break
+		}
+		if common.StakerSnapShot == nil{
+			common.StakerSnapShot = xenio.NewStakerSnapshot()
+		}
+
+		xenioAPI := xenio.API{}
+		xenioAPI.AddStakerToSnapshot(address)
+
+		address_Json, _ := json.Marshal(address)
+		p.Log().Info("coinbase " + string(address_Json) + " received")
+	case msg.Code == TransmitNodeList:
+		var stakers []common.StakerTransmit
+		p.Log().Warn("staker list received")
+
+		if err := msg.Decode(&stakers); err != nil {
+			return errResp(ErrDecode, "msg %v: %v", msg, err)
+		}
+		if common.StakerSnapShot == nil{
+			common.StakerSnapShot = xenio.NewStakerSnapshot()
+		}
+		xenio.StakerCast(stakers)
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
 	}
@@ -688,6 +733,7 @@ func (pm *ProtocolManager) BroadcastBlock(block *types.Block, propagate bool) {
 			peer.SendNewBlock(block, td)
 		}
 		log.Trace("Propagated block", "hash", hash, "recipients", len(transfer), "duration", common.PrettyDuration(time.Since(block.ReceivedAt)))
+		return
 	}
 	// Otherwise if the block is indeed in out own chain, announce it
 	if pm.blockchain.HasBlock(hash) {
@@ -723,10 +769,15 @@ func (self *ProtocolManager) minedBroadcastLoop() {
 }
 
 func (self *ProtocolManager) txBroadcastLoop() {
-	// automatically stops if unsubscribe
-	for obj := range self.txSub.Chan() {
-		event := obj.Data.(core.TxPreEvent)
-		self.BroadcastTx(event.Tx.Hash(), event.Tx)
+	for {
+		select {
+		case event := <-self.txCh:
+			self.BroadcastTx(event.Tx.Hash(), event.Tx)
+
+		// Err() channel will be closed when unsubscribing.
+		case <-self.txSub.Err():
+			return
+		}
 	}
 }
 
@@ -737,6 +788,7 @@ type EthNodeInfo struct {
 	Difficulty *big.Int    `json:"difficulty"` // Total difficulty of the host's blockchain
 	Genesis    common.Hash `json:"genesis"`    // SHA3 hash of the host's genesis block
 	Head       common.Hash `json:"head"`       // SHA3 hash of the host's best owned block
+
 }
 
 // NodeInfo retrieves some protocol metadata about the running host node.

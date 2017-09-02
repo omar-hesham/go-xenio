@@ -30,6 +30,7 @@ import (
 	"github.com/xenioplatform/go-xenio/common/hexutil"
 	"github.com/xenioplatform/go-xenio/consensus"
 	"github.com/xenioplatform/go-xenio/consensus/clique"
+	"github.com/xenioplatform/go-xenio/consensus/xenio"
 	"github.com/xenioplatform/go-xenio/consensus/ethash"
 	"github.com/xenioplatform/go-xenio/core"
 	"github.com/xenioplatform/go-xenio/core/types"
@@ -42,11 +43,13 @@ import (
 	"github.com/xenioplatform/go-xenio/internal/ethapi"
 	"github.com/xenioplatform/go-xenio/log"
 	"github.com/xenioplatform/go-xenio/miner"
+	"github.com/xenioplatform/go-xenio/staker"
 	"github.com/xenioplatform/go-xenio/node"
 	"github.com/xenioplatform/go-xenio/p2p"
 	"github.com/xenioplatform/go-xenio/params"
 	"github.com/xenioplatform/go-xenio/rlp"
 	"github.com/xenioplatform/go-xenio/rpc"
+	"strconv"
 )
 
 type LesServer interface {
@@ -76,8 +79,10 @@ type Ethereum struct {
 	ApiBackend *EthApiBackend
 
 	miner     *miner.Miner
+	staker    *staker.Staker
 	gasPrice  *big.Int
 	etherbase common.Address
+	serverbase common.Address
 
 	networkId     uint64
 	netRPCService *ethapi.PublicNetAPI
@@ -126,7 +131,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if err := addMipmapBloomBins(chainDb); err != nil {
 		return nil, err
 	}
-	log.Info("Initialising Ethereum protocol", "versions", ProtocolVersions, "network", config.NetworkId)
+	log.Info("Initialising Xenio protocol", "versions", ProtocolVersions, "network", config.NetworkId)
 
 	if !config.SkipBcVersionCheck {
 		bcVersion := core.GetBlockChainVersion(chainDb)
@@ -137,7 +142,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	}
 
 	vmConfig := vm.Config{EnablePreimageRecording: config.EnablePreimageRecording}
-	eth.blockchain, err = core.NewBlockChain(chainDb, eth.chainConfig, eth.engine, eth.eventMux, vmConfig)
+	eth.blockchain, err = core.NewBlockChain(chainDb, eth.chainConfig, eth.engine, vmConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -151,8 +156,8 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if config.TxPool.Journal != "" {
 		config.TxPool.Journal = ctx.ResolvePath(config.TxPool.Journal)
 	}
-	eth.txPool = core.NewTxPool(config.TxPool, eth.chainConfig, eth.EventMux(), eth.blockchain.State, eth.blockchain.GasLimit)
-
+	eth.txPool = core.NewTxPool(config.TxPool, eth.chainConfig, eth.blockchain)
+	log.Warn("Engine: maxpeers = " + strconv.Itoa(config.MaxPeers))
 	maxPeers := config.MaxPeers
 	if config.LightServ > 0 {
 		// if we are running a light server, limit the number of ETH peers so that we reserve some space for incoming LES connections
@@ -170,6 +175,10 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 
 	eth.miner = miner.New(eth, eth.chainConfig, eth.EventMux(), eth.engine)
 	eth.miner.SetExtra(makeExtraData(config.ExtraData))
+
+	eth.staker = staker.New(eth, eth.chainConfig, eth.EventMux(), eth.engine)
+	eth.staker.SetExtra(makeExtraData(config.ExtraData))
+
 
 	eth.ApiBackend = &EthApiBackend{eth, nil}
 	gpoParams := config.GPO
@@ -216,6 +225,10 @@ func CreateConsensusEngine(ctx *node.ServiceContext, config *Config, chainConfig
 	if chainConfig.Clique != nil {
 		return clique.New(chainConfig.Clique, db)
 	}
+	if chainConfig.Xenio != nil {
+		log.Warn("Xenio: PoN consensus selected") //TODO: remove line
+		return xenio.New(chainConfig.Xenio, db)
+	}
 	// Otherwise assume proof-of-work
 	switch {
 	case config.PowFake:
@@ -250,20 +263,30 @@ func (s *Ethereum) APIs() []rpc.API {
 			Version:   "1.0",
 			Service:   NewPublicEthereumAPI(s),
 			Public:    true,
-		}, {
+		}, /*{
 			Namespace: "eth",
 			Version:   "1.0",
 			Service:   NewPublicMinerAPI(s),
+			Public:    true,
+		},*/{
+			Namespace: "eth",
+			Version:   "1.0",
+			Service:   NewPublicStakerAPI(s),
 			Public:    true,
 		}, {
 			Namespace: "eth",
 			Version:   "1.0",
 			Service:   downloader.NewPublicDownloaderAPI(s.protocolManager.downloader, s.eventMux),
 			Public:    true,
-		}, {
+		}, /*{
 			Namespace: "miner",
 			Version:   "1.0",
 			Service:   NewPrivateMinerAPI(s),
+			Public:    false,
+		}, */{
+			Namespace: "staker",
+			Version:   "1.0",
+			Service:   NewPrivateStakerAPI(s),
 			Public:    false,
 		}, {
 			Namespace: "eth",
@@ -311,21 +334,43 @@ func (s *Ethereum) Etherbase() (eb common.Address, err error) {
 	}
 	return common.Address{}, fmt.Errorf("xeniobase address must be explicitly specified")
 }
+func (s *Ethereum) Serverbase() (eb common.Address, err error) {
+	s.lock.RLock()
+	serverbase := s.serverbase
+	s.lock.RUnlock()
 
+	if serverbase != (common.Address{}) {
+		return serverbase, nil
+	}
+
+	return common.Address{}, fmt.Errorf("serverbase address must be explicitly specified")
+}
 // set in js console via admin interface or wrapper from cli flags
 func (self *Ethereum) SetEtherbase(etherbase common.Address) {
 	self.lock.Lock()
 	self.etherbase = etherbase
+	common.Coinbase = etherbase
 	self.lock.Unlock()
 
-	self.miner.SetEtherbase(etherbase)
+	//self.miner.SetEtherbase(etherbase)
+	self.staker.SetEtherbase(etherbase)
 }
+// set in js console via admin interface or wrapper from cli flags
+func (self *Ethereum) SetServerbase(serverbase common.Address) {
+	self.lock.Lock()
+	self.serverbase = serverbase
+	self.lock.Unlock()
 
+	self.staker.SetServerbase(serverbase)
+}
 func (s *Ethereum) StartMining(local bool) error {
 	eb, err := s.Etherbase()
 	if err != nil {
-		log.Error("Cannot start mining without xeniobase", "err", err)
+		log.Error("Cannot start staking without xeniobase", "err", err)
 		return fmt.Errorf("xeniobase missing: %v", err)
+	}
+	if _, ok := s.engine.(*xenio.Xenio); ok {
+		return s.StartStaking(local)
 	}
 	if clique, ok := s.engine.(*clique.Clique); ok {
 		wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
@@ -346,9 +391,38 @@ func (s *Ethereum) StartMining(local bool) error {
 	return nil
 }
 
+func (s *Ethereum) StartStaking(local bool) error {
+	eb, err := s.Etherbase()
+	if err != nil {
+		log.Error("Cannot start staking without xeniobase", "err", err)
+		return fmt.Errorf("xeniobase missing: %v", err)
+	}
+	if xenio, ok := s.engine.(*xenio.Xenio); ok {
+		wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
+		if wallet == nil || err != nil {
+			log.Error("Xeniobase account unavailable locally", "err", err)
+			return fmt.Errorf("singer missing: %v", err)
+		}
+		xenio.Authorize(eb, wallet.SignHash)
+	}
+	if local {
+		// If local (CPU) mining is started, we can disable the transaction rejection
+		// mechanism introduced to speed sync times. CPU mining on mainnet is ludicrous
+		// so noone will ever hit this path, whereas marking sync done on CPU mining
+		// will ensure that private networks work in single miner mode too.
+		atomic.StoreUint32(&s.protocolManager.acceptTxs, 1)
+	}
+	go s.staker.Start(eb)
+	return nil
+}
+
+
 func (s *Ethereum) StopMining()         { s.miner.Stop() }
+func (s *Ethereum) StopStaking()         { s.staker.Stop() }
 func (s *Ethereum) IsMining() bool      { return s.miner.Mining() }
+func (s *Ethereum) IsStaking() bool      { return s.staker.Staking() }
 func (s *Ethereum) Miner() *miner.Miner { return s.miner }
+func (s *Ethereum) Staker() *staker.Staker { return s.staker }
 
 func (s *Ethereum) AccountManager() *accounts.Manager  { return s.accountManager }
 func (s *Ethereum) BlockChain() *core.BlockChain       { return s.blockchain }
@@ -396,6 +470,7 @@ func (s *Ethereum) Stop() error {
 	}
 	s.txPool.Stop()
 	s.miner.Stop()
+	s.staker.Stop()
 	s.eventMux.Stop()
 
 	s.chainDb.Close()

@@ -36,6 +36,8 @@ const (
 	baseProtocolMaxMsgSize = 2 * 1024
 
 	pingInterval = 15 * time.Second
+	stakeInterval = 15 * time.Second // 15 for dev tests
+	GetNodeCoinbase  = 0x11
 )
 
 const (
@@ -150,7 +152,6 @@ func (p *Peer) run() (remoteRequested bool, err error) {
 	p.wg.Add(2)
 	go p.readLoop(readErr)
 	go p.pingLoop()
-
 	// Start all protocol handlers.
 	writeStart <- struct{}{}
 	p.startProtocols(writeStart, writeErr)
@@ -200,6 +201,7 @@ func (p *Peer) pingLoop() {
 				p.protoErr <- err
 				return
 			}
+			//SendItems(p.rw,GetNodeCoinbase,common.Address{})
 		case <-p.closed:
 			return
 		}

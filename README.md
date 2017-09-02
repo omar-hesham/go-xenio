@@ -1,4 +1,4 @@
-## Go Ethereum
+## Go Xenio
 
 Official golang implementation of the Ethereum protocol.
 
@@ -39,6 +39,7 @@ The go-xenio project comes with several wrappers/executables found in the `cmd` 
 | `gethrpctest` | Developer utility tool to support our [ethereum/rpc-test](github.com/xenioplatform/rpc-tests) test suite which validates baseline conformity to the [Ethereum JSON RPC](github.com/xenioplatform/wiki/wiki/JSON-RPC) specs. Please see the [test suite's readme](github.com/xenioplatform/rpc-tests/blob/master/README.md) for details. |
 | `rlpdump` | Developer utility tool to convert binary RLP ([Recursive Length Prefix](github.com/xenioplatform/wiki/wiki/RLP)) dumps (data encoding used by the Ethereum protocol both network as well as consensus wise) to user friendlier hierarchical representation (e.g. `rlpdump --hex CE0183FFFFFFC4C304050583616263`). |
 | `swarm`    | swarm daemon and tools. This is the entrypoint for the swarm network. `swarm --help` for command line options and subcommands. See https://swarm-guide.readthedocs.io for swarm documentation. |
+| `puppeth`    | a CLI wizard that aids in creating a new Ethereum network. |
 
 ## Running geth
 
@@ -88,12 +89,12 @@ here.
 
 Specifying the `--testnet` flag however will reconfigure your Geth instance a bit:
 
- * Instead of using the default data directory (`~/.ethereum` on Linux for example), Geth will nest
-   itself one level deeper into a `testnet` subfolder (`~/.ethereum/testnet` on Linux). Note, on OSX
+ * Instead of using the default data directory (`~/.xenio` on Linux for example), xenio-cli will nest
+   itself one level deeper into a `testnet` subfolder (`~/.xenio/testnet` on Linux). Note, on OSX
    and Linux this also means that attaching to a running testnet node requires the use of a custom
    endpoint since `geth attach` will try to attach to a production node endpoint by default. E.g.
-   `geth attach <datadir>/testnet/geth.ipc`. Windows users are not affected by this.
- * Instead of connecting the main Ethereum network, the client will connect to the test network,
+   `xenio-cli attach <datadir>/testnet/xenio.ipc`. Windows users are not affected by this.
+ * Instead of connecting the main Xenio network, the client will connect to the test network,
    which uses different P2P bootnodes, different network IDs and genesis states.
    
 *Note: Although there are some internal protective measures to prevent transactions from crossing
@@ -115,7 +116,7 @@ To get an idea how the file should look like you can use the `dumpconfig` subcom
 $ geth --your-favourite-flags dumpconfig
 ```
 
-*Note: This works only with geth v1.6.0 and above*
+*Note: This works only with geth v1.6.0 and above.*
 
 #### Docker quick start
 

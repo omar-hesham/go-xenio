@@ -1,18 +1,18 @@
-// Copyright 2016 The go-xenio Authors
-// This file is part of the go-xenio library.
+// Copyright 2016 The go-ethereum Authors
+// This file is part of the go-ethereum library.
 //
-// The go-xenio library is free software: you can redistribute it and/or modify
+// The go-ethereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-xenio library is distributed in the hope that it will be useful,
+// The go-ethereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-xenio library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package network
 
@@ -40,7 +40,6 @@ import (
 	"github.com/xenioplatform/go-xenio/contracts/chequebook"
 	"github.com/xenioplatform/go-xenio/log"
 	"github.com/xenioplatform/go-xenio/p2p"
-	"github.com/xenioplatform/go-xenio/p2p/discover"
 	bzzswap "github.com/xenioplatform/go-xenio/swarm/services/swap"
 	"github.com/xenioplatform/go-xenio/swarm/services/swap/swap"
 	"github.com/xenioplatform/go-xenio/swarm/storage"
@@ -56,8 +55,6 @@ const (
 // bzz represents the swarm wire protocol
 // an instance is running on each peer
 type bzz struct {
-	selfID     discover.NodeID      // peer's node id used in peer advertising in handshake
-	key        storage.Key          // baseaddress as storage.Key
 	storage    StorageHandler       // handler storage/retrieval related requests coming via the bzz wire protocol
 	hive       *Hive                // the logistic manager, peerPool, routing service and peer handler
 	dbAccess   *DbAccess            // access to db storage counter and iterator for syncing

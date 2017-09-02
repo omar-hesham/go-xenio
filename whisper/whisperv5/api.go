@@ -23,6 +23,9 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	"strings"
+	//mrand "math/rand"
+	"encoding/hex"
 
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/common/hexutil"
@@ -37,7 +40,7 @@ const (
 )
 
 var (
-	ErrSymAsym              = errors.New("specify either a symetric or a asymmetric key")
+	ErrSymAsym              = errors.New("specify either a symmetric or an asymmetric key")
 	ErrInvalidSymmetricKey  = errors.New("invalid symmetric key")
 	ErrInvalidPublicKey     = errors.New("invalid public key")
 	ErrInvalidSigningPubKey = errors.New("invalid signing public key")
@@ -137,6 +140,130 @@ func (api *PublicWhisperAPI) NewKeyPair(ctx context.Context) (string, error) {
 	return api.w.NewKeyPair()
 }
 
+
+func (api *PublicWhisperAPI) MessageSend(ctx context.Context,  message string,  topic string, hexKey string, targetPeer string) (string, error) {
+
+	//symKey_id, err := api.w.GenerateSymKey()
+	//symKey, err := api.w.GetSymKey(symKey_id)
+	//"0x0f99d381030a59edc477bddf741069e0d9158c191f04f3d8d079c01db9792ee2"
+	//var randomKey []byte //make([]byte, aesKeyLength)
+	if hexKey == "" {
+		hexKey = "7c8d019192c24224e2cafccae3a61fb586b14323a6bc8f9e7df1d929333ff993"
+	}
+
+	randomKey, err := hex.DecodeString(hexKey)
+	var _message NewMessage
+	_message.Payload = []byte(message)
+	_message.PowTarget = 2
+	_message.PowTime = 3
+	_message.TTL = 600
+	_message.Topic, err = api.MessageGenerateTopic(ctx, topic)
+
+	if targetPeer != ""{
+		_message.TargetPeer = targetPeer
+	}
+	log.Info("key: " + hex.EncodeToString(randomKey))
+	log.Info("topic: " + _message.Topic.String())
+	symKey_id, err := api.AddSymKey(ctx, randomKey)
+	symKey, err := api.w.GetSymKey(symKey_id)
+
+	log.Info("sumkeyid: " + string(symKey_id))
+	//log.Info(string(symKey))
+	_message.SymKeyID = symKey_id
+
+
+	// post example
+	//shh.sendMessage('boohoo','tooopic', '')
+	_, err = api.Post(ctx, _message)
+
+	return hex.EncodeToString(symKey), err
+}
+
+func (api *PublicWhisperAPI) MessageRead(ctx context.Context, messages []*Message) {
+	if len(messages) > 0 {
+		for _, msg := range messages {
+			msg.ActualMessage = BytesToString(msg.Payload)
+			log.Info(msg.ActualMessage)
+		}
+	} else {
+		log.Warn("read failed")
+	}
+}
+
+func (api *PublicWhisperAPI) MessageReceive(ctx context.Context, messageFilterID string) ([]*Message, error) {
+	messages, err := api.GetFilterMessages(messageFilterID)
+	return messages, err
+}
+
+func (api *PublicWhisperAPI) MessageSetupListener(ctx context.Context, topic string, hexKey string) (string, error) {
+	// Allowed number of topics
+	const topicNum = 1
+
+	var _filter Filter
+	var _criteria Criteria
+
+	if hexKey == "" {
+		hexKey = "7c8d019192c24224e2cafccae3a61fb586b14323a6bc8f9e7df1d929333ff993"
+	}
+
+	topicHex, err := api.MessageGenerateTopic(ctx, topic)
+	randomKey, err := hex.DecodeString(hexKey)
+	//log.Info(hex.EncodeToString(randomKey))
+
+	symKey_id, err := api.AddSymKey(ctx, randomKey)
+	symKey, err := api.w.GetSymKey(symKey_id)
+
+	//log.Info(string(symKey_id))
+
+	// Create a new Subscription
+	_filter.Topics = make([][]byte, topicNum)
+	log.Info("Topic String: " + topic)
+	for i := 0; i < topicNum; i++ {
+		_filter.Topics[i] = []byte(topicHex.String())
+		log.Info("Topic Filter: " + string(_filter.Topics[i]))
+	}
+	_filter.KeySym = symKey
+	_filter.AllowP2P = true
+
+	// Set a new filter in order to poll new messages
+	_criteria.Topics = make([]TopicType, 1)
+	_criteria.Topics[0] = topicHex
+	_criteria.SymKeyID = symKey_id
+	log.Info("Topic: " + _criteria.Topics[0].String())
+
+	messageFilterID, err := api.NewMessageFilter(_criteria)
+	log.Info("Filter ID: " + messageFilterID)
+	if err != nil {
+		log.Error(fmt.Sprintf("%v\n", err))
+	}
+
+	return messageFilterID, err
+}
+
+// Expects topic string in plain text or in hex format
+func (api *PublicWhisperAPI) MessageGenerateTopic(ctx context.Context, topic string) (TopicType, error) {
+	// Handle topic string that is already in hex format
+	if strings.HasPrefix(topic, "0x") {
+		topic = strings.Replace(topic, "0x", "", 1)
+		topicHex, err := hex.DecodeString(topic)
+		log.Info("Topic given recognised as already in hex format")
+		return BytesToTopic(topicHex), err
+	} else {
+		// Set default topic
+		if topic == "" {
+			topic = DefaultTopic
+			log.Info("Topic not given, using default topic: \"" + topic + "\"")
+		}
+
+		topicHex := BytesToTopic([]byte(topic))
+		log.Info("Generated topic \"" + topicHex.String() + "\" from value \"" + topic +"\"")
+		return topicHex, nil
+	}
+}
+
+func BytesToString(data []byte) string {
+	return string(data[:])
+}
 // AddPrivateKey imports the given private key.
 func (api *PublicWhisperAPI) AddPrivateKey(ctx context.Context, privateKey hexutil.Bytes) (string, error) {
 	key, err := crypto.ToECDSA(privateKey)
@@ -243,7 +370,7 @@ func (api *PublicWhisperAPI) Post(ctx context.Context, req NewMessage) (bool, er
 		err         error
 	)
 
-	// user must specify either a symmetric or a asymmetric key
+	// user must specify either a symmetric or an asymmetric key
 	if (symKeyGiven && pubKeyGiven) || (!symKeyGiven && !pubKeyGiven) {
 		return false, ErrSymAsym
 	}
@@ -344,7 +471,7 @@ func (api *PublicWhisperAPI) Messages(ctx context.Context, crit Criteria) (*rpc.
 		return nil, rpc.ErrNotificationsUnsupported
 	}
 
-	// user must specify either a symmetric or a asymmetric key
+	// user must specify either a symmetric or an asymmetric key
 	if (symKeyGiven && pubKeyGiven) || (!symKeyGiven && !pubKeyGiven) {
 		return nil, ErrSymAsym
 	}
@@ -441,6 +568,7 @@ type Message struct {
 	PoW       float64   `json:"pow"`
 	Hash      []byte    `json:"hash"`
 	Dst       []byte    `json:"recipientPublicKey,omitempty"`
+	ActualMessage string `json:"actualMessage,omitempty"`
 }
 
 type messageOverride struct {
@@ -534,7 +662,7 @@ func (api *PublicWhisperAPI) NewMessageFilter(req Criteria) (string, error) {
 		err error
 	)
 
-	// user must specify either a symmetric or a asymmetric key
+	// user must specify either a symmetric or an asymmetric key
 	if (symKeyGiven && asymKeyGiven) || (!symKeyGiven && !asymKeyGiven) {
 		return "", ErrSymAsym
 	}

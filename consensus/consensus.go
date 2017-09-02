@@ -23,6 +23,7 @@ import (
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/params"
 	"github.com/xenioplatform/go-xenio/rpc"
+	"math/big"
 )
 
 // ChainReader defines a small collection of methods needed to access the local
@@ -98,4 +99,12 @@ type PoW interface {
 
 	// Hashrate returns the current mining hashrate of a PoW consensus engine.
 	Hashrate() float64
+}
+
+// PoN is a consensus engine based on proof-of-network.
+type PoN interface {
+	Engine
+
+	// LivePeers returns the current connected peers connected to the network
+	LivePeers() big.Int
 }
