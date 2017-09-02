@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/xenioplatform/go-xenio/common"
-	"github.com/xenioplatform/go-xenio/consensus/xenio"
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/p2p"
 	"github.com/xenioplatform/go-xenio/rlp"
@@ -227,35 +226,6 @@ func (p *peer) RequestNodeData(hashes []common.Hash) error {
 func (p *peer) RequestReceipts(hashes []common.Hash) error {
 	p.Log().Debug("Fetching batch of receipts", "count", len(hashes))
 	return p2p.Send(p.rw, GetReceiptsMsg, hashes)
-}
-// RequestCoinbase fetches the coinbase of the remote node, if the node wants to share it.
-func (p *peer) RequestCoinbase(adr common.Address) error {
-	p.Log().Warn("Fetching remote nodes Coinbase")
-	return p2p.Send(p.rw, GetNodeCoinbase, adr)
-}
-// TransmitCoinbase transmits our coinbase to the remote node.
-func (p *peer) TransmitCoinbase(adr common.Address) error {
-	p.Log().Warn("Transmitting Coinbase")
-	err := p2p.Send(p.rw, TransmitCoinbase, adr)
-	if err == nil {
-		err = p.TransmitNodeList()
-	}
-	return err
-}
-func (p *peer) TransmitNodeList() error {
-	p.Log().Warn("Transmitting NodeList")
-	if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) > 0 {
-		var toSend []common.StakerTransmit
-		for key, value := range common.StakerSnapShot.Stakers {
-			if xenio.StakerExpired(key) == false {
-				_time := fmt.Sprint(value.LastSeen.Unix())
-				toSend = append(toSend, common.StakerTransmit{key, _time})
-			}
-		}
-		return p2p.Send(p.rw, TransmitNodeList, toSend)
-	} else {
-		return nil
-	}
 }
 
 // Handshake executes the eth protocol handshake, negotiating version number,
