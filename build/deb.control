@@ -4,15 +4,15 @@ Priority: extra
 Maintainer: {{.Author}}
 Build-Depends: debhelper (>= 8.0.0), golang-1.9
 Standards-Version: 3.9.5
-Homepage: https://ethereum.org
+Homepage: https://xenio.io
 Vcs-Git: git://github.com/xenioplatform/go-xenio.git
 Vcs-Browser: github.com/xenioplatform/go-xenio
 
 Package: {{.Name}}
 Architecture: any
 Depends: ${misc:Depends}, {{.ExeList}}
-Description: Meta-package to install geth and other tools
- Meta-package to install geth and other tools
+Description: Meta-package to install xenio-cli and other tools
+ Meta-package to install xenio-cli and other tools
 
 {{range .Executables}}
 Package: {{$.ExeName .}}

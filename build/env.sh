@@ -10,10 +10,10 @@ fi
 # Create fake Go workspace if it doesn't exist yet.
 workspace="$PWD/build/_workspace"
 root="$PWD"
-ethdir="$workspace/src/github.com/xenioplatform"
-if [ ! -L "$ethdir/go-xenio" ]; then
+xeniodir="$workspace/src/github.com/xenioplatform"
+if [ ! -L "$xeniodir/go-xenio" ]; then
     mkdir -p "$ethdir"
-    cd "$ethdir"
+    cd "$xeniodir"
     ln -s ../../../../../. go-xenio
     cd "$root"
 fi
@@ -23,8 +23,8 @@ GOPATH="$workspace"
 export GOPATH
 
 # Run the command inside the workspace.
-cd "$ethdir/go-xenio"
-PWD="$ethdir/go-xenio"
+cd "$xeniodir/go-xenio"
+PWD="$xeniodir/go-xenio"
 
 # Launch the arguments with the configured environment.
 exec "$@"

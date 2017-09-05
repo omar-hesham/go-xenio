@@ -1,4 +1,6 @@
-// Copyright 2014 The go-xenio Authors
+// Copyright 2017 The go-xenio Authors
+// Copyright 2017 The go-ethereum Authors
+//
 // This file is part of go-xenio.
 //
 // go-xenio is free software: you can redistribute it and/or modify
@@ -14,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with go-xenio. If not, see <http://www.gnu.org/licenses/>.
 
-// geth is the official command-line client for Ethereum.
+// xenio-cli is the official command-line client for Xenio.
 package main
 
 import (
@@ -46,7 +48,7 @@ const (
 var (
 	// Git SHA1 commit hash of the release (set via linker flags)
 	gitCommit = ""
-	// Ethereum address of the Geth release oracle.
+	// Xenio address of the xenio-cli release oracle.
 	relOracle = common.HexToAddress("0xfa7b9770ca4cb04296cac84f37736d4041251cdf")
 	// The app that holds all commands and flags.
 	app = utils.NewApp(gitCommit, "the go-xenio command line interface")
@@ -139,7 +141,7 @@ var (
 )
 
 func init() {
-	// Initialize the CLI app and start Geth
+	// Initialize the CLI app and start xenio-cli
 	app.Action = geth
 	app.HideVersion = true // we have a command to print the version
 	app.Copyright = "Copyright 2013-2017 The go-xenio Authors"

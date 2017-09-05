@@ -4,15 +4,15 @@
                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.ethereum</groupId>
-  <artifactId>geth</artifactId>
+  <groupId>io.xenio</groupId>
+  <artifactId>xenio-cli</artifactId>
   <version>{{.Version}}</version>
   <packaging>aar</packaging>
 
-  <name>Android Ethereum Client</name>
+  <name>Android Xenio Client</name>
   <description>Android port of the go-xenio libraries and node</description>
   <url>github.com/xenioplatform/go-xenio</url>
-  <inceptionYear>2015</inceptionYear>
+  <inceptionYear>2017</inceptionYear>
 
   <licenses>
     <license>
@@ -23,8 +23,8 @@
   </licenses>
 
   <organization>
-    <name>Ethereum</name>
-    <url>https://ethereum.org</url>
+    <name>Xenio</name>
+    <url>https://xenio.io</url>
   </organization>
 
   <developers>

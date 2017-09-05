@@ -1,4 +1,6 @@
-// Copyright 2015 The go-xenio Authors
+// Copyright 2017 The go-xenio Authors
+// Copyright 2015 The go-ethereum Authors
+//
 // This file is part of go-xenio.
 //
 // go-xenio is free software: you can redistribute it and/or modify
@@ -13,8 +15,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with go-xenio. If not, see <http://www.gnu.org/licenses/>.
-
-// Contains the geth command usage template and generator.
 
 package main
 
