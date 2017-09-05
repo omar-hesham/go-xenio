@@ -35,8 +35,6 @@ func TestState(t *testing.T) {
 	st.skipLoad(`^stTransactionTest/OverflowGasRequire\.json`) // gasLimit > 256 bits
 	st.skipLoad(`^stTransactionTest/zeroSigTransa[^/]*\.json`) // EIP-86 is not supported yet
 	// Expected failures:
-	st.fails(`^stCodeSizeLimit/codesizeOOGInvalidSize\.json/(Frontier|Homestead|EIP150)`,
-		"code size limit implementation is not conditional on fork")
 	st.fails(`^stRevertTest/RevertPrecompiledTouch\.json/EIP158`, "bug in test")
 	st.fails(`^stRevertTest/RevertPrefoundEmptyOOG\.json/EIP158`, "bug in test")
 	st.fails(`^stRevertTest/RevertPrecompiledTouch\.json/Byzantium`, "bug in test")
@@ -52,7 +50,8 @@ func TestState(t *testing.T) {
 					t.Skip("constantinople not supported yet")
 				}
 				withTrace(t, test.gasLimit(subtest), func(vmconfig vm.Config) error {
-					return st.checkFailure(t, name, test.Run(subtest, vmconfig))
+					_, err := test.Run(subtest, vmconfig)
+					return st.checkFailure(t, name, err)
 				})
 			})
 		}
