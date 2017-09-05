@@ -200,7 +200,7 @@ func (p *Peer) pingLoop() {
 				return
 			}
 			ping.Reset(pingInterval)
-		case <-p.closed:
+		case <-p.Closed:
 			return
 		}
 	}
