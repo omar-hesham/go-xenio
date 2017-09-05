@@ -23,10 +23,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/tests"
+	"github.com/xenioplatform/go-xenio/core/state"
+	"github.com/xenioplatform/go-xenio/core/vm"
+	"github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/tests"
 
 	cli "gopkg.in/urfave/cli.v1"
 )
