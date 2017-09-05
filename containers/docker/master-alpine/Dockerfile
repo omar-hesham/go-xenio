@@ -3,12 +3,12 @@ FROM alpine:3.5
 RUN \
   apk add --update go git make gcc musl-dev linux-headers ca-certificates && \
   git clone --depth 1 --branch release/1.6 github.com/xenioplatform/go-xenio && \
-  (cd go-xenio && make geth) && \
-  cp go-xenio/build/bin/geth /geth && \
+  (cd go-xenio && make xenio-cli) && \
+  cp go-xenio/build/bin/xenio-cli /xenio-cli && \
   apk del go git make gcc musl-dev linux-headers && \
   rm -rf /go-xenio && rm -rf /var/cache/apk/*
 
 EXPOSE 8545
-EXPOSE 30303
+EXPOSE 30666
 
-ENTRYPOINT ["/geth"]
+ENTRYPOINT ["/xenio-cli"]

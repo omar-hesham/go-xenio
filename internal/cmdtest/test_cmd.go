@@ -1,5 +1,7 @@
-// Copyright 2016 The go-xenio Authors
-// This file is part of go-xenio.
+// Copyright 2017 The go-xenio Authors
+// Copyright 2016 The go-ethereum Authors
+//
+// This file is part of the go-xenio library.
 //
 // go-xenio is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
