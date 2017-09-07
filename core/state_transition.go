@@ -20,7 +20,6 @@ package core
 
 import (
 	"errors"
-	"fmt"
 	"math/big"
 
 	"github.com/xenioplatform/go-xenio/common"
@@ -199,8 +198,11 @@ func (st *StateTransition) preCheck() error {
 
 	// Make sure this transaction's nonce is correct
 	if msg.CheckNonce() {
-		if n := st.state.GetNonce(sender.Address()); n != msg.Nonce() {
-			return fmt.Errorf("invalid nonce: have %d, expected %d", msg.Nonce(), n)
+		nonce := st.state.GetNonce(sender.Address())
+		if nonce < msg.Nonce() {
+			return ErrNonceTooHigh
+		} else if nonce > msg.Nonce() {
+			return ErrNonceTooLow
 		}
 	}
 	return st.buyGas()

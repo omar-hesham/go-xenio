@@ -173,3 +173,10 @@ func (b *LesApiBackend) EventMux() *event.TypeMux {
 func (b *LesApiBackend) AccountManager() *accounts.Manager {
 	return b.eth.accountManager
 }
+
+func (b *LesApiBackend) BloomStatus() (uint64, uint64) {
+	return params.BloomBitsBlocks, 0
+}
+
+func (b *LesApiBackend) ServiceFilter(ctx context.Context, session *bloombits.MatcherSession) {
+}

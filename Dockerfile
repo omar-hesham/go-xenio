@@ -1,13 +1,16 @@
-FROM alpine:3.6
+# Build Geth in a stock Go builder container
+FROM golang:1.9-alpine as builder
 
-ADD . /go-xenio
-RUN \
-  apk add --no-cache git go make gcc musl-dev linux-headers && \
-  (cd go-xenio && make xenio-cli)                           && \
-  cp go-xenio/build/bin/xenio-cli /usr/local/bin/           && \
-  apk del git go make gcc musl-dev linux-headers          && \
-  rm -rf /go-xenio && rm -rf /var/cache/apk/*
+RUN apk add --no-cache make gcc musl-dev linux-headers
 
-EXPOSE 8545 30666 30666/udp
+ADD . /go-ethereum
+RUN cd /go-ethereum && make geth
 
-ENTRYPOINT ["xenio-cli"]
+# Pull Geth into a second stage deploy alpine container
+FROM alpine:latest
+
+RUN apk add --no-cache ca-certificates
+COPY --from=builder /go-ethereum/build/bin/geth /usr/local/bin/
+
+EXPOSE 8545 8546 30303 30303/udp
+ENTRYPOINT ["geth"]
