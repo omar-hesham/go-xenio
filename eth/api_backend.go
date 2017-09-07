@@ -26,6 +26,7 @@ import (
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/common/math"
 	"github.com/xenioplatform/go-xenio/core"
+	"github.com/xenioplatform/go-xenio/core/bloombits"
 	"github.com/xenioplatform/go-xenio/core/state"
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/core/vm"

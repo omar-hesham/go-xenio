@@ -35,6 +35,7 @@ import (
 	"github.com/xenioplatform/go-xenio/consensus/xenio"
 	"github.com/xenioplatform/go-xenio/consensus/ethash"
 	"github.com/xenioplatform/go-xenio/core"
+	"github.com/xenioplatform/go-xenio/core/bloombits"
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/core/vm"
 	"github.com/xenioplatform/go-xenio/eth/downloader"
@@ -51,7 +52,6 @@ import (
 	"github.com/xenioplatform/go-xenio/params"
 	"github.com/xenioplatform/go-xenio/rlp"
 	"github.com/xenioplatform/go-xenio/rpc"
-	"strconv"
 )
 
 type LesServer interface {
@@ -166,7 +166,6 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		config.TxPool.Journal = ctx.ResolvePath(config.TxPool.Journal)
 	}
 	eth.txPool = core.NewTxPool(config.TxPool, eth.chainConfig, eth.blockchain)
-	log.Warn("Engine: maxpeers = " + strconv.Itoa(config.MaxPeers))
 	if eth.protocolManager, err = NewProtocolManager(eth.chainConfig, config.SyncMode, config.NetworkId, eth.eventMux, eth.txPool, eth.engine, eth.blockchain, chainDb); err != nil {
 		return nil, err
 	}

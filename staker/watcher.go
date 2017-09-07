@@ -332,8 +332,6 @@ func (self *watcher) wait() {
 				if stat == core.CanonStatTy {
 					// This puts transactions in a extra db for rpc
 					core.WriteTxLookupEntries(self.chainDb, block)
-					// Write map map bloom filters
-					core.WriteMipmapBloom(self.chainDb, block.NumberU64(), work.receipts)
 					// implicit by posting ChainHeadEvent
 					mustCommitNewWork = false
 				}
@@ -483,8 +481,6 @@ func (self *watcher) commitNewWork() {
 	}
 	txs := types.NewTransactionsByPriceAndNonce(pending)
 	work.commitTransactions(self.mux, txs, self.chain, self.coinbase)
-
-	self.eth.TxPool().RemoveBatch(work.failedTxs)
 
 	// compute uncles for the new block.
 	var (
