@@ -646,8 +646,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	}
 
 	if _, authorized := snap.Signers[signer]; !authorized {
-		dump, _ := json.Marshal(signer)
-		log.Error("cannot find account: " + string(dump)+ " inside array")
 		return nil, errUnauthorized
 	}
 	// If we're amongst the recent signers, wait for the next block
