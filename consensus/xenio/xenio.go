@@ -41,6 +41,7 @@ import (
 	"github.com/xenioplatform/go-xenio/rlp"
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
+	"strconv"
 )
 
 const (
@@ -132,7 +133,7 @@ var (
 	// errUnauthorized is returned if a header is signed by a non-authorized entity.
 	errUnauthorized = errors.New("unauthorized")
 	// errOutOfTurn is returned if a header is signed by a authorized but out of turn entity.
-	errOutOfTurn = errors.New("not peers turn")
+	errOutOfTurn = errors.New("invalid turn")
 )
 
 // SignerFn is a signer callback function to request a hash to be signed by a
@@ -495,7 +496,16 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 		if recent == signer {
 			// Signer is among recents, only fail if the current block doesn't shift it out
 			if limit := uint64(len(snap.Signers)/2 + 1); seen > number-limit {
-				return errOutOfTurn
+				parentTime := big.NewInt(120)
+				parentNumber := big.NewInt(-1)
+				parentNumber.Add(parentNumber,header.Number)
+				parentNumberUINT, _ := strconv.ParseUint(parentNumber.String(),10,64) // TODO: find a better way to do this
+				parentTime.Add(parentTime, chain.GetHeaderByNumber(parentNumberUINT).Time)
+				if parentTime.Cmp(header.Time) < 1{
+					log.Error("a signer has delayed his work, his turn has been skipped")
+				}else {
+					return errOutOfTurn
+				}
 			}
 		}
 	}
@@ -652,6 +662,12 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	// If we're amongst the recent signers, wait for the next block
 	for seen, recent := range snap.Recents {
 		if recent == signer {
+			nextTime := big.NewInt(120)
+			nextTime.Add(nextTime, chain.CurrentHeader().Time)
+			if nextTime.Cmp(big.NewInt(time.Now().Unix())) < 1 {
+				log.Warn("Block Minting is Late, trying to out of turn seal")
+				break
+			}
 			// Signer is among recents, only wait if the current block doesn't shift it out
 			if limit := uint64(len(snap.Signers)/2 + 1); number < limit || seen > number-limit {
 				log.Info("Signed recently, must wait for others")
