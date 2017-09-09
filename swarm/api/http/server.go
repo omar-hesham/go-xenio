@@ -334,7 +334,7 @@ func (s *Server) HandleGetRaw(w http.ResponseWriter, r *Request) {
 			return api.SkipManifest
 		})
 		if entry == nil {
-			http.NotFound(w, &r.Request)
+			s.NotFound(w, r, fmt.Errorf("Manifest entry could not be loaded"))
 			return
 		}
 		key = storage.Key(common.Hex2Bytes(entry.Hash))
@@ -343,8 +343,7 @@ func (s *Server) HandleGetRaw(w http.ResponseWriter, r *Request) {
 	// check the root chunk exists by retrieving the file's size
 	reader := s.api.Retrieve(key)
 	if _, err := reader.Size(nil); err != nil {
-		s.logDebug("key not found %s: %s", key, err)
-		http.NotFound(w, &r.Request)
+		s.NotFound(w, r, fmt.Errorf("Root chunk not found %s: %s", key, err))
 		return
 	}
 
@@ -536,16 +535,20 @@ func (s *Server) HandleGetFile(w http.ResponseWriter, r *Request) {
 		return
 	}
 
-	reader, contentType, _, err := s.api.Get(key, r.uri.Path)
+	reader, contentType, status, err := s.api.Get(key, r.uri.Path)
 	if err != nil {
-		s.Error(w, r, err)
+		switch status {
+		case http.StatusNotFound:
+			s.NotFound(w, r, err)
+		default:
+			s.Error(w, r, err)
+		}
 		return
 	}
 
 	// check the root chunk exists by retrieving the file's size
 	if _, err := reader.Size(nil); err != nil {
-		s.logDebug("file not found %s: %s", r.uri, err)
-		http.NotFound(w, &r.Request)
+		s.NotFound(w, r, fmt.Errorf("File not found %s: %s", r.uri, err))
 		return
 	}
 
@@ -558,14 +561,14 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.logDebug("HTTP %s request URL: '%s', Host: '%s', Path: '%s', Referer: '%s', Accept: '%s'", r.Method, r.RequestURI, r.URL.Host, r.URL.Path, r.Referer(), r.Header.Get("Accept"))
 
 	uri, err := api.Parse(strings.TrimLeft(r.URL.Path, "/"))
+	req := &Request{Request: *r, uri: uri}
 	if err != nil {
 		s.logError("Invalid URI %q: %s", r.URL.Path, err)
-		http.Error(w, fmt.Sprintf("Invalid bzz URI: %s", err), http.StatusBadRequest)
+		s.BadRequest(w, req, fmt.Sprintf("Invalid URI %q: %s", r.URL.Path, err))
 		return
 	}
 	s.logDebug("%s request received for %s", r.Method, uri)
 
-	req := &Request{Request: *r, uri: uri}
 	switch r.Method {
 	case "POST":
 		if uri.Raw() {
@@ -581,7 +584,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		//   strictly a traditional PUT request which replaces content
 		//   at a URI, and POST is more ubiquitous)
 		if uri.Raw() {
-			http.Error(w, fmt.Sprintf("No PUT to %s allowed.", uri), http.StatusBadRequest)
+			ShowError(w, r, fmt.Sprintf("No PUT to %s allowed.", uri), http.StatusBadRequest)
 			return
 		} else {
 			s.HandlePostFiles(w, req)
@@ -589,7 +592,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	case "DELETE":
 		if uri.Raw() {
-			http.Error(w, fmt.Sprintf("No DELETE to %s allowed.", uri), http.StatusBadRequest)
+			ShowError(w, r, fmt.Sprintf("No DELETE to %s allowed.", uri), http.StatusBadRequest)
 			return
 		}
 		s.HandleDelete(w, req)
@@ -613,7 +616,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.HandleGetFile(w, req)
 
 	default:
-		http.Error(w, "Method "+r.Method+" is not supported.", http.StatusMethodNotAllowed)
+		ShowError(w, r, fmt.Sprintf("Method "+r.Method+" is not supported.", uri), http.StatusMethodNotAllowed)
 
 	}
 }
@@ -645,11 +648,13 @@ func (s *Server) logError(format string, v ...interface{}) {
 }
 
 func (s *Server) BadRequest(w http.ResponseWriter, r *Request, reason string) {
-	s.logDebug("bad request %s %s: %s", r.Method, r.uri, reason)
-	http.Error(w, reason, http.StatusBadRequest)
+	ShowError(w, &r.Request, fmt.Sprintf("Bad request %s %s: %s", r.Method, r.uri, reason), http.StatusBadRequest)
 }
 
 func (s *Server) Error(w http.ResponseWriter, r *Request, err error) {
-	s.logError("error serving %s %s: %s", r.Method, r.uri, err)
-	http.Error(w, err.Error(), http.StatusInternalServerError)
+	ShowError(w, &r.Request, fmt.Sprintf("Error serving %s %s: %s", r.Method, r.uri, err), http.StatusInternalServerError)
+}
+
+func (s *Server) NotFound(w http.ResponseWriter, r *Request, err error) {
+	ShowError(w, &r.Request, fmt.Sprintf("NOT FOUND error serving %s %s: %s", r.Method, r.uri, err), http.StatusNotFound)
 }
