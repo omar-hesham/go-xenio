@@ -41,7 +41,6 @@ import (
 	"github.com/xenioplatform/go-xenio/rlp"
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
-	"encoding/json"
 )
 
 const (
@@ -132,6 +131,8 @@ var (
 
 	// errUnauthorized is returned if a header is signed by a non-authorized entity.
 	errUnauthorized = errors.New("unauthorized")
+	// errOutOfTurn is returned if a header is signed by a authorized but out of turn entity.
+	errOutOfTurn = errors.New("not peers turn")
 )
 
 // SignerFn is a signer callback function to request a hash to be signed by a
@@ -494,7 +495,7 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 		if recent == signer {
 			// Signer is among recents, only fail if the current block doesn't shift it out
 			if limit := uint64(len(snap.Signers)/2 + 1); seen > number-limit {
-				return errUnauthorized
+				return errOutOfTurn
 			}
 		}
 	}
