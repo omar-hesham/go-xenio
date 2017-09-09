@@ -1,4 +1,6 @@
 // Copyright 2017 The go-xenio Authors
+// Copyright 2017 The go-ethereum Authors
+//
 // This file is part of the go-xenio library.
 //
 // The go-xenio library is free software: you can redistribute it and/or modify
@@ -140,7 +142,7 @@ func compareGeneratedFileWithFileInMount(t *testing.T, files map[string]fileInfo
 		if err != nil {
 			t.Fatalf("Could not readfile %v : %v", fname, err)
 		}
-		if bytes.Compare(fileContents, finfo.contents) != 0 {
+		if !bytes.Equal(fileContents, finfo.contents) {
 			t.Fatalf("File %v contents mismatch: %v , %v", fname, fileContents, finfo.contents)
 
 		}

@@ -1,4 +1,6 @@
-// Copyright 2015 The go-xenio Authors
+// Copyright 2017 The go-xenio Authors
+// Copyright 2015 The go-ethereum Authors
+//
 // This file is part of the go-xenio library.
 //
 // The go-xenio library is free software: you can redistribute it and/or modify
@@ -66,11 +68,11 @@ func newTestProtocolManager(mode downloader.SyncMode, blocks int, generator func
 		panic(err)
 	}
 
-	pm, err := NewProtocolManager(gspec.Config, mode, DefaultConfig.NetworkId, 1000, evmux, &testTxPool{added: newtx}, engine, blockchain, db)
+	pm, err := NewProtocolManager(gspec.Config, mode, DefaultConfig.NetworkId, evmux, &testTxPool{added: newtx}, engine, blockchain, db)
 	if err != nil {
 		return nil, err
 	}
-	pm.Start()
+	pm.Start(1000)
 	return pm, nil
 }
 

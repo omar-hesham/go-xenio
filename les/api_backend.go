@@ -1,4 +1,6 @@
-// Copyright 2016 The go-xenio Authors
+// Copyright 2017 The go-xenio Authors
+// Copyright 2016 The go-ethereum Authors
+//
 // This file is part of the go-xenio library.
 //
 // The go-xenio library is free software: you can redistribute it and/or modify
@@ -24,6 +26,7 @@ import (
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/common/math"
 	"github.com/xenioplatform/go-xenio/core"
+	"github.com/xenioplatform/go-xenio/core/bloombits"
 	"github.com/xenioplatform/go-xenio/core/state"
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/core/vm"
@@ -170,4 +173,11 @@ func (b *LesApiBackend) EventMux() *event.TypeMux {
 
 func (b *LesApiBackend) AccountManager() *accounts.Manager {
 	return b.eth.accountManager
+}
+
+func (b *LesApiBackend) BloomStatus() (uint64, uint64) {
+	return params.BloomBitsBlocks, 0
+}
+
+func (b *LesApiBackend) ServiceFilter(ctx context.Context, session *bloombits.MatcherSession) {
 }

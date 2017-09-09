@@ -1,4 +1,6 @@
 // Copyright 2017 The go-xenio Authors
+// Copyright 2017 The go-ethereum Authors
+//
 // This file is part of the go-xenio library.
 //
 // The go-xenio library is free software: you can redistribute it and/or modify
@@ -324,7 +326,7 @@ func gasCall(gt params.GasTable, evm *EVM, contract *Contract, stack *Stack, mem
 		eip158         = evm.ChainConfig().IsEIP158(evm.BlockNumber)
 	)
 	if eip158 {
-		if evm.StateDB.Empty(address) && transfersValue {
+		if transfersValue && evm.StateDB.Empty(address)  {
 			gas += params.CallNewAccountGas
 		}
 	} else if !evm.StateDB.Exist(address) {

@@ -1,4 +1,6 @@
-// Copyright 2015 The go-xenio Authors
+// Copyright 2017 The go-xenio Authors
+// Copyright 2015 The go-ethereum Authors
+//
 // This file is part of the go-xenio library.
 //
 // The go-xenio library is free software: you can redistribute it and/or modify
@@ -59,7 +61,6 @@ type Backend interface {
 
 	// TxPool API
 	SendTx(ctx context.Context, signedTx *types.Transaction) error
-	RemoveTx(txHash common.Hash)
 	GetPoolTransactions() (types.Transactions, error)
 	GetPoolTransaction(txHash common.Hash) *types.Transaction
 	GetPoolNonce(ctx context.Context, addr common.Address) (uint64, error)

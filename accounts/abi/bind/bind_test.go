@@ -1,4 +1,6 @@
-// Copyright 2016 The go-xenio Authors
+// Copyright 2017 The go-xenio Authors
+// Copyright 2016 The go-ethereum Authors
+//
 // This file is part of the go-xenio library.
 //
 // The go-xenio library is free software: you can redistribute it and/or modify
@@ -459,7 +461,7 @@ func TestBindings(t *testing.T) {
 	}
 	// Skip the test if the go-xenio sources are symlinked (https://github.com/golang/go/issues/14845)
 	linkTestCode := fmt.Sprintf("package linktest\nfunc CheckSymlinks(){\nfmt.Println(backends.NewSimulatedBackend(nil))\n}")
-	linkTestDeps, err := imports.Process("", []byte(linkTestCode), nil)
+	linkTestDeps, err := imports.Process(os.TempDir(), []byte(linkTestCode), nil)
 	if err != nil {
 		t.Fatalf("failed check for goimports symlink bug: %v", err)
 	}

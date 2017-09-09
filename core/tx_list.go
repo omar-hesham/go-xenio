@@ -1,4 +1,6 @@
-// Copyright 2016 The go-xenio Authors
+// Copyright 2017 The go-xenio Authors
+// Copyright 2016 The go-ethereum Authors
+//
 // This file is part of the go-xenio library.
 //
 // The go-xenio library is free software: you can redistribute it and/or modify
@@ -298,6 +300,7 @@ func (l *txList) Filter(costLimit, gasLimit *big.Int) (types.Transactions, types
 
 	// If the list was strict, filter anything above the lowest nonce
 	var invalids types.Transactions
+
 	if l.strict && len(removed) > 0 {
 		lowest := uint64(math.MaxUint64)
 		for _, tx := range removed {
@@ -435,6 +438,7 @@ func (l *txPricedList) Cap(threshold *big.Int, local *accountSet) types.Transact
 		}
 		// Stop the discards if we've reached the threshold
 		if tx.GasPrice().Cmp(threshold) >= 0 {
+			save = append(save, tx)
 			break
 		}
 		// Non stale transaction found, discard unless local

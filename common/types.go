@@ -1,18 +1,20 @@
+// Copyright 2017 The go-xenio Authors
 // Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// This file is part of the go-xenio library.
+//
+// The go-xenio library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-xenio library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-xenio library. If not, see <http://www.gnu.org/licenses/>.
 
 package common
 
@@ -31,7 +33,7 @@ import (
 const (
 	HashLength    = 32
 	AddressLength = 20
-	StakerTTL	  = 20*60
+	StakerTTL	  = 1200 // seconds
 )
 
 var (
@@ -92,7 +94,7 @@ func (h Hash) MarshalText() ([]byte, error) {
 	return hexutil.Bytes(h[:]).MarshalText()
 }
 
-// Sets the hash to the value of b. If b is larger than len(h) it will panic
+// Sets the hash to the value of b. If b is larger than len(h), 'b' will be cropped (from the left).
 func (h *Hash) SetBytes(b []byte) {
 	if len(b) > len(h) {
 		b = b[len(b)-HashLength:]
@@ -101,7 +103,7 @@ func (h *Hash) SetBytes(b []byte) {
 	copy(h[HashLength-len(b):], b)
 }
 
-// Set string `s` to h. If s is larger than len(h) it will panic
+// Set string `s` to h. If s is larger than len(h) s will be cropped (from left) to fit.
 func (h *Hash) SetString(s string) { h.SetBytes([]byte(s)) }
 
 // Sets h to other

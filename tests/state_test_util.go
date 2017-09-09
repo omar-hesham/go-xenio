@@ -1,18 +1,20 @@
+// Copyright 2017 The go-xenio Authors
 // Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// This file is part of the go-xenio library.
+//
+// The go-xenio library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-xenio library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-xenio library. If not, see <http://www.gnu.org/licenses/>.
 
 package tests
 
@@ -120,10 +122,10 @@ func (t *StateTest) Subtests() []StateSubtest {
 }
 
 // Run executes a specific subtest.
-func (t *StateTest) Run(subtest StateSubtest, vmconfig vm.Config) error {
+func (t *StateTest) Run(subtest StateSubtest, vmconfig vm.Config) (*state.StateDB, error) {
 	config, ok := Forks[subtest.Fork]
 	if !ok {
-		return UnsupportedForkError{subtest.Fork}
+		return nil, UnsupportedForkError{subtest.Fork}
 	}
 	block, _ := t.genesis(config).ToBlock()
 	db, _ := ethdb.NewMemDatabase()
@@ -132,7 +134,7 @@ func (t *StateTest) Run(subtest StateSubtest, vmconfig vm.Config) error {
 	post := t.json.Post[subtest.Fork][subtest.Index]
 	msg, err := t.json.Tx.toMessage(post)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	context := core.NewEVMContext(msg, block.Header(), nil, &t.json.Env.Coinbase)
 	context.GetHash = vmTestBlockHash
@@ -145,13 +147,13 @@ func (t *StateTest) Run(subtest StateSubtest, vmconfig vm.Config) error {
 		statedb.RevertToSnapshot(snapshot)
 	}
 	if logs := rlpHash(statedb.Logs()); logs != common.Hash(post.Logs) {
-		return fmt.Errorf("post state logs hash mismatch: got %x, want %x", logs, post.Logs)
+		return statedb, fmt.Errorf("post state logs hash mismatch: got %x, want %x", logs, post.Logs)
 	}
 	root, _ := statedb.CommitTo(db, config.IsEIP158(block.Number()))
 	if root != common.Hash(post.Root) {
-		return fmt.Errorf("post state root mismatch: got %x, want %x", root, post.Root)
+		return statedb, fmt.Errorf("post state root mismatch: got %x, want %x", root, post.Root)
 	}
-	return nil
+	return statedb, nil
 }
 
 func (t *StateTest) gasLimit(subtest StateSubtest) uint64 {

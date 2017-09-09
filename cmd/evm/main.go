@@ -1,4 +1,6 @@
-// Copyright 2014 The go-xenio Authors
+// Copyright 2017 The go-xenio Authors
+// Copyright 2014 The go-ethereum Authors
+//
 // This file is part of go-xenio.
 //
 // go-xenio is free software: you can redistribute it and/or modify
@@ -143,6 +145,7 @@ func init() {
 		compileCommand,
 		disasmCommand,
 		runCommand,
+		stateTestCommand,
 	}
 }
 

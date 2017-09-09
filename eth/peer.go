@@ -1,4 +1,6 @@
-// Copyright 2015 The go-xenio Authors
+// Copyright 2017 The go-xenio Authors
+// Copyright 2015 The go-ethereum Authors
+//
 // This file is part of the go-xenio library.
 //
 // The go-xenio library is free software: you can redistribute it and/or modify
@@ -65,6 +67,8 @@ type peer struct {
 
 	knownTxs    *set.Set // Set of transaction hashes known to be known by this peer
 	knownBlocks *set.Set // Set of block hashes known to be known by this peer
+
+	stakeWait       sync.WaitGroup
 }
 
 func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
@@ -227,33 +231,6 @@ func (p *peer) RequestReceipts(hashes []common.Hash) error {
 	p.Log().Debug("Fetching batch of receipts", "count", len(hashes))
 	return p2p.Send(p.rw, GetReceiptsMsg, hashes)
 }
-// RequestCoinbase fetches the coinbase of the remote node, if the node wants to share it.
-func (p *peer) RequestCoinbase(adr common.Address) error {
-	p.Log().Warn("Fetching remote nodes Coinbase")
-	return p2p.Send(p.rw, GetNodeCoinbase, adr)
-}
-// TransmitCoinbase transmits our coinbase to the remote node.
-func (p *peer) TransmitCoinbase(adr common.Address) error {
-	p.Log().Warn("Transmitting Coinbase")
-	err := p2p.Send(p.rw, TransmitCoinbase, adr)
-	if err == nil {
-		err = p.TransmitNodeList()
-	}
-	return err
-}
-func (p *peer) TransmitNodeList() error {
-	p.Log().Warn("Transmitting NodeList")
-	if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) > 0 {
-		var toSend []common.StakerTransmit
-		for key, value := range common.StakerSnapShot.Stakers {
-			_time := fmt.Sprint(value.LastSeen.Unix())
-			toSend = append(toSend, common.StakerTransmit{key, _time})
-		}
-		return p2p.Send(p.rw, TransmitNodeList, toSend)
-	}else {
-		return nil
-	}
-}
 
 // Handshake executes the eth protocol handshake, negotiating version number,
 // network IDs, difficulties, head and genesis blocks.
@@ -354,6 +331,8 @@ func (ps *peerSet) Register(p *peer) error {
 	}
 	ps.peers[p.id] = p
 	p.RequestCoinbase(common.Address{})
+	p.stakeWait.Add(2)
+	go p.transmitLoop()
 	return nil
 }
 

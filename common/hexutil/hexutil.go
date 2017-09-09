@@ -1,4 +1,6 @@
-// Copyright 2016 The go-xenio Authors
+// Copyright 2017 The go-xenio Authors
+// Copyright 2016 The go-ethereum Authors
+//
 // This file is part of the go-xenio library.
 //
 // The go-xenio library is free software: you can redistribute it and/or modify
@@ -16,7 +18,7 @@
 
 /*
 Package hexutil implements hex encoding with 0x prefix.
-This encoding is used by the Ethereum RPC API to transport binary data in JSON payloads.
+This encoding is used by the Xenio RPC API to transport binary data in JSON payloads.
 
 Encoding Rules
 

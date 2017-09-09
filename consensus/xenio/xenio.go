@@ -1,4 +1,6 @@
 // Copyright 2017 The go-xenio Authors
+// Copyright 2017 The go-ethereum Authors
+//
 // This file is part of the go-xenio library.
 //
 // The go-xenio library is free software: you can redistribute it and/or modify
@@ -573,14 +575,26 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 		header.Time = big.NewInt(time.Now().Unix())
 	}
 
-	// TODO: collect peers and change that here.
-	var rewardList [2]common.Address
-	rewardList[0] = common.HexToAddress("0xed0755710cf86d9A00331EF729Fa99650e05898b")
-	rewardList[1] = common.HexToAddress("0x2f0ff2bc39a2c4c2d479be1a92a962e10da9e97a")
-	for _, element := range rewardList {
-		header.RewardList = append(header.RewardList, element)
+	//PoN Rewards
+	var failsafe bool
+	failsafe = true
+	if number != 0{
+		if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
+			if len(common.StakerSnapShot.Stakers) >= 0 {
+				for key := range common.StakerSnapShot.Stakers {
+					if !StakerExpired(key) {
+						failsafe = false
+						header.RewardList = append(header.RewardList, key)
+					}
+				}
+			}
+		}
+	}/*else{
+		log.Error("genesis block")
+	}*/
+	if failsafe {
+		header.RewardList = append(header.RewardList, common.HexToAddress("0xed0755710cf86d9A00331EF729Fa99650e05898b"))
 	}
-
 	return nil
 }
 
@@ -632,8 +646,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	}
 
 	if _, authorized := snap.Signers[signer]; !authorized {
-		dump, _ := json.Marshal(signer)
-		log.Error("cannot find account: " + string(dump)+ " inside array")
 		return nil, errUnauthorized
 	}
 	// If we're amongst the recent signers, wait for the next block
@@ -699,8 +711,8 @@ func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*typ
 	}*/
 	for _, address := range header.RewardList {
 		state.AddBalance(address, reward)
-		//cb, _ := json.Marshal(address)
-		//log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
+	//	cb, _ := json.Marshal(address)
+	//	log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
 	}
 
 }

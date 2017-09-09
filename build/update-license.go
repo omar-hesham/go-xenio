@@ -76,6 +76,8 @@ var (
 // its input is an info structure.
 var licenseT = template.Must(template.New("").Parse(`
 // Copyright {{.Year}} The go-xenio Authors
+// Copyright {{.Year}} The go-ethereum Authors
+//
 // This file is part of {{.Whole false}}.
 //
 // {{.Whole true}} is free software: you can redistribute it and/or modify

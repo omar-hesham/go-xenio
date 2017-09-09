@@ -1,4 +1,6 @@
-// Copyright 2016 The go-xenio Authors
+// Copyright 2017 The go-xenio Authors
+// Copyright 2016 The go-ethereum Authors
+//
 // This file is part of the go-xenio library.
 //
 // The go-xenio library is free software: you can redistribute it and/or modify
@@ -122,7 +124,7 @@ func Bind(types []string, abis []string, bytecodes []string, pkg string, lang La
 	}
 	// For Go bindings pass the code through goimports to clean it up and double check
 	if lang == LangGo {
-		code, err := imports.Process("", buffer.Bytes(), nil)
+		code, err := imports.Process(".", buffer.Bytes(), nil)
 		if err != nil {
 			return "", fmt.Errorf("%v\n%s", err, buffer)
 		}

@@ -1,4 +1,6 @@
-// Copyright 2015 The go-xenio Authors
+// Copyright 2017 The go-xenio Authors
+// Copyright 2015 The go-ethereum Authors
+//
 // This file is part of the go-xenio library.
 //
 // The go-xenio library is free software: you can redistribute it and/or modify
@@ -149,6 +151,11 @@ web3._extend({
 			name: 'discard',
 			call: 'xenio_discard',
 			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'getActiveStakerList',
+			call: 'xenio_getActiveStakerList',
+			params: 0
 		}),
 		new web3._extend.Method({
 			name: 'getStakerSnapshot',

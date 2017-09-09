@@ -1,4 +1,6 @@
-// Copyright 2014 The go-xenio Authors
+// Copyright 2017 The go-xenio Authors
+// Copyright 2014 The go-ethereum Authors
+//
 // This file is part of the go-xenio library.
 //
 // The go-xenio library is free software: you can redistribute it and/or modify
@@ -14,7 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-xenio library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package core implements the Ethereum consensus protocol.
+// Package core implements the Xenio consensus protocol.
 package core
 
 import (
@@ -81,7 +83,6 @@ type BlockChain struct {
 
 	hc            *HeaderChain
 	chainDb       ethdb.Database
-	rmTxFeed      event.Feed
 	rmLogsFeed    event.Feed
 	chainFeed     event.Feed
 	chainSideFeed event.Feed
@@ -760,12 +761,6 @@ func (bc *BlockChain) InsertReceiptChain(blockChain types.Blocks, receiptChain [
 				log.Crit("Failed to write block receipts", "err", err)
 				return
 			}
-			if err := WriteMipmapBloom(bc.chainDb, block.NumberU64(), receipts); err != nil {
-				errs[index] = fmt.Errorf("failed to write log blooms: %v", err)
-				atomic.AddInt32(&failed, 1)
-				log.Crit("Failed to write log blooms", "err", err)
-				return
-			}
 			if err := WriteTxLookupEntries(bc.chainDb, block); err != nil {
 				errs[index] = fmt.Errorf("failed to write lookup metadata: %v", err)
 				atomic.AddInt32(&failed, 1)
@@ -1018,10 +1013,6 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 			if err := WriteTxLookupEntries(bc.chainDb, block); err != nil {
 				return i, err
 			}
-			// Write map map bloom filters
-			if err := WriteMipmapBloom(bc.chainDb, block.NumberU64(), receipts); err != nil {
-				return i, err
-			}
 			// Write hash preimages
 			if err := WritePreimages(bc.chainDb, block.NumberU64(), state.Preimages()); err != nil {
 				return i, err
@@ -1179,11 +1170,6 @@ func (bc *BlockChain) reorg(oldBlock, newBlock *types.Block) error {
 		if err := WriteTxLookupEntries(bc.chainDb, block); err != nil {
 			return err
 		}
-		// Write map map bloom filters
-		receipts := GetBlockReceipts(bc.chainDb, block.Hash(), block.NumberU64())
-		if err := WriteMipmapBloom(bc.chainDb, block.NumberU64(), receipts); err != nil {
-			return err
-		}
 		addedTxs = append(addedTxs, block.Transactions()...)
 	}
 
@@ -1194,15 +1180,9 @@ func (bc *BlockChain) reorg(oldBlock, newBlock *types.Block) error {
 	for _, tx := range diff {
 		DeleteTxLookupEntry(bc.chainDb, tx.Hash())
 	}
-	// Must be posted in a goroutine because of the transaction pool trying
-	// to acquire the chain manager lock
-	if len(diff) > 0 {
-		go bc.rmTxFeed.Send(RemovedTransactionEvent{diff})
-	}
 	if len(deletedLogs) > 0 {
 		go bc.rmLogsFeed.Send(RemovedLogsEvent{deletedLogs})
 	}
-
 	if len(oldChain) > 0 {
 		go func() {
 			for _, block := range oldChain {
@@ -1400,11 +1380,6 @@ func (bc *BlockChain) Config() *params.ChainConfig { return bc.config }
 
 // Engine retrieves the blockchain's consensus engine.
 func (bc *BlockChain) Engine() consensus.Engine { return bc.engine }
-
-// SubscribeRemovedTxEvent registers a subscription of RemovedTransactionEvent.
-func (bc *BlockChain) SubscribeRemovedTxEvent(ch chan<- RemovedTransactionEvent) event.Subscription {
-	return bc.scope.Track(bc.rmTxFeed.Subscribe(ch))
-}
 
 // SubscribeRemovedLogsEvent registers a subscription of RemovedLogsEvent.
 func (bc *BlockChain) SubscribeRemovedLogsEvent(ch chan<- RemovedLogsEvent) event.Subscription {

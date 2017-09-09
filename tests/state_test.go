@@ -1,18 +1,20 @@
+// Copyright 2017 The go-xenio Authors
 // Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// This file is part of the go-xenio library.
+//
+// The go-xenio library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-xenio library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-xenio library. If not, see <http://www.gnu.org/licenses/>.
 
 package tests
 
@@ -35,8 +37,6 @@ func TestState(t *testing.T) {
 	st.skipLoad(`^stTransactionTest/OverflowGasRequire\.json`) // gasLimit > 256 bits
 	st.skipLoad(`^stTransactionTest/zeroSigTransa[^/]*\.json`) // EIP-86 is not supported yet
 	// Expected failures:
-	st.fails(`^stCodeSizeLimit/codesizeOOGInvalidSize\.json/(Frontier|Homestead|EIP150)`,
-		"code size limit implementation is not conditional on fork")
 	st.fails(`^stRevertTest/RevertPrecompiledTouch\.json/EIP158`, "bug in test")
 	st.fails(`^stRevertTest/RevertPrefoundEmptyOOG\.json/EIP158`, "bug in test")
 	st.fails(`^stRevertTest/RevertPrecompiledTouch\.json/Byzantium`, "bug in test")
@@ -52,7 +52,8 @@ func TestState(t *testing.T) {
 					t.Skip("constantinople not supported yet")
 				}
 				withTrace(t, test.gasLimit(subtest), func(vmconfig vm.Config) error {
-					return st.checkFailure(t, name, test.Run(subtest, vmconfig))
+					_, err := test.Run(subtest, vmconfig)
+					return st.checkFailure(t, name, err)
 				})
 			})
 		}

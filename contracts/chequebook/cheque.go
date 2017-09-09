@@ -1,4 +1,6 @@
-// Copyright 2016 The go-xenio Authors
+// Copyright 2017 The go-xenio Authors
+// Copyright 2016 The go-ethereum Authors
+//
 // This file is part of the go-xenio library.
 //
 // The go-xenio library is free software: you can redistribute it and/or modify
@@ -14,10 +16,10 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-xenio library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package chequebook package wraps the 'chequebook' Ethereum smart contract.
+// Package chequebook package wraps the 'chequebook' Xenio smart contract.
 //
 // The functions in this package allow using chequebook for
-// issuing, receiving, verifying cheques in ether; (auto)cashing cheques in ether
+// issuing, receiving, verifying cheques in xenio; (auto)cashing cheques in ether
 // as well as (auto)depositing ether to the chequebook contract.
 package chequebook
 
@@ -53,7 +55,7 @@ import (
 // * setting current balance on peer's chequebook
 // * sending the transaction to cash the cheque
 // * depositing ether to the chequebook
-// * watching incoming ether
+// * watching incoming xenio
 
 var (
 	gasToCash = big.NewInt(2000000) // gas cost of a cash transaction using chequebook

@@ -1,4 +1,6 @@
-// Copyright 2015 The go-xenio Authors
+// Copyright 2017 The go-xenio Authors
+// Copyright 2015 The go-ethereum Authors
+//
 // This file is part of the go-xenio library.
 //
 // The go-xenio library is free software: you can redistribute it and/or modify
@@ -169,7 +171,8 @@ func (a *RemoteAgent) SubmitWork(nonce types.BlockNonce, mixDigest, hash common.
 // RemoteAgent.Start() constantly recreates these channels, so the loop code cannot
 // assume data stability in these member fields.
 func (a *RemoteAgent) loop(workCh chan *Work, quitCh chan struct{}) {
-	ticker := time.Tick(5 * time.Second)
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
 
 	for {
 		select {
@@ -179,7 +182,7 @@ func (a *RemoteAgent) loop(workCh chan *Work, quitCh chan struct{}) {
 			a.mu.Lock()
 			a.currentWork = work
 			a.mu.Unlock()
-		case <-ticker:
+		case <-ticker.C:
 			// cleanup
 			a.mu.Lock()
 			for hash, work := range a.work {

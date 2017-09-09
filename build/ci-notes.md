@@ -21,18 +21,17 @@ variable which Travis CI makes available to certain builds.
 We want to build go-xenio with the most recent version of Go, irrespective of the Go
 version that is available in the main Ubuntu repository. In order to make this possible,
 our PPA depends on the ~gophers/ubuntu/archive PPA. Our source package build-depends on
-golang-1.8, which is co-installable alongside the regular golang package. PPA dependencies
-can be edited at https://launchpad.net/%7Eethereum/+archive/ubuntu/ethereum/+edit-dependencies
+golang-1.9, which is co-installable alongside the regular golang package.
 
 ## Building Packages Locally (for testing)
 
 You need to run Ubuntu to do test packaging.
 
-Add the gophers PPA and install Go 1.8 and Debian packaging tools:
+Add the gophers PPA and install Go 1.9 and Debian packaging tools:
 
     $ sudo apt-add-repository ppa:gophers/ubuntu/archive
     $ sudo apt-get update
-    $ sudo apt-get install build-essential golang-1.8 devscripts debhelper
+    $ sudo apt-get install build-essential golang-1.9 devscripts debhelper
 
 Create the source packages:
 
@@ -40,10 +39,10 @@ Create the source packages:
 
 Then go into the source package directory for your running distribution and build the package:
 
-    $ cd dist/ethereum-unstable-1.6.0+xenial
+    $ cd dist/xenio-cli-unstable-1.6.0+xenial
     $ dpkg-buildpackage
 
 Built packages are placed in the dist/ directory.
 
     $ cd ..
-    $ dpkg-deb -c geth-unstable_1.6.0+xenial_amd64.deb
+    $ dpkg-deb -c xenio-cli-unstable_1.6.0+xenial_amd64.deb

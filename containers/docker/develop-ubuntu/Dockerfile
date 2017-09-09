@@ -4,12 +4,12 @@ RUN \
   apt-get update && apt-get upgrade -q -y && \
   apt-get install -y --no-install-recommends golang git make gcc libc-dev ca-certificates && \
   git clone --depth 1 github.com/xenioplatform/go-xenio && \
-  (cd go-xenio && make geth) && \
-  cp go-xenio/build/bin/geth /geth && \
+  (cd go-xenio && make xenio-cli) && \
+  cp go-xenio/build/bin/xenio-cli /xenio-cli && \
   apt-get remove -y golang git make gcc libc-dev && apt autoremove -y && apt-get clean && \
   rm -rf /go-xenio
 
 EXPOSE 8545
-EXPOSE 30303
+EXPOSE 30666
 
-ENTRYPOINT ["/geth"]
+ENTRYPOINT ["/xenio-cli"]

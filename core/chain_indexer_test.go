@@ -1,18 +1,20 @@
+// Copyright 2017 The go-xenio Authors
 // Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// This file is part of the go-xenio library.
+//
+// The go-xenio library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-xenio library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-xenio library. If not, see <http://www.gnu.org/licenses/>.
 
 package core
 
@@ -58,7 +60,6 @@ func testChainIndexer(t *testing.T, count int) {
 		)
 		backends[i] = &testChainIndexBackend{t: t, processCh: make(chan uint64)}
 		backends[i].indexer = NewChainIndexer(db, ethdb.NewTable(db, string([]byte{byte(i)})), backends[i], sectionSize, confirmsReq, 0, fmt.Sprintf("indexer-%d", i))
-		defer backends[i].indexer.Close()
 
 		if sections, _, _ := backends[i].indexer.Sections(); sections != 0 {
 			t.Fatalf("Canonical section count mismatch: have %v, want %v", sections, 0)
@@ -67,6 +68,7 @@ func testChainIndexer(t *testing.T, count int) {
 			backends[i-1].indexer.AddChildIndexer(backends[i].indexer)
 		}
 	}
+	defer backends[0].indexer.Close() // parent indexer shuts down children
 	// notify pings the root indexer about a new head or reorg, then expect
 	// processed blocks if a section is processable
 	notify := func(headNum, failNum uint64, reorg bool) {
@@ -226,7 +228,7 @@ func (b *testChainIndexBackend) Process(header *types.Header) {
 	}
 }
 
-func (b *testChainIndexBackend) Commit(db ethdb.Database) error {
+func (b *testChainIndexBackend) Commit() error {
 	if b.headerCnt != b.indexer.sectionSize {
 		b.t.Error("Not enough headers processed")
 	}

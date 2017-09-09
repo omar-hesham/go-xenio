@@ -5,37 +5,37 @@ OutFile "${OUTPUTFILE}" # set through command line arguments
 # Links for "Add/Remove Programs"
 !define HELPURL "github.com/xenioplatform/go-xenio/issues"
 !define UPDATEURL "github.com/xenioplatform/go-xenio/releases"
-!define ABOUTURL "github.com/xenioplatform/go-xenio#ethereum-go"
+!define ABOUTURL "github.com/xenioplatform/go-xenio"
 !define /date NOW "%Y%m%d"
 
 PageEx license
   LicenseData {{.License}}
 PageExEnd
 
-# Install geth binary
-Section "Geth" GETH_IDX
+# Install xenio-cli binary
+Section "xenio-cli" GETH_IDX
   SetOutPath $INSTDIR
-  file {{.Geth}}
+  file {{.xenio-cli}}
 
   # Create start menu launcher
   createDirectory "$SMPROGRAMS\${APPNAME}"
-  createShortCut "$SMPROGRAMS\${APPNAME}\${APPNAME}.lnk" "$INSTDIR\geth.exe" "--fast" "--cache=512"
-  createShortCut "$SMPROGRAMS\${APPNAME}\Attach.lnk" "$INSTDIR\geth.exe" "attach" "" ""
+  createShortCut "$SMPROGRAMS\${APPNAME}\${APPNAME}.lnk" "$INSTDIR\xenio-cli.exe" "--fast" "--cache=512"
+  createShortCut "$SMPROGRAMS\${APPNAME}\Attach.lnk" "$INSTDIR\xenio-cli.exe" "attach" "" ""
   createShortCut "$SMPROGRAMS\${APPNAME}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "" ""
 
   # Firewall - remove rules (if exists)
-  SimpleFC::AdvRemoveRule "Geth incoming peers (TCP:30303)"
-  SimpleFC::AdvRemoveRule "Geth outgoing peers (TCP:30303)"
-  SimpleFC::AdvRemoveRule "Geth UDP discovery (UDP:30303)"
+  SimpleFC::AdvRemoveRule "xenio-cli incoming peers (TCP:30666)"
+  SimpleFC::AdvRemoveRule "xenio-cli outgoing peers (TCP:30666)"
+  SimpleFC::AdvRemoveRule "xenio-cli UDP discovery (UDP:30666)"
 
   # Firewall - add rules
-  SimpleFC::AdvAddRule "Geth incoming peers (TCP:30303)" ""  6 1 1 2147483647 1 "$INSTDIR\geth.exe" "" "" "Ethereum" 30303 "" "" ""
-  SimpleFC::AdvAddRule "Geth outgoing peers (TCP:30303)" ""  6 2 1 2147483647 1 "$INSTDIR\geth.exe" "" "" "Ethereum" "" 30303 "" ""
-  SimpleFC::AdvAddRule "Geth UDP discovery (UDP:30303)" "" 17 2 1 2147483647 1 "$INSTDIR\geth.exe" "" "" "Ethereum" "" 30303 "" ""
+  SimpleFC::AdvAddRule "xenio-cli incoming peers (TCP:30666)" ""  6 1 1 2147483647 1 "$INSTDIR\xenio-cli.exe" "" "" "Xenio" 30666 "" "" ""
+  SimpleFC::AdvAddRule "xenio-cli outgoing peers (TCP:30666)" ""  6 2 1 2147483647 1 "$INSTDIR\xenio-cli.exe" "" "" "Xenio" "" 30666 "" ""
+  SimpleFC::AdvAddRule "xenio-cli UDP discovery (UDP:30666)" "" 17 2 1 2147483647 1 "$INSTDIR\xenio-cli.exe" "" "" "Xenio" "" 30666 "" ""
 
   # Set default IPC endpoint (github.com/xenioplatform/EIPs/issues/147)
-  ${EnvVarUpdate} $0 "ETHEREUM_SOCKET" "R" "HKLM" "\\.\pipe\xenio.ipc"
-  ${EnvVarUpdate} $0 "ETHEREUM_SOCKET" "A" "HKLM" "\\.\pipe\xenio.ipc"
+  ${EnvVarUpdate} $0 "XENIO_SOCKET" "R" "HKLM" "\\.\pipe\xenio.ipc"
+  ${EnvVarUpdate} $0 "XENIO_SOCKET" "A" "HKLM" "\\.\pipe\xenio.ipc"
 
   # Add instdir to PATH
   Push "$INSTDIR"
