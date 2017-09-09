@@ -503,9 +503,9 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 				parentTime.Add(parentTime, chain.GetHeaderByNumber(parentNumberUINT).Time)
 				if parentTime.Cmp(header.Time) < 1{
 					log.Error("a signer has delayed his work, his turn has been skipped")
-				}else {
+				}//else {
 					return errOutOfTurn
-				}
+				//}
 			}
 		}
 	}
