@@ -42,7 +42,6 @@ import (
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
 	"strconv"
-	"encoding/json"
 )
 
 const (
@@ -506,8 +505,6 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 				parentNumberUINT, _ := strconv.ParseUint(parentNumber.String(),10,64) // TODO: find a better way to do this
 				parentHeader := chain.GetHeaderByNumber(parentNumberUINT)
 				if parentHeader == nil{
-					a,_ :=json.Marshal(parents)
-					log.Warn(string(a))
 					break
 					//return errOrphanChild
 				}
