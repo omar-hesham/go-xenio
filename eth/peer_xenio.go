@@ -32,7 +32,7 @@ const (
 )
 // RequestCoinbase fetches the coinbase of the remote node, if the node wants to share it.
 func (p *peer) RequestCoinbase(adr common.Address) error {
-	p.Log().Warn("Fetching remote nodes Coinbase")
+	p.Log().Trace("Fetching remote nodes Coinbase")
 	return p2p.Send(p.rw, GetNodeCoinbase, adr)
 }
 
