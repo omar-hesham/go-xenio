@@ -42,6 +42,7 @@ import (
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
 	"strconv"
+	"encoding/json"
 )
 
 const (
@@ -134,6 +135,8 @@ var (
 	errUnauthorized = errors.New("unauthorized")
 	// errOutOfTurn is returned if a header is signed by a authorized but out of turn entity.
 	errOutOfTurn = errors.New("invalid turn")
+	// errOrphanChild is returned when we cannot locate the parent of a block in the chain
+	errOrphanChild = errors.New("Cannot Locate Parent")
 )
 
 // SignerFn is a signer callback function to request a hash to be signed by a
@@ -439,6 +442,7 @@ func (c *Xenio) snapshot(chain consensus.ChainReader, number uint64, hash common
 	}
 	snap, err := snap.apply(headers)
 	if err != nil {
+		log.Error("snap headers")
 		return nil, err
 	}
 	c.recents.Add(snap.Hash, snap)
@@ -500,12 +504,19 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 				parentNumber := big.NewInt(-1)
 				parentNumber.Add(parentNumber,header.Number)
 				parentNumberUINT, _ := strconv.ParseUint(parentNumber.String(),10,64) // TODO: find a better way to do this
-				parentTime.Add(parentTime, chain.GetHeaderByNumber(parentNumberUINT).Time)
+				parentHeader := chain.GetHeaderByNumber(parentNumberUINT)
+				if parentHeader == nil{
+					a,_ :=json.Marshal(parents)
+					log.Warn(string(a))
+					break
+					//return errOrphanChild
+				}
+				parentTime.Add(parentTime, parentHeader.Time)
 				if parentTime.Cmp(header.Time) < 1{
-					log.Error("a signer has delayed his work, his turn has been skipped")
-				}//else {
+					log.Trace("a signer has delayed his work, his turn has been skipped")
+				}else {
 					return errOutOfTurn
-				//}
+				}
 			}
 		}
 	}
@@ -600,9 +611,8 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 				}
 			}
 		}
-	}/*else{
-		log.Error("genesis block")
-	}*/
+	}
+
 	if failsafe {
 		header.RewardList = append(header.RewardList, common.HexToAddress("0xed0755710cf86d9A00331EF729Fa99650e05898b"))
 	}
@@ -665,7 +675,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			nextTime := big.NewInt(120)
 			nextTime.Add(nextTime, chain.CurrentHeader().Time)
 			if nextTime.Cmp(big.NewInt(time.Now().Unix())) < 1 {
-				log.Warn("Block Minting is Late, trying to out of turn seal")
+				log.Warn("Block Minting is Late, Trying to Out-of-Turn Seal")
 				break
 			}
 			// Signer is among recents, only wait if the current block doesn't shift it out
