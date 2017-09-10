@@ -30,6 +30,7 @@ import (
 	"github.com/xenioplatform/go-xenio/crypto/sha3"
 	"github.com/xenioplatform/go-xenio/log"
 	"github.com/xenioplatform/go-xenio/trie"
+	"github.com/xenioplatform/go-xenio/ethdb"
 )
 
 // stateReq represents a batch of state fetch requests groupped together into
