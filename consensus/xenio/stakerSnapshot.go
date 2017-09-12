@@ -81,6 +81,7 @@ func StakerCast(stakers []common.StakerTransmit) {
 		_time, err := strconv.ParseInt(value.LastSeen, 10, 64)
 		if err == nil {
 			newStaker.LastSeen = time.Unix(_time, 0).UTC()
+			newStaker.FirstSeen = newStaker.LastSeen
 			delta := now.Sub(newStaker.LastSeen)
 			// only add non expired stakers to list
 			if delta.Seconds() <= common.StakerTTL {
@@ -161,6 +162,7 @@ func (api *API) AddStakerToSnapshot(address common.Address) {
 		api.GetStakerSnapshot()
 	}
 	var staker common.Staker
-	staker.LastSeen = time.Now().UTC()
+	staker.FirstSeen = time.Now().UTC()
+	staker.LastSeen = staker.FirstSeen
 	common.StakerSnapShot.Stakers[address] = staker
 }
