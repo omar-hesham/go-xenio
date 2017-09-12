@@ -38,58 +38,56 @@ var Modules = map[string]string{
 
 const Chequebook_JS = `
 web3._extend({
-  property: 'chequebook',
-  methods:
-  [
-    new web3._extend.Method({
-      name: 'deposit',
-      call: 'chequebook_deposit',
-      params: 1,
-      inputFormatter: [null]
-    }),
-    new web3._extend.Property({
+	property: 'chequebook',
+	methods: [
+		new web3._extend.Method({
+			name: 'deposit',
+			call: 'chequebook_deposit',
+			params: 1,
+			inputFormatter: [null]
+		}),
+		new web3._extend.Property({
 			name: 'balance',
 			getter: 'chequebook_balance',
-				outputFormatter: web3._extend.utils.toDecimal
+			outputFormatter: web3._extend.utils.toDecimal
 		}),
-    new web3._extend.Method({
-      name: 'cash',
-      call: 'chequebook_cash',
-      params: 1,
-      inputFormatter: [null]
-    }),
-    new web3._extend.Method({
-      name: 'issue',
-      call: 'chequebook_issue',
-      params: 2,
-      inputFormatter: [null, null]
-    }),
-  ]
+		new web3._extend.Method({
+			name: 'cash',
+			call: 'chequebook_cash',
+			params: 1,
+			inputFormatter: [null]
+		}),
+		new web3._extend.Method({
+			name: 'issue',
+			call: 'chequebook_issue',
+			params: 2,
+			inputFormatter: [null, null]
+		}),
+	]
 });
 `
 
 const Clique_JS = `
 web3._extend({
-  property: 'clique',
-  methods:
-  [
+	property: 'clique',
+	methods: [
 		new web3._extend.Method({
 			name: 'getSnapshot',
 			call: 'clique_getSnapshot',
 			params: 1,
-      inputFormatter: [null]
+			inputFormatter: [null]
 		}),
 		new web3._extend.Method({
 			name: 'getSnapshotAtHash',
 			call: 'clique_getSnapshotAtHash',
 			params: 1
 		}),
-    new web3._extend.Method({
-      name: 'getSigners',
-      call: 'clique_getSigners',
-      params: 1,
-      inputFormatter: [null]
-    }),
+		new web3._extend.Method({
+			name: 'getSigners',
+			call: 'clique_getSigners',
+			params: 1,
+			inputFormatter: [null]
+		}),
 		new web3._extend.Method({
 			name: 'getSignersAtHash',
 			call: 'clique_getSignersAtHash',
@@ -104,10 +102,9 @@ web3._extend({
 			name: 'discard',
 			call: 'clique_discard',
 			params: 1
-		})
-  ],
-	properties:
-	[
+		}),
+	],
+	properties: [
 		new web3._extend.Property({
 			name: 'proposals',
 			getter: 'clique_proposals'
@@ -181,8 +178,7 @@ web3._extend({
 const Admin_JS = `
 web3._extend({
 	property: 'admin',
-	methods:
-	[
+	methods: [
 		new web3._extend.Method({
 			name: 'addPeer',
 			call: 'admin_addPeer',
@@ -228,10 +224,9 @@ web3._extend({
 		new web3._extend.Method({
 			name: 'stopWS',
 			call: 'admin_stopWS'
-		})
+		}),
 	],
-	properties:
-	[
+	properties: [
 		new web3._extend.Property({
 			name: 'nodeInfo',
 			getter: 'admin_nodeInfo'
@@ -243,7 +238,7 @@ web3._extend({
 		new web3._extend.Property({
 			name: 'datadir',
 			getter: 'admin_datadir'
-		})
+		}),
 	]
 });
 `
@@ -251,8 +246,7 @@ web3._extend({
 const Debug_JS = `
 web3._extend({
 	property: 'debug',
-	methods:
-	[
+	methods: [
 		new web3._extend.Method({
 			name: 'printBlock',
 			call: 'debug_printBlock',
@@ -333,6 +327,16 @@ web3._extend({
 			call: 'debug_stacks',
 			params: 0,
 			outputFormatter: console.log
+		}),
+		new web3._extend.Method({
+			name: 'freeOSMemory',
+			call: 'debug_freeOSMemory',
+			params: 0,
+		}),
+		new web3._extend.Method({
+			name: 'setGCPercent',
+			call: 'debug_setGCPercent',
+			params: 1,
 		}),
 		new web3._extend.Method({
 			name: 'memStats',
@@ -424,8 +428,7 @@ web3._extend({
 const Eth_JS = `
 web3._extend({
 	property: 'eth',
-	methods:
-	[
+	methods: [
 		new web3._extend.Method({
 			name: 'sign',
 			call: 'eth_sign',
@@ -462,10 +465,9 @@ web3._extend({
 			},
 			params: 2,
 			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter, web3._extend.utils.toHex]
-		})
+		}),
 	],
-	properties:
-	[
+	properties: [
 		new web3._extend.Property({
 			name: 'pendingTransactions',
 			getter: 'eth_pendingTransactions',
@@ -477,7 +479,7 @@ web3._extend({
 				}
 				return formatted;
 			}
-		})
+		}),
 	]
 });
 `
@@ -485,8 +487,7 @@ web3._extend({
 const Miner_JS = `
 web3._extend({
 	property: 'miner',
-	methods:
-	[
+	methods: [
 		new web3._extend.Method({
 			name: 'start',
 			call: 'miner_start',
@@ -517,7 +518,7 @@ web3._extend({
 		new web3._extend.Method({
 			name: 'getHashrate',
 			call: 'miner_getHashrate'
-		})
+		}),
 	],
 	properties: []
 });
@@ -570,12 +571,11 @@ const Net_JS = `
 web3._extend({
 	property: 'net',
 	methods: [],
-	properties:
-	[
+	properties: [
 		new web3._extend.Property({
 			name: 'version',
 			getter: 'net_version'
-		})
+		}),
 	]
 });
 `
@@ -583,8 +583,7 @@ web3._extend({
 const Personal_JS = `
 web3._extend({
 	property: 'personal',
-	methods:
-	[
+	methods: [
 		new web3._extend.Method({
 			name: 'importRawKey',
 			call: 'personal_importRawKey',
@@ -610,14 +609,13 @@ web3._extend({
 			name: 'deriveAccount',
 			call: 'personal_deriveAccount',
 			params: 3
-		})
+		}),
 	],
-	properties:
-	[
+	properties: [
 		new web3._extend.Property({
 			name: 'listWallets',
 			getter: 'personal_listWallets'
-		})
+		}),
 	]
 })
 `
@@ -626,12 +624,11 @@ const RPC_JS = `
 web3._extend({
 	property: 'rpc',
 	methods: [],
-	properties:
-	[
+	properties: [
 		new web3._extend.Property({
 			name: 'modules',
 			getter: 'rpc_modules'
-		})
+		}),
 	]
 });
 `
@@ -804,7 +801,7 @@ web3._extend({
 			name: 'listmounts',
 			call: 'swarmfs_listmounts',
 			params: 0
-		})
+		}),
 	]
 });
 `
@@ -831,7 +828,7 @@ web3._extend({
 				status.queued = web3._extend.utils.toDecimal(status.queued);
 				return status;
 			}
-		})
+		}),
 	]
 });
 `
