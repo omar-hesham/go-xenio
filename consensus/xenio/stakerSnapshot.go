@@ -19,12 +19,14 @@ package xenio
 
 import (
 	//"encoding/json"
+	"math/big"
+	"strconv"
 	"time"
 
 	"github.com/xenioplatform/go-xenio/common"
-	//"github.com/xenioplatform/go-xenio/ethdb"
+	"github.com/xenioplatform/go-xenio/core/state"
 	//"github.com/xenioplatform/go-xenio/log"
-	"strconv"
+
 )
 
 // loadSnapshot loads an existing snapshot from the database.
@@ -134,6 +136,17 @@ func DeleteAllExpiredStakers() {
 		if StakerExpired(address) == true {
 			delete(common.StakerSnapShot.Stakers, address)
 		}
+	}
+}
+
+func HasCoins(address common.Address, state *state.StateDB) bool {
+	coins := state.GetBalance(address)
+	//log.Info("address in reward list found" + address.String())
+	//log.Info("balance found" + coins.String())
+	if coins.Cmp(big.NewInt(0)) == 1 {
+		return true
+	} else {
+		return false
 	}
 }
 
