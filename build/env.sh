@@ -12,7 +12,7 @@ workspace="$PWD/build/_workspace"
 root="$PWD"
 xeniodir="$workspace/src/github.com/xenioplatform"
 if [ ! -L "$xeniodir/go-xenio" ]; then
-    mkdir -p "$ethdir"
+    mkdir -p "$xeniodir"
     cd "$xeniodir"
     ln -s ../../../../../. go-xenio
     cd "$root"
