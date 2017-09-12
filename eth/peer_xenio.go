@@ -53,7 +53,7 @@ func (p *peer) TransmitNodeList() error {
 			if xenio.StakerExpired(key) == false {
 				_lasttime := fmt.Sprint(value.LastSeen.Unix())
 				_firsttime := fmt.Sprint(value.FirstSeen.Unix())
-				toSend = append(toSend, common.StakerTransmit{key,_firsttime, _lasttime})
+				toSend = append(toSend, common.StakerTransmit{key,_firsttime, _lasttime, ""})
 			}
 		}
 		return p2p.Send(p.rw, TransmitNodeList, toSend)

@@ -258,10 +258,12 @@ type StakerSnapshot struct {
 type Staker struct {
 	FirstSeen		time.Time			`json:"firstseen"`
 	LastSeen		time.Time			`json:"lastseen"`
+	ExtraData       string              `json:"extradata"`
 }
 
 type StakerTransmit struct {
 	Address 		Address				`json:"address"`
 	FirstSeen       string              `json:"firstseen"`
 	LastSeen		string				`json:"lastseen"`
+	ExtraData       string              `json:"extradata"`
 }
