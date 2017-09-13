@@ -42,6 +42,7 @@ import (
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
 	"strconv"
+	"encoding/json"
 )
 
 const (
@@ -595,25 +596,18 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header, state
 	}
 
 	//PoN Rewards
-	var failsafe bool
-	failsafe = true
-	if number != 0 {
+	if number >= 1 {
 		if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
 			if len(common.StakerSnapShot.Stakers) >= 0 {
 				for key := range common.StakerSnapShot.Stakers {
 					if state != nil {
 						if !StakerExpired(key) && HasCoins(key, state) {
-							failsafe = false
 							header.RewardList = append(header.RewardList, key)
 						}
 					}
 				}
 			}
 		}
-	}
-
-	if failsafe {
-		header.RewardList = append(header.RewardList, common.HexToAddress("0xed0755710cf86d9A00331EF729Fa99650e05898b"))
 	}
 	return nil
 }
@@ -735,10 +729,12 @@ func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*typ
 		r.Div(blockReward, big32)
 		reward.Add(reward, r)
 	}*/
-	for _, address := range header.RewardList {
-		state.AddBalance(address, reward)
-	//	cb, _ := json.Marshal(address)
-	//	log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
+	if len(header.RewardList) >=1 {
+		for _, address := range header.RewardList {
+			state.AddBalance(address, reward)
+			cb, _ := json.Marshal(address)
+			log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
+		}
 	}
 
 }
