@@ -41,6 +41,7 @@ import (
 	"github.com/xenioplatform/go-xenio/rlp"
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
+	"strconv"
 )
 
 const (
@@ -131,6 +132,10 @@ var (
 
 	// errUnauthorized is returned if a header is signed by a non-authorized entity.
 	errUnauthorized = errors.New("unauthorized")
+	// errOutOfTurn is returned if a header is signed by a authorized but out of turn entity.
+	errOutOfTurn = errors.New("invalid turn")
+	// errOrphanChild is returned when we cannot locate the parent of a block in the chain
+	errOrphanChild = errors.New("Cannot Locate Parent")
 )
 
 // SignerFn is a signer callback function to request a hash to be signed by a
@@ -436,6 +441,7 @@ func (c *Xenio) snapshot(chain consensus.ChainReader, number uint64, hash common
 	}
 	snap, err := snap.apply(headers)
 	if err != nil {
+		log.Error("snap headers")
 		return nil, err
 	}
 	c.recents.Add(snap.Hash, snap)
@@ -493,7 +499,21 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 		if recent == signer {
 			// Signer is among recents, only fail if the current block doesn't shift it out
 			if limit := uint64(len(snap.Signers)/2 + 1); seen > number-limit {
-				return errUnauthorized
+				parentTime := big.NewInt(120)
+				parentNumber := big.NewInt(-1)
+				parentNumber.Add(parentNumber,header.Number)
+				parentNumberUINT, _ := strconv.ParseUint(parentNumber.String(),10,64) // TODO: find a better way to do this
+				parentHeader := chain.GetHeaderByNumber(parentNumberUINT)
+				if parentHeader == nil{
+					break
+					//return errOrphanChild
+				}
+				parentTime.Add(parentTime, parentHeader.Time)
+				if parentTime.Cmp(header.Time) < 1{
+					log.Trace("a signer has delayed his work, his turn has been skipped")
+				}else {
+					return errOutOfTurn
+				}
 			}
 		}
 	}
@@ -575,24 +595,16 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 	}
 
 	//PoN Rewards
-	var failsafe bool
-	failsafe = true
-	if number != 0{
+	if number >= 1 {
 		if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
 			if len(common.StakerSnapShot.Stakers) >= 0 {
 				for key := range common.StakerSnapShot.Stakers {
 					if !StakerExpired(key) {
-						failsafe = false
 						header.RewardList = append(header.RewardList, key)
 					}
 				}
 			}
 		}
-	}/*else{
-		log.Error("genesis block")
-	}*/
-	if failsafe {
-		header.RewardList = append(header.RewardList, common.HexToAddress("0xed0755710cf86d9A00331EF729Fa99650e05898b"))
 	}
 	return nil
 }
@@ -650,6 +662,12 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	// If we're amongst the recent signers, wait for the next block
 	for seen, recent := range snap.Recents {
 		if recent == signer {
+			nextTime := big.NewInt(120)
+			nextTime.Add(nextTime, chain.CurrentHeader().Time)
+			if nextTime.Cmp(big.NewInt(time.Now().Unix())) < 1 {
+				log.Warn("Block Minting is Late, Trying to Out-of-Turn Seal")
+				break
+			}
 			// Signer is among recents, only wait if the current block doesn't shift it out
 			if limit := uint64(len(snap.Signers)/2 + 1); number < limit || seen > number-limit {
 				log.Info("Signed recently, must wait for others")
@@ -708,10 +726,14 @@ func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*typ
 		r.Div(blockReward, big32)
 		reward.Add(reward, r)
 	}*/
-	for _, address := range header.RewardList {
-		state.AddBalance(address, reward)
-	//	cb, _ := json.Marshal(address)
-	//	log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
+	if len(header.RewardList) >= 1 {
+		for _, address := range header.RewardList {
+			//if HasCoins(address, state) {
+				state.AddBalance(address, reward)
+				//cb, _ := json.Marshal(address)
+				//log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
+			//}
+		}
 	}
 
 }

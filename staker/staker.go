@@ -134,8 +134,6 @@ func (self *Staker) Start(coinbase common.Address) {
 
 	if areBigEqualNumbers(coins,big.NewInt(0)){
 		log.Error("Your balance is 0 and you wont be able to stake in the feature")
-	}else {
-		log.Info("Staking @ " + coinbase.String() + " with " + coins.String() + " wei")
 	}
 
 	log.Info("Starting staking operation")

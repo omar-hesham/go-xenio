@@ -50,12 +50,13 @@ type Snapshot struct {
 	config   *params.XenioConfig // Consensus engine parameters to fine tune behavior
 	sigcache *lru.ARCCache        // Cache of recent block signatures to speed up ecrecover
 
-	Number  uint64                      `json:"number"`  // Block number where the snapshot was created
-	Hash    common.Hash                 `json:"hash"`    // Block hash where the snapshot was created
-	Signers map[common.Address]struct{} `json:"signers"` // Set of authorized signers at this moment
-	Recents map[uint64]common.Address   `json:"recents"` // Set of recent signers for spam protections
-	Votes   []*Vote                     `json:"votes"`   // List of votes cast in chronological order
-	Tally   map[common.Address]Tally    `json:"tally"`   // Current vote tally to avoid recalculating
+	Number      uint64                      `json:"number"`      // Block number where the snapshot was created
+	Hash        common.Hash                 `json:"hash"`        // Block hash where the snapshot was created
+	MasterNodes map[common.Address]struct{} `json:"masternodes"` // Set of master nodes
+	Signers     map[common.Address]struct{} `json:"signers"`     // Set of authorized signers at this moment
+	Recents     map[uint64]common.Address   `json:"recents"`     // Set of recent signers for spam protections
+	Votes       []*Vote                     `json:"votes"`       // List of votes cast in chronological order
+	Tally       map[common.Address]Tally    `json:"tally"`       // Current vote tally to avoid recalculating
 }
 
 // newSnapshot creates a new snapshot with the specified startup parameters. This
@@ -210,11 +211,12 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 		if _, ok := snap.Signers[signer]; !ok {
 			return nil, errUnauthorized
 		}
-		for _, recent := range snap.Recents {
+		/*for _, recent := range snap.Recents {
 			if recent == signer {
+				log.Error("snap recents 2")
 				return nil, errUnauthorized
 			}
-		}
+		}*/
 		snap.Recents[number] = signer
 
 		// Header authorized, discard any previous votes from the signer

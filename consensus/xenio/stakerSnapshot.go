@@ -19,12 +19,14 @@ package xenio
 
 import (
 	//"encoding/json"
+	"math/big"
+	"strconv"
 	"time"
 
 	"github.com/xenioplatform/go-xenio/common"
-	//"github.com/xenioplatform/go-xenio/ethdb"
+	"github.com/xenioplatform/go-xenio/core/state"
 	//"github.com/xenioplatform/go-xenio/log"
-	"strconv"
+
 )
 
 // loadSnapshot loads an existing snapshot from the database.
@@ -81,6 +83,7 @@ func StakerCast(stakers []common.StakerTransmit) {
 		_time, err := strconv.ParseInt(value.LastSeen, 10, 64)
 		if err == nil {
 			newStaker.LastSeen = time.Unix(_time, 0).UTC()
+			newStaker.FirstSeen = newStaker.LastSeen
 			delta := now.Sub(newStaker.LastSeen)
 			// only add non expired stakers to list
 			if delta.Seconds() <= common.StakerTTL {
@@ -136,6 +139,17 @@ func DeleteAllExpiredStakers() {
 	}
 }
 
+func HasCoins(address common.Address, state *state.StateDB) bool {
+	coins := state.GetBalance(address)
+	//log.Info("address in reward list found" + address.String())
+	//log.Info("balance found" + coins.String())
+	if coins.Cmp(big.NewInt(0)) == 1 {
+		return true
+	} else {
+		return false
+	}
+}
+
 func (api *API) GetActiveStakerList() []common.Address {
 	var stakerList []common.Address
 	if common.StakerSnapShot != nil {
@@ -161,6 +175,7 @@ func (api *API) AddStakerToSnapshot(address common.Address) {
 		api.GetStakerSnapshot()
 	}
 	var staker common.Staker
-	staker.LastSeen = time.Now().UTC()
+	staker.FirstSeen = time.Now().UTC()
+	staker.LastSeen = staker.FirstSeen
 	common.StakerSnapShot.Stakers[address] = staker
 }

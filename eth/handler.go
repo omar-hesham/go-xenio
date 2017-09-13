@@ -616,7 +616,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		// Schedule all the unknown hashes for retrieval
 		unknown := make(newBlockHashesData, 0, len(announces))
 		for _, block := range announces {
-			if !pm.blockchain.HasBlock(block.Hash) {
+			if !pm.blockchain.HasBlock(block.Hash, block.Number) {
 				unknown = append(unknown, block)
 			}
 		}
@@ -700,7 +700,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		p.Log().Info("coinbase " + string(address_Json) + " received")
 	case msg.Code == TransmitNodeList:
 		var stakers []common.StakerTransmit
-		p.Log().Warn("staker list received")
+		p.Log().Trace("staker list received")
 
 		if err := msg.Decode(&stakers); err != nil {
 			return errResp(ErrDecode, "msg %v: %v", msg, err)
@@ -740,7 +740,7 @@ func (pm *ProtocolManager) BroadcastBlock(block *types.Block, propagate bool) {
 		return
 	}
 	// Otherwise if the block is indeed in out own chain, announce it
-	if pm.blockchain.HasBlock(hash) {
+	if pm.blockchain.HasBlock(hash, block.NumberU64()) {
 		for _, peer := range peers {
 			peer.SendNewBlockHashes([]common.Hash{hash}, []uint64{block.NumberU64()})
 		}
