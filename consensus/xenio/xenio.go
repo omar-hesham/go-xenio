@@ -607,6 +607,8 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header, state
 					}
 				}
 			}
+		}else{
+			log.Error("snapshot is empty")
 		}
 	}
 	return nil
