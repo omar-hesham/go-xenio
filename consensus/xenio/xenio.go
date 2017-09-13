@@ -530,7 +530,7 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 
 // Prepare implements consensus.Engine, preparing all the consensus fields of the
 // header for running the transactions on top.
-func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header, state *state.StateDB) error {
+func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error {
 	// If the block isn't a checkpoint, cast a random vote (good enough for now)
 	header.Coinbase = common.Address{}
 	header.Nonce = types.BlockNonce{}
@@ -599,11 +599,9 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header, state
 		if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
 			if len(common.StakerSnapShot.Stakers) >= 0 {
 				for key := range common.StakerSnapShot.Stakers {
-					//if state != nil {
-					if !StakerExpired(key) { //&& HasCoins(key, state) {
+					if !StakerExpired(key) {
 						header.RewardList = append(header.RewardList, key)
 					}
-					//}
 				}
 			}
 		}

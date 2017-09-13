@@ -426,7 +426,7 @@ func (self *watcher) commitNewWork() {
 	if atomic.LoadInt32(&self.staking) == 1 {
 		header.Coinbase = self.coinbase
 	}
-	if err := self.engine.Prepare(self.chain, header, nil); err != nil {
+	if err := self.engine.Prepare(self.chain, header); err != nil {
 		log.Error("Failed to prepare header for mining", "err", err)
 		return
 	}
