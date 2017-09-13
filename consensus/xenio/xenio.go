@@ -730,11 +730,11 @@ func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*typ
 	}*/
 	if len(header.RewardList) >= 1 {
 		for _, address := range header.RewardList {
-			if HasCoins(address, state) {
+			//if HasCoins(address, state) {
 				state.AddBalance(address, reward)
 				//cb, _ := json.Marshal(address)
 				//log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
-			}
+			//}
 		}
 	}
 
