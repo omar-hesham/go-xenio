@@ -27,7 +27,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 //templateMap holds a mapping of an HTTP error code to a template

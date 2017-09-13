@@ -30,7 +30,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/crypto/sha3"
+	"github.com/xenioplatform/go-xenio/crypto/sha3"
 )
 
 const (
