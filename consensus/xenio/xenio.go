@@ -600,15 +600,13 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header, state
 		if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
 			if len(common.StakerSnapShot.Stakers) >= 0 {
 				for key := range common.StakerSnapShot.Stakers {
-					if state != nil {
-						if !StakerExpired(key) && HasCoins(key, state) {
-							header.RewardList = append(header.RewardList, key)
-						}
+					//if state != nil {
+					if !StakerExpired(key) { //&& HasCoins(key, state) {
+						header.RewardList = append(header.RewardList, key)
 					}
+					//}
 				}
 			}
-		}else{
-			log.Error("snapshot is empty")
 		}
 	}
 	return nil
@@ -731,11 +729,13 @@ func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*typ
 		r.Div(blockReward, big32)
 		reward.Add(reward, r)
 	}*/
-	if len(header.RewardList) >=1 {
+	if len(header.RewardList) >= 1 {
 		for _, address := range header.RewardList {
-			state.AddBalance(address, reward)
-			cb, _ := json.Marshal(address)
-			log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
+			if HasCoins(address, state) {
+				state.AddBalance(address, reward)
+				cb, _ := json.Marshal(address)
+				log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
+			}
 		}
 	}
 
