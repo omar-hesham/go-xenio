@@ -53,7 +53,7 @@ type Snapshot struct {
 	Number      uint64                      `json:"number"`      // Block number where the snapshot was created
 	Hash        common.Hash                 `json:"hash"`        // Block hash where the snapshot was created
 	MasterNodes map[common.Address]struct{} `json:"masternodes"` // Set of master nodes
-	Signers     map[common.Address]struct{} `json:"signers"`     // Set of authorized signers at this moment
+	Signers     map[common.Address]uint64   `json:"signers"`     // Set of authorized signers at this moment
 	Recents     map[uint64]common.Address   `json:"recents"`     // Set of recent signers for spam protections
 	Votes       []*Vote                     `json:"votes"`       // List of votes cast in chronological order
 	Tally       map[common.Address]Tally    `json:"tally"`       // Current vote tally to avoid recalculating
@@ -68,12 +68,12 @@ func newSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, number uint
 		sigcache: sigcache,
 		Number:   number,
 		Hash:     hash,
-		Signers:  make(map[common.Address]struct{}),
+		Signers:  make(map[common.Address]uint64),
 		Recents:  make(map[uint64]common.Address),
 		Tally:    make(map[common.Address]Tally),
 	}
 	for _, signer := range signers {
-		snap.Signers[signer] = struct{}{}
+		snap.Signers[signer] = 0
 	}
 	return snap
 }
@@ -110,13 +110,13 @@ func (s *Snapshot) copy() *Snapshot {
 		sigcache: s.sigcache,
 		Number:   s.Number,
 		Hash:     s.Hash,
-		Signers:  make(map[common.Address]struct{}),
+		Signers:  make(map[common.Address]uint64),
 		Recents:  make(map[uint64]common.Address),
 		Votes:    make([]*Vote, len(s.Votes)),
 		Tally:    make(map[common.Address]Tally),
 	}
 	for signer := range s.Signers {
-		cpy.Signers[signer] = struct{}{}
+		cpy.Signers[signer] = 0
 	}
 	for block, signer := range s.Recents {
 		cpy.Recents[block] = signer
@@ -251,7 +251,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 		// If the vote passed, update the list of signers
 		if tally := snap.Tally[header.Coinbase]; tally.Votes > len(snap.Signers)/2 {
 			if tally.Authorize {
-				snap.Signers[header.Coinbase] = struct{}{}
+				snap.Signers[header.Coinbase] = 0
 			} else {
 				delete(snap.Signers, header.Coinbase)
 
