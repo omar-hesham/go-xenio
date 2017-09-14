@@ -21,6 +21,7 @@ package xenio
 import (
 	"bytes"
 	"encoding/json"
+	"time"
 
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/core/types"
@@ -53,10 +54,15 @@ type Snapshot struct {
 	Number      uint64                      `json:"number"`      // Block number where the snapshot was created
 	Hash        common.Hash                 `json:"hash"`        // Block hash where the snapshot was created
 	MasterNodes map[common.Address]struct{} `json:"masternodes"` // Set of master nodes
-	Signers     map[common.Address]uint64   `json:"signers"`     // Set of authorized signers at this moment
+	Signers     map[common.Address]Signer   `json:"signers"`     // Set of authorized signers at this moment
 	Recents     map[uint64]common.Address   `json:"recents"`     // Set of recent signers for spam protections
 	Votes       []*Vote                     `json:"votes"`       // List of votes cast in chronological order
 	Tally       map[common.Address]Tally    `json:"tally"`       // Current vote tally to avoid recalculating
+}
+
+type Signer struct {
+	BlockNumber uint64						`json:"blocknumber"` // Block number assigned for signing
+	SignDate 	time.Time					`json:"signdate"`    // Date Time for Block signing
 }
 
 // newSnapshot creates a new snapshot with the specified startup parameters. This
@@ -68,12 +74,15 @@ func newSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, number uint
 		sigcache: sigcache,
 		Number:   number,
 		Hash:     hash,
-		Signers:  make(map[common.Address]uint64),
+		Signers:  make(map[common.Address]Signer),
 		Recents:  make(map[uint64]common.Address),
 		Tally:    make(map[common.Address]Tally),
 	}
-	for _, signer := range signers {
-		snap.Signers[signer] = 0
+	var newSigner Signer
+	for i, signer := range signers {
+		newSigner.BlockNumber = number + uint64(i + 1) // Block Zero not in play!
+		newSigner.SignDate = time.Unix(time.Now().UTC().Unix()+int64(i)*int64(config.Period), 0).UTC()
+		snap.Signers[signer] = newSigner
 	}
 	return snap
 }
@@ -110,13 +119,13 @@ func (s *Snapshot) copy() *Snapshot {
 		sigcache: s.sigcache,
 		Number:   s.Number,
 		Hash:     s.Hash,
-		Signers:  make(map[common.Address]uint64),
+		Signers:  make(map[common.Address]Signer),
 		Recents:  make(map[uint64]common.Address),
 		Votes:    make([]*Vote, len(s.Votes)),
 		Tally:    make(map[common.Address]Tally),
 	}
-	for signer := range s.Signers {
-		cpy.Signers[signer] = 0
+	for address, signerData := range s.Signers {
+		cpy.Signers[address] = signerData
 	}
 	for block, signer := range s.Recents {
 		cpy.Recents[block] = signer
@@ -251,7 +260,8 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 		// If the vote passed, update the list of signers
 		if tally := snap.Tally[header.Coinbase]; tally.Votes > len(snap.Signers)/2 {
 			if tally.Authorize {
-				snap.Signers[header.Coinbase] = 0
+				var newSigner Signer
+				snap.Signers[header.Coinbase] = newSigner
 			} else {
 				delete(snap.Signers, header.Coinbase)
 
