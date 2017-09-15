@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-xenio Authors
+// This file is part of the go-xenio library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-xenio library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-xenio library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-xenio library. If not, see <http://www.gnu.org/licenses/>.
 
 package params
 
@@ -21,7 +21,7 @@ import (
 	"math"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/xenioplatform/go-xenio/common"
 )
 
 var (
@@ -80,7 +80,24 @@ var (
 			Epoch:  30000,
 		},
 	}
+	XenioChainConfig = &ChainConfig{
+				ChainId:         big.NewInt(7497),
+				HomesteadBlock:  big.NewInt(1), // never enable
+				DAOForkBlock:    nil, // never enable
+				DAOForkSupport:  true,
+				EIP150Block:     big.NewInt(2), // never enable
+				EIP150Hash:      common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000"),
+				EIP155Block:     big.NewInt(3), // never enable
+				EIP158Block:     big.NewInt(3), // never enable
+				ByzantiumBlock: big.NewInt(math.MaxInt64), // never enable
+				XenioBlock:		 big.NewInt(math.MaxInt64),
 
+					Xenio: &XenioConfig{
+						Epoch:      30000,
+						Period: 	60,
+						//SuperPeriod:60*30,
+						},
+			}
 	// AllProtocolChanges contains every protocol change (EIPs)
 	// introduced and accepted by the Ethereum core developers.
 	//
@@ -89,11 +106,20 @@ var (
 	// means that all fields must be set at all times. This forces
 	// anyone adding flags to the config to also have to set these
 	// fields.
-	AllProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), new(EthashConfig), nil}
-	TestChainConfig    = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), new(EthashConfig), nil}
+	AllProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0) /*disabled*/,big.NewInt(0), new(EthashConfig), nil, nil}
+	TestChainConfig    = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), nil, big.NewInt(0),new(EthashConfig), nil, nil}
 	TestRules          = TestChainConfig.Rules(new(big.Int))
 )
 
+type XenioConfig struct {
+	Period      uint64 `json:"period"`      // Number of seconds between blocks to enforce
+	Epoch       uint64 `json:"epoch"`       // TODO: maybe remove that
+	SuperPeriod uint64 `json:"superperiod"` // Number of seconds between super blocks to enforce
+}
+
+func (c *XenioConfig) String() string {
+	return "xenio"
+}
 // ChainConfig is the core config which determines the blockchain settings.
 //
 // ChainConfig is stored in the database on a per block basis. This means
@@ -118,6 +144,7 @@ type ChainConfig struct {
 	// Various consensus engines
 	Ethash *EthashConfig `json:"ethash,omitempty"`
 	Clique *CliqueConfig `json:"clique,omitempty"`
+	Xenio *XenioConfig 	 `json:"xenio,omitempty"`
 }
 
 // EthashConfig is the consensus engine configs for proof-of-work based sealing.
@@ -147,10 +174,12 @@ func (c *ChainConfig) String() string {
 		engine = c.Ethash
 	case c.Clique != nil:
 		engine = c.Clique
+	case c.Xenio != nil:
+		engine = c.Xenio
 	default:
 		engine = "unknown"
 	}
-	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Engine: %v}",
+	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: Xenio: %v %v Engine: %v}",
 		c.ChainId,
 		c.HomesteadBlock,
 		c.DAOForkBlock,
@@ -159,6 +188,7 @@ func (c *ChainConfig) String() string {
 		c.EIP155Block,
 		c.EIP158Block,
 		c.ByzantiumBlock,
+		c.XenioBlock,
 		engine,
 	)
 }
@@ -188,7 +218,9 @@ func (c *ChainConfig) IsEIP158(num *big.Int) bool {
 func (c *ChainConfig) IsByzantium(num *big.Int) bool {
 	return isForked(c.ByzantiumBlock, num)
 }
-
+func (c *ChainConfig) IsXenio(num *big.Int) bool {
+	return isForked(c.XenioBlock, num)
+}
 // GasTable returns the gas table corresponding to the current phase (homestead or homestead reprice).
 //
 // The returned GasTable's fields shouldn't, under any circumstances, be changed.
