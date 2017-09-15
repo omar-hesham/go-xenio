@@ -1,20 +1,18 @@
-// Copyright 2017 The go-xenio Authors
 // Copyright 2016 The go-ethereum Authors
+// This file is part of the go-ethereum library.
 //
-// This file is part of the go-xenio library.
-//
-// The go-xenio library is free software: you can redistribute it and/or modify
+// The go-ethereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-xenio library is distributed in the hope that it will be useful,
+// The go-ethereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-xenio library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package params
 
@@ -23,7 +21,7 @@ import (
 	"math"
 	"math/big"
 
-	"github.com/xenioplatform/go-xenio/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 var (
@@ -43,7 +41,7 @@ var (
 		EIP155Block:     big.NewInt(2675000),
 		EIP158Block:     big.NewInt(2675000),
 		XenioBlock:      big.NewInt(math.MaxInt64), // never enable
-		MetropolisBlock: big.NewInt(math.MaxInt64), // Don't enable yet
+		ByzantiumBlock: big.NewInt(math.MaxInt64), // Don't enable yet
 
 		Ethash: new(EthashConfig),
 	}
@@ -59,7 +57,7 @@ var (
 		EIP155Block:     big.NewInt(10),
 		EIP158Block:     big.NewInt(10),
 		XenioBlock:      big.NewInt(math.MaxInt64), // never enable
-		MetropolisBlock: big.NewInt(math.MaxInt64), // Don't enable yet
+		ByzantiumBlock: big.NewInt(math.MaxInt64),
 
 		Ethash: new(EthashConfig),
 	}
@@ -75,7 +73,7 @@ var (
 		EIP155Block:     big.NewInt(3),
 		EIP158Block:     big.NewInt(3),
 		XenioBlock:      big.NewInt(math.MaxInt64), // never enable
-		MetropolisBlock: big.NewInt(math.MaxInt64), // Don't enable yet
+		ByzantiumBlock: big.NewInt(math.MaxInt64), // Don't enable yet
 
 		Clique: &CliqueConfig{
 			Period: 15,
@@ -83,24 +81,6 @@ var (
 		},
 	}
 
-	XenioChainConfig = &ChainConfig{
-		ChainId:         big.NewInt(7497),
-		HomesteadBlock:  big.NewInt(1), // never enable
-		DAOForkBlock:    nil, // never enable
-		DAOForkSupport:  true,
-		EIP150Block:     big.NewInt(2), // never enable
-		EIP150Hash:      common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000"),
-		EIP155Block:     big.NewInt(3), // never enable
-		EIP158Block:     big.NewInt(3), // never enable
-		MetropolisBlock: big.NewInt(math.MaxInt64), // never enable
-		XenioBlock:		 big.NewInt(math.MaxInt64),
-
-		Xenio: &XenioConfig{
-			Epoch:      30000,
-			Period: 	60,
-			//SuperPeriod:60*30,
-		},
-	}
 	// AllProtocolChanges contains every protocol change (EIPs)
 	// introduced and accepted by the Ethereum core developers.
 	//
@@ -109,8 +89,8 @@ var (
 	// means that all fields must be set at all times. This forces
 	// anyone adding flags to the config to also have to set these
 	// fields.
-	AllProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(math.MaxInt64) /*disabled*/,big.NewInt(0), new(EthashConfig), nil, nil} //TODO: remove xenioblock
-	TestChainConfig    = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), nil, big.NewInt(0),new(EthashConfig), nil, nil}
+	AllProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), new(EthashConfig), nil}
+	TestChainConfig    = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), new(EthashConfig), nil}
 	TestRules          = TestChainConfig.Rules(new(big.Int))
 )
 
@@ -126,19 +106,18 @@ type ChainConfig struct {
 	DAOForkBlock   *big.Int `json:"daoForkBlock,omitempty"`   // TheDAO hard-fork switch block (nil = no fork)
 	DAOForkSupport bool     `json:"daoForkSupport,omitempty"` // Whether the nodes supports or opposes the DAO hard-fork
 
-	// EIP150 implements the Gas price changes (github.com/xenioplatform/EIPs/issues/150)
+	// EIP150 implements the Gas price changes (https://github.com/ethereum/EIPs/issues/150)
 	EIP150Block *big.Int    `json:"eip150Block,omitempty"` // EIP150 HF block (nil = no fork)
 	EIP150Hash  common.Hash `json:"eip150Hash,omitempty"`  // EIP150 HF hash (fast sync aid)
 
 	EIP155Block *big.Int `json:"eip155Block,omitempty"` // EIP155 HF block
 	EIP158Block *big.Int `json:"eip158Block,omitempty"` // EIP158 HF block
 
-	MetropolisBlock *big.Int `json:"metropolisBlock,omitempty"` // Metropolis switch block (nil = no fork, 0 = already on homestead)
+	ByzantiumBlock *big.Int `json:"byzantiumBlock,omitempty"` // Byzantium switch block (nil = no fork, 0 = alraedy on homestead)
 	XenioBlock *big.Int `json:"xenioBlock,omitempty"`
 	// Various consensus engines
 	Ethash *EthashConfig `json:"ethash,omitempty"`
 	Clique *CliqueConfig `json:"clique,omitempty"`
-	Xenio *XenioConfig 	 `json:"xenio,omitempty"`
 }
 
 // EthashConfig is the consensus engine configs for proof-of-work based sealing.
@@ -155,19 +134,11 @@ type CliqueConfig struct {
 	Epoch  uint64 `json:"epoch"`  // Epoch length to reset votes and checkpoint
 }
 
-type XenioConfig struct {
-	Period uint64 		`json:"period"` // Number of seconds between blocks to enforce
-	Epoch  uint64 `json:"epoch"` // TODO: maybe remove that
-	SuperPeriod uint64	`json:"superperiod"` // Number of seconds between super blocks to enforce
-}
-
 // String implements the stringer interface, returning the consensus engine details.
 func (c *CliqueConfig) String() string {
 	return "clique"
 }
-func (c *XenioConfig) String() string {
-	return "xenio"
-}
+
 // String implements the fmt.Stringer interface.
 func (c *ChainConfig) String() string {
 	var engine interface{}
@@ -176,12 +147,10 @@ func (c *ChainConfig) String() string {
 		engine = c.Ethash
 	case c.Clique != nil:
 		engine = c.Clique
-	case c.Xenio != nil:
-		engine = c.Xenio
 	default:
 		engine = "unknown"
 	}
-	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Metropolis: %v  Xenio: %v Engine: %v}",
+	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Engine: %v}",
 		c.ChainId,
 		c.HomesteadBlock,
 		c.DAOForkBlock,
@@ -189,8 +158,7 @@ func (c *ChainConfig) String() string {
 		c.EIP150Block,
 		c.EIP155Block,
 		c.EIP158Block,
-		c.MetropolisBlock,
-		c.XenioBlock,
+		c.ByzantiumBlock,
 		engine,
 	)
 }
@@ -217,12 +185,10 @@ func (c *ChainConfig) IsEIP158(num *big.Int) bool {
 	return isForked(c.EIP158Block, num)
 }
 
-func (c *ChainConfig) IsMetropolis(num *big.Int) bool {
-	return isForked(c.MetropolisBlock, num)
+func (c *ChainConfig) IsByzantium(num *big.Int) bool {
+	return isForked(c.ByzantiumBlock, num)
 }
-func (c *ChainConfig) IsXenio(num *big.Int) bool {
-	return isForked(c.XenioBlock, num)
-}
+
 // GasTable returns the gas table corresponding to the current phase (homestead or homestead reprice).
 //
 // The returned GasTable's fields shouldn't, under any circumstances, be changed.
@@ -280,8 +246,8 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 	if c.IsEIP158(head) && !configNumEqual(c.ChainId, newcfg.ChainId) {
 		return newCompatError("EIP158 chain ID", c.EIP158Block, newcfg.EIP158Block)
 	}
-	if isForkIncompatible(c.MetropolisBlock, newcfg.MetropolisBlock, head) {
-		return newCompatError("Metropolis fork block", c.MetropolisBlock, newcfg.MetropolisBlock)
+	if isForkIncompatible(c.ByzantiumBlock, newcfg.ByzantiumBlock, head) {
+		return newCompatError("Byzantium fork block", c.ByzantiumBlock, newcfg.ByzantiumBlock)
 	}
 	return nil
 }
@@ -349,7 +315,7 @@ func (err *ConfigCompatError) Error() string {
 type Rules struct {
 	ChainId                                   *big.Int
 	IsHomestead, IsEIP150, IsEIP155, IsEIP158 bool
-	IsMetropolis                              bool
+	IsByzantium                               bool
 }
 
 func (c *ChainConfig) Rules(num *big.Int) Rules {
@@ -357,5 +323,5 @@ func (c *ChainConfig) Rules(num *big.Int) Rules {
 	if chainId == nil {
 		chainId = new(big.Int)
 	}
-	return Rules{ChainId: new(big.Int).Set(chainId), IsHomestead: c.IsHomestead(num), IsEIP150: c.IsEIP150(num), IsEIP155: c.IsEIP155(num), IsEIP158: c.IsEIP158(num), IsMetropolis: c.IsMetropolis(num)}
+	return Rules{ChainId: new(big.Int).Set(chainId), IsHomestead: c.IsHomestead(num), IsEIP150: c.IsEIP150(num), IsEIP155: c.IsEIP155(num), IsEIP158: c.IsEIP158(num), IsByzantium: c.IsByzantium(num)}
 }
