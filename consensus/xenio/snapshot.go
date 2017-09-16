@@ -28,6 +28,7 @@ import (
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/ethdb"
 	"github.com/xenioplatform/go-xenio/params"
+	"github.com/xenioplatform/go-xenio/log"
 	lru "github.com/hashicorp/golang-lru"
 )
 
@@ -296,8 +297,22 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 	snap.Number += uint64(len(headers))
 	snap.Hash = headers[len(headers)-1].Hash()
 
+	// Retrieve and update Signer List
+	//genesis := chain.GetHeaderByNumber(0)
+	//if err := c.VerifyHeader(chain, genesis, false); err != nil {
+	//	return nil, err
+	//}
+	//signers := make([]common.Address, (len(genesis.Extra)-extraVanity-extraSeal)/common.AddressLength)
+	//for i := 0; i < len(signers); i++ {
+	//	copy(signers[i][:], genesis.Extra[extraVanity+i*common.AddressLength:])
+	//}
+	snap = updateSigners(snap, nil, snap.Number, nil, snap.Signers)
+
+	blob,_ := json.Marshal(snap)
+	log.Warn(string(blob))
 	return snap, nil
 }
+
 
 // signers retrieves the list of authorized signers in ascending order.
 func (s *Snapshot) signers() []common.Address {
@@ -315,15 +330,27 @@ func (s *Snapshot) signers() []common.Address {
 	return signers
 }
 
-func updateSigners(snap *Snapshot, config *params.XenioConfig, number uint64, SignDate *big.Int, signers []common.Address) *Snapshot {
+func updateSigners(snap *Snapshot, config *params.XenioConfig, number uint64, SignDate *big.Int, signers map[common.Address]Signer) *Snapshot {
 	var newSigner Signer
-	for i, signer := range signers {
+	i := 0
+	for address := range signers {
 		newSigner.BlockNumber = number + uint64(i+1) // Assign next Block
-		newSigner.SignDate = time.Unix(SignDate.Int64()+int64(i+1)*int64(config.Period), 0).UTC()
-		snap.Signers[signer] = newSigner
+		//newSigner.SignDate = time.Unix(SignDate.Int64()+int64(i+1)*int64(config.Period), 0).UTC()
+		snap.Signers[address] = newSigner
+		i++
 	}
 	return snap
 }
+
+//func updateSigners(snap *Snapshot, config *params.XenioConfig, number uint64, SignDate *big.Int, signers []common.Address) *Snapshot {
+//	var newSigner Signer
+//	for i, signer := range signers {
+//		newSigner.BlockNumber = number + uint64(i+1) // Assign next Block
+//		newSigner.SignDate = time.Unix(SignDate.Int64()+int64(i+1)*int64(config.Period), 0).UTC()
+//		snap.Signers[signer] = newSigner
+//	}
+//	return snap
+//}
 
 // inturn returns if a signer at a given block height is in-turn or not.
 func (s *Snapshot) inturn(number uint64, signer common.Address) bool {
