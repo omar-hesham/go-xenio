@@ -446,6 +446,17 @@ func (c *Xenio) snapshot(chain consensus.ChainReader, number uint64, hash common
 	}
 	c.recents.Add(snap.Hash, snap)
 
+	// Retrieve and update Signer List
+	genesis := chain.GetHeaderByNumber(number)
+	if err := c.VerifyHeader(chain, genesis, false); err != nil {
+		return nil, err
+	}
+	signers := make([]common.Address, (len(genesis.Extra)-extraVanity-extraSeal)/common.AddressLength)
+	for i := 0; i < len(signers); i++ {
+		copy(signers[i][:], genesis.Extra[extraVanity+i*common.AddressLength:])
+	}
+	snap = updateSigners(snap, c.config, number, genesis.Time, signers)
+
 	// If we've generated a new checkpoint snapshot, save to disk
 	if snap.Number%checkpointInterval == 0 && len(headers) > 0 {
 		if err = snap.store(c.db); err != nil {
@@ -502,8 +513,7 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 				parentTime := big.NewInt(120)
 				parentNumber := big.NewInt(-1)
 				parentNumber.Add(parentNumber,header.Number)
-				parentNumberUINT, _ := strconv.ParseUint(parentNumber.String(),10,64) // TODO: find a better way to do this
-				parentHeader := chain.GetHeaderByNumber(parentNumberUINT)
+				parentHeader := chain.GetHeaderByNumber(parentNumber.Uint64())
 				if parentHeader == nil{
 					break
 					//return errOrphanChild

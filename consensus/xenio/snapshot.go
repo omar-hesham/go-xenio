@@ -21,6 +21,7 @@ package xenio
 import (
 	"bytes"
 	"encoding/json"
+	"math/big"
 	"time"
 
 	"github.com/xenioplatform/go-xenio/common"
@@ -312,6 +313,16 @@ func (s *Snapshot) signers() []common.Address {
 		}
 	}
 	return signers
+}
+
+func updateSigners(snap *Snapshot, config *params.XenioConfig, number uint64, SignDate *big.Int, signers []common.Address) *Snapshot {
+	var newSigner Signer
+	for i, signer := range signers {
+		newSigner.BlockNumber = number + uint64(i+1) // Assign next Block
+		newSigner.SignDate = time.Unix(SignDate.Int64()+int64(i+1)*int64(config.Period), 0).UTC()
+		snap.Signers[signer] = newSigner
+	}
+	return snap
 }
 
 // inturn returns if a signer at a given block height is in-turn or not.
