@@ -607,27 +607,14 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 	if number >= 1 {
 		if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
 			if len(common.StakerSnapShot.Stakers) >= 0 {
-				datetime := time.Now()
-				masterNodes := make(map[common.Address]Signer,0)
 				for key := range common.StakerSnapShot.Stakers {
 					if !StakerExpired(key) {
 						header.RewardList = append(header.RewardList, key)
-						var node Signer
-						node.BlockNumber = 1
-						datetime = datetime.Add(30000000000)// its in nano seconds
-						node.SignDate =  datetime
-						masterNodes[key] = node
 					}
-				}
-				if(len(masterNodes)) > 0 {
-					blob, _ := json.Marshal(masterNodes)
-					header.SuperBlock = blob //append(header.SuperBlock, superbyte...)
-				//	log.Warn(string(header.SuperBlock))
 				}
 			}
 		}
 	}
-
 	return nil
 }
 
@@ -714,6 +701,29 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		return nil, nil
 	case <-time.After(delay):
 	}
+	//change superblock headers
+	datetime := time.Now()
+	masterNodes := make(map[common.Address]Signer,0)
+	b_number :=header.Number.Uint64()
+	for address := range snap.MasterNodes {
+		var node Signer
+		if address == header.Coinbase {// put the signer at the end of the list
+			node.BlockNumber = header.Number.Uint64() + uint64(len(snap.MasterNodes))
+		}else{
+			b_number++
+			node.BlockNumber = b_number
+		}
+		datetime = datetime.Add(30000000000)// its in nano seconds
+		node.SignDate =  datetime
+		masterNodes[address] = node
+	}
+
+	if(len(masterNodes)) > 0 {
+		blob, _ := json.Marshal(masterNodes)
+		header.SuperBlock = blob
+		log.Warn(string(blob))
+	}
+
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
 	if err != nil {
