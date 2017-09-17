@@ -41,7 +41,6 @@ import (
 	"github.com/xenioplatform/go-xenio/rlp"
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
-	"encoding/json"
 )
 
 const (
@@ -718,11 +717,11 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		masterNodes[address] = node
 	}
 
-	if(len(masterNodes)) > 0 {
+	/*if(len(masterNodes)) > 0 {
 		blob, _ := json.Marshal(masterNodes)
 		header.SuperBlock = blob
 		log.Warn(string(blob))
-	}
+	}*/
 
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())

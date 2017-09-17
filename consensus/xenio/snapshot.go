@@ -297,7 +297,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 			superBlockData := make(map[common.Address]Signer,0)
 
 			if err := json.Unmarshal(header.SuperBlock,&superBlockData); err != nil {
-				log.Warn(err.Error())
+				log.Trace(err.Error())
 			}else{
 				for key, a := range superBlockData{
 					snap.MasterNodes[key] = a
