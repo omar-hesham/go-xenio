@@ -86,7 +86,7 @@ type Header struct {
 	MixDigest   common.Hash      `json:"mixHash"          gencodec:"required"`
 	Nonce       BlockNonce	     `json:"nonce"            gencodec:"required"`
 	RewardList	[]common.Address `json:"rewardList"       gencodec:"required"`
-	SuperBlock  []byte           `json:"superblock"       gencodec:"required"`
+	SuperBlock  []byte           `json:"superBlock"       gencodec:"required"`
 }
 
 // field type overrides for gencodec
