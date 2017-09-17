@@ -364,8 +364,8 @@ func (c *Xenio) verifyCascadingFields(chain consensus.ChainReader, header *types
 	}
 	// If the block is a checkpoint block, verify the signer list
 	if number%c.config.Epoch == 0 {
-		signers := make([]byte, len(snap.Signers)*common.AddressLength)
-		for i, signer := range snap.signers() {
+		signers := make([]byte, len(snap.MasterNodes)*common.AddressLength)
+		for i, signer := range snap.masterNodes() {
 			copy(signers[i*common.AddressLength:], signer[:])
 		}
 		extraSuffix := len(header.Extra) - extraSeal
@@ -502,13 +502,13 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 	if err != nil {
 		return err
 	}
-	if _, ok := snap.Signers[signer]; !ok {
+	if _, ok := snap.MasterNodes[signer]; !ok {
 		return errUnauthorized
 	}
 	for seen, recent := range snap.Recents {
 		if recent == signer {
 			// Signer is among recents, only fail if the current block doesn't shift it out
-			if limit := uint64(len(snap.Signers)/2 + 1); seen > number-limit {
+			if limit := uint64(len(snap.MasterNodes)/2 + 1); seen > number-limit {
 				parentTime := big.NewInt(120)
 				parentNumber := big.NewInt(-1)
 				parentNumber.Add(parentNumber,header.Number)
@@ -584,7 +584,7 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 	header.Extra = header.Extra[:extraVanity]
 
 	if number%c.config.Epoch == 0 {
-		for _, signer := range snap.signers() {
+		for _, signer := range snap.masterNodes() {
 			header.Extra = append(header.Extra, signer[:]...)
 		}
 	}
@@ -665,7 +665,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		return nil, errUnauthorized
 	}
 
-	if _, authorized := snap.Signers[signer]; !authorized {
+	if _, authorized := snap.MasterNodes[signer]; !authorized {
 		return nil, errUnauthorized
 	}
 	// If we're amongst the recent signers, wait for the next block
@@ -678,7 +678,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 				break
 			}
 			// Signer is among recents, only wait if the current block doesn't shift it out
-			if limit := uint64(len(snap.Signers)/2 + 1); number < limit || seen > number-limit {
+			if limit := uint64(len(snap.MasterNodes)/2 + 1); number < limit || seen > number-limit {
 				log.Info("Signed recently, must wait for others")
 				<-stop
 				return nil, nil
@@ -689,7 +689,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	delay := time.Unix(header.Time.Int64(), 0).Sub(time.Now())
 	if header.Difficulty.Cmp(diffNoTurn) == 0 {
 		// It's not our turn explicitly to sign, delay it a bit
-		wiggle := time.Duration(len(snap.Signers)/2+1) * wiggleTime
+		wiggle := time.Duration(len(snap.MasterNodes)/2+1) * wiggleTime
 		delay += time.Duration(rand.Int63n(int64(wiggle)))
 
 		log.Trace("Out-of-turn signing requested", "wiggle", common.PrettyDuration(wiggle))

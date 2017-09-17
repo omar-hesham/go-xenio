@@ -55,8 +55,8 @@ type Snapshot struct {
 
 	Number      uint64                      `json:"number"`      // Block number where the snapshot was created
 	Hash        common.Hash                 `json:"hash"`        // Block hash where the snapshot was created
-	MasterNodes map[common.Address]struct{} `json:"masternodes"` // Set of master nodes
-	Signers     map[common.Address]Signer   `json:"signers"`     // Set of authorized signers at this moment
+	//Stakers map[common.Address]struct{} `json:"stakers"` // Set of master nodes
+	MasterNodes map[common.Address]Signer   `json:"masternodes"`     // Set of authorized signers at this moment
 	Recents     map[uint64]common.Address   `json:"recents"`     // Set of recent signers for spam protections
 	Votes       []*Vote                     `json:"votes"`       // List of votes cast in chronological order
 	Tally       map[common.Address]Tally    `json:"tally"`       // Current vote tally to avoid recalculating
@@ -76,7 +76,7 @@ func newSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, number uint
 		sigcache: sigcache,
 		Number:   number,
 		Hash:     hash,
-		Signers:  make(map[common.Address]Signer),
+		MasterNodes:  make(map[common.Address]Signer),
 		Recents:  make(map[uint64]common.Address),
 		Tally:    make(map[common.Address]Tally),
 	}
@@ -84,7 +84,7 @@ func newSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, number uint
 	for i, signer := range signers {
 		newSigner.BlockNumber = number + uint64(i + 1) // Block Zero not in play!
 		newSigner.SignDate = time.Unix(time.Now().UTC().Unix()+int64(i)*int64(config.Period), 0).UTC()
-		snap.Signers[signer] = newSigner
+		snap.MasterNodes[signer] = newSigner
 	}
 	return snap
 }
@@ -121,13 +121,13 @@ func (s *Snapshot) copy() *Snapshot {
 		sigcache: s.sigcache,
 		Number:   s.Number,
 		Hash:     s.Hash,
-		Signers:  make(map[common.Address]Signer),
+		MasterNodes:  make(map[common.Address]Signer),
 		Recents:  make(map[uint64]common.Address),
 		Votes:    make([]*Vote, len(s.Votes)),
 		Tally:    make(map[common.Address]Tally),
 	}
-	for address, signerData := range s.Signers {
-		cpy.Signers[address] = signerData
+	for address, signerData := range s.MasterNodes {
+		cpy.MasterNodes[address] = signerData
 	}
 	for block, signer := range s.Recents {
 		cpy.Recents[block] = signer
@@ -143,7 +143,7 @@ func (s *Snapshot) copy() *Snapshot {
 // validVote returns whether it makes sense to cast the specified vote in the
 // given snapshot context (e.g. don't try to add an already authorized signer).
 func (s *Snapshot) validVote(address common.Address, authorize bool) bool {
-	_, signer := s.Signers[address]
+	_, signer := s.MasterNodes[address]
 	return (signer && !authorize) || (!signer && authorize)
 }
 
@@ -211,7 +211,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 			snap.Tally = make(map[common.Address]Tally)
 		}
 		// Delete the oldest signer from the recent list to allow it signing again
-		if limit := uint64(len(snap.Signers)/2 + 1); number >= limit {
+		if limit := uint64(len(snap.MasterNodes)/2 + 1); number >= limit {
 			delete(snap.Recents, number-limit)
 		}
 		// Resolve the authorization key and check against signers
@@ -219,7 +219,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 		if err != nil {
 			return nil, err
 		}
-		if _, ok := snap.Signers[signer]; !ok {
+		if _, ok := snap.MasterNodes[signer]; !ok {
 			return nil, errUnauthorized
 		}
 		/*for _, recent := range snap.Recents {
@@ -260,15 +260,15 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 			})
 		}
 		// If the vote passed, update the list of signers
-		if tally := snap.Tally[header.Coinbase]; tally.Votes > len(snap.Signers)/2 {
+		if tally := snap.Tally[header.Coinbase]; tally.Votes > len(snap.MasterNodes)/2 {
 			if tally.Authorize {
 				var newSigner Signer
-				snap.Signers[header.Coinbase] = newSigner
+				snap.MasterNodes[header.Coinbase] = newSigner
 			} else {
-				delete(snap.Signers, header.Coinbase)
+				delete(snap.MasterNodes, header.Coinbase)
 
 				// Signer list shrunk, delete any leftover recent caches
-				if limit := uint64(len(snap.Signers)/2 + 1); number >= limit {
+				if limit := uint64(len(snap.MasterNodes)/2 + 1); number >= limit {
 					delete(snap.Recents, number-limit)
 				}
 				// Discard any previous votes the deauthorized signer cast
@@ -306,7 +306,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 	//for i := 0; i < len(signers); i++ {
 	//	copy(signers[i][:], genesis.Extra[extraVanity+i*common.AddressLength:])
 	//}
-	snap = updateSigners(snap, nil, snap.Number, nil, snap.Signers)
+	snap = updateSigners(snap, nil, snap.Number, nil, snap.MasterNodes)
 
 	//blob,_ := json.Marshal(snap)
 	//log.Warn(string(blob))
@@ -315,9 +315,9 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 
 
 // signers retrieves the list of authorized signers in ascending order.
-func (s *Snapshot) signers() []common.Address {
-	signers := make([]common.Address, 0, len(s.Signers))
-	for signer := range s.Signers {
+func (s *Snapshot) masterNodes() []common.Address {
+	signers := make([]common.Address, 0, len(s.MasterNodes))
+	for signer := range s.MasterNodes {
 		signers = append(signers, signer)
 	}
 	for i := 0; i < len(signers); i++ {
@@ -336,7 +336,7 @@ func updateSigners(snap *Snapshot, config *params.XenioConfig, number uint64, Si
 	for address := range signers {
 		newSigner.BlockNumber = number + uint64(i+1) // Assign next Block
 		//newSigner.SignDate = time.Unix(SignDate.Int64()+int64(i+1)*int64(config.Period), 0).UTC()
-		snap.Signers[address] = newSigner
+		snap.MasterNodes[address] = newSigner
 		i++
 	}
 	return snap
@@ -354,7 +354,7 @@ func updateSigners(snap *Snapshot, config *params.XenioConfig, number uint64, Si
 
 // inturn returns if a signer at a given block height is in-turn or not.
 func (s *Snapshot) inturn(number uint64, signer common.Address) bool {
-	signers, offset := s.signers(), 0
+	signers, offset := s.masterNodes(), 0
 	for offset < len(signers) && signers[offset] != signer {
 		offset++
 	}
