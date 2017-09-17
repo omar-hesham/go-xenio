@@ -763,6 +763,7 @@ func (s *PublicBlockChainAPI) rpcOutputBlock(b *types.Block, inclTx bool, fullTx
 		"transactionsRoot": head.TxHash,
 		"receiptsRoot":     head.ReceiptHash,
 		"rewardsCount":		len(head.RewardList),
+		"isSuperBlock":     hexutil.Bytes(head.SuperBlock),
 	}
 
 	if inclTx {
