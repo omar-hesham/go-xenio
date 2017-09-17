@@ -28,7 +28,7 @@ import (
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/ethdb"
 	"github.com/xenioplatform/go-xenio/params"
-	"github.com/xenioplatform/go-xenio/log"
+	//"github.com/xenioplatform/go-xenio/log"
 	lru "github.com/hashicorp/golang-lru"
 )
 
@@ -308,8 +308,8 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 	//}
 	snap = updateSigners(snap, nil, snap.Number, nil, snap.Signers)
 
-	blob,_ := json.Marshal(snap)
-	log.Warn(string(blob))
+	//blob,_ := json.Marshal(snap)
+	//log.Warn(string(blob))
 	return snap, nil
 }
 
