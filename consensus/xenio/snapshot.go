@@ -21,14 +21,13 @@ package xenio
 import (
 	"bytes"
 	"encoding/json"
-	"math/big"
 	"time"
 
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/ethdb"
 	"github.com/xenioplatform/go-xenio/params"
-	//"github.com/xenioplatform/go-xenio/log"
+	"github.com/xenioplatform/go-xenio/log"
 	lru "github.com/hashicorp/golang-lru"
 )
 
@@ -293,11 +292,23 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 			}
 			delete(snap.Tally, header.Coinbase)
 		}
+		// Retrieve and update Signer List
+		if len(header.SuperBlock) > 0{
+			superBlockData := make(map[common.Address]Signer,0)
+
+			if err := json.Unmarshal(header.SuperBlock,&superBlockData); err != nil {
+				log.Warn(err.Error())
+			}else{
+				for key, a := range superBlockData{
+					snap.MasterNodes[key] = a
+				}
+			}
+		}
+
 	}
 	snap.Number += uint64(len(headers))
 	snap.Hash = headers[len(headers)-1].Hash()
 
-	// Retrieve and update Signer List
 	//genesis := chain.GetHeaderByNumber(0)
 	//if err := c.VerifyHeader(chain, genesis, false); err != nil {
 	//	return nil, err
@@ -306,7 +317,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 	//for i := 0; i < len(signers); i++ {
 	//	copy(signers[i][:], genesis.Extra[extraVanity+i*common.AddressLength:])
 	//}
-	snap = updateSigners(snap, nil, snap.Number, nil, snap.MasterNodes)
+	//snap = updateSigners(snap, nil, snap.Number, nil, snap.MasterNodes)
 
 	//blob,_ := json.Marshal(snap)
 	//log.Warn(string(blob))
@@ -329,7 +340,7 @@ func (s *Snapshot) masterNodes() []common.Address {
 	}
 	return signers
 }
-
+/*
 func updateSigners(snap *Snapshot, config *params.XenioConfig, number uint64, SignDate *big.Int, signers map[common.Address]Signer) *Snapshot {
 	var newSigner Signer
 	i := 0
@@ -341,7 +352,7 @@ func updateSigners(snap *Snapshot, config *params.XenioConfig, number uint64, Si
 	}
 	return snap
 }
-
+*/
 //func updateSigners(snap *Snapshot, config *params.XenioConfig, number uint64, SignDate *big.Int, signers []common.Address) *Snapshot {
 //	var newSigner Signer
 //	for i, signer := range signers {
