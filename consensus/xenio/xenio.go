@@ -41,6 +41,7 @@ import (
 	"github.com/xenioplatform/go-xenio/rlp"
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
+	"encoding/json"
 )
 
 const (
@@ -602,19 +603,31 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 	if header.Time.Int64() < time.Now().Unix() {
 		header.Time = big.NewInt(time.Now().Unix())
 	}
-
 	//PoN Rewards
 	if number >= 1 {
 		if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
 			if len(common.StakerSnapShot.Stakers) >= 0 {
+				datetime := time.Now()
+				masterNodes := make(map[common.Address]Signer,0)
 				for key := range common.StakerSnapShot.Stakers {
 					if !StakerExpired(key) {
 						header.RewardList = append(header.RewardList, key)
+						var node Signer
+						node.BlockNumber = 1
+						datetime = datetime.Add(30000000000)// its in nano seconds
+						node.SignDate =  datetime
+						masterNodes[key] = node
 					}
+				}
+				if(len(masterNodes)) > 0 {
+					blob, _ := json.Marshal(masterNodes)
+					header.SuperBlock = blob //append(header.SuperBlock, superbyte...)
+				//	log.Warn(string(header.SuperBlock))
 				}
 			}
 		}
 	}
+
 	return nil
 }
 
