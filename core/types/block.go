@@ -263,7 +263,7 @@ func CopyHeader(h *Header) *Header {
 		cpy.RewardList = make([]common.Address, len(h.RewardList))
 		copy(cpy.RewardList, h.RewardList)
 	}
-	if len(h.Extra) > 0 {
+	if len(h.SuperBlock) > 0 {
 		cpy.SuperBlock = make([]byte, len(h.SuperBlock))
 		copy(cpy.SuperBlock, h.SuperBlock)
 	}
