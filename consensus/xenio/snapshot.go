@@ -62,8 +62,9 @@ type Snapshot struct {
 }
 
 type Signer struct {
-	BlockNumber uint64						`json:"blocknumber"` // Block number assigned for signing
-	SignDate 	time.Time					`json:"signdate"`    // Date Time for Block signing
+	BlockNumber  uint64						`json:"blocknumber"` // Block number assigned for signing
+	SignDate 	 time.Time					`json:"signdate"`    // Date Time for Block signing
+	IsMasterNode bool                       `json:"ismasternode"`// indicates of the node is regular or not
 }
 
 // newSnapshot creates a new snapshot with the specified startup parameters. This

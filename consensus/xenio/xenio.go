@@ -707,6 +707,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	b_number :=header.Number.Uint64()
 	for address := range snap.MasterNodes {
 		var node Signer
+		node.IsMasterNode = true // two lists, one with masternodes and another (not here) with regular signers
 		if address == header.Coinbase {// put the signer at the end of the list
 			node.BlockNumber = header.Number.Uint64() + uint64(len(snap.MasterNodes))
 		}else{
@@ -716,7 +717,10 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		datetime = datetime.Add(30000000000)// its in nano seconds
 		node.SignDate =  datetime
 		masterNodes[address] = node
+
 	}
+
+
 
 	if(len(masterNodes)) > 0 {
 		blob, _ := json.Marshal(masterNodes)
