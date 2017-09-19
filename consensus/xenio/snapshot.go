@@ -52,13 +52,13 @@ type Snapshot struct {
 	config   *params.XenioConfig // Consensus engine parameters to fine tune behavior
 	sigcache *lru.ARCCache        // Cache of recent block signatures to speed up ecrecover
 
-	Number      uint64                      `json:"number"`      // Block number where the snapshot was created
-	Hash        common.Hash                 `json:"hash"`        // Block hash where the snapshot was created
-	//Stakers map[common.Address]struct{} `json:"stakers"` // Set of master nodes
-	MasterNodes map[common.Address]Signer   `json:"masternodes"`     // Set of authorized signers at this moment
-	Recents     map[uint64]common.Address   `json:"recents"`     // Set of recent signers for spam protections
-	Votes       []*Vote                     `json:"votes"`       // List of votes cast in chronological order
-	Tally       map[common.Address]Tally    `json:"tally"`       // Current vote tally to avoid recalculating
+	Number       uint64                      `json:"number"`      // Block number where the snapshot was created
+	Hash         common.Hash                 `json:"hash"`        // Block hash where the snapshot was created
+	MasterNodes  map[common.Address]Signer   `json:"masternodes"` // Set of authorized super signing nodes at this moment
+	StakingNodes map[common.Address]Signer   `json:"stakingnodes"`// Set of normal signers
+	Recents      map[uint64]common.Address   `json:"recents"`     // Set of recent signers for spam protections
+	Votes        []*Vote                     `json:"votes"`       // List of votes cast in chronological order
+	Tally        map[common.Address]Tally    `json:"tally"`       // Current vote tally to avoid recalculating
 }
 
 type Signer struct {
@@ -71,13 +71,14 @@ type Signer struct {
 // the genesis block.
 func newSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, number uint64, hash common.Hash, signers []common.Address) *Snapshot {
 	snap := &Snapshot{
-		config:   config,
-		sigcache: sigcache,
-		Number:   number,
-		Hash:     hash,
+		config:       config,
+		sigcache:     sigcache,
+		Number:       number,
+		Hash:         hash,
 		MasterNodes:  make(map[common.Address]Signer),
-		Recents:  make(map[uint64]common.Address),
-		Tally:    make(map[common.Address]Tally),
+		StakingNodes: make(map[common.Address]Signer),
+		Recents:      make(map[uint64]common.Address),
+		Tally:        make(map[common.Address]Tally),
 	}
 	var newSigner Signer
 	for i, signer := range signers {
@@ -116,17 +117,21 @@ func (s *Snapshot) store(db ethdb.Database) error {
 // copy creates a deep copy of the snapshot, though not the individual votes.
 func (s *Snapshot) copy() *Snapshot {
 	cpy := &Snapshot{
-		config:   s.config,
-		sigcache: s.sigcache,
-		Number:   s.Number,
-		Hash:     s.Hash,
+		config:       s.config,
+		sigcache:     s.sigcache,
+		Number:       s.Number,
+		Hash:         s.Hash,
 		MasterNodes:  make(map[common.Address]Signer),
-		Recents:  make(map[uint64]common.Address),
-		Votes:    make([]*Vote, len(s.Votes)),
-		Tally:    make(map[common.Address]Tally),
+		StakingNodes: make(map[common.Address]Signer),
+		Recents:      make(map[uint64]common.Address),
+		Votes:        make([]*Vote, len(s.Votes)),
+		Tally:        make(map[common.Address]Tally),
 	}
 	for address, signerData := range s.MasterNodes {
 		cpy.MasterNodes[address] = signerData
+	}
+	for address, signerData := range s.StakingNodes {
+		cpy.StakingNodes[address] = signerData
 	}
 	for block, signer := range s.Recents {
 		cpy.Recents[block] = signer
