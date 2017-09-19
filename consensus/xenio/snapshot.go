@@ -305,8 +305,10 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 			if err := json.Unmarshal(header.SuperBlock,&superBlockData); err != nil {
 				log.Trace(err.Error())
 			}else{
-				for key, a := range superBlockData{
-					snap.MasterNodes[key] = a
+				for key, node := range superBlockData{
+					if node.IsMasterNode {
+						snap.MasterNodes[key] = node
+					}
 				}
 			}
 		}
