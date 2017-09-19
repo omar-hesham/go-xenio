@@ -308,6 +308,8 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 				for key, node := range superBlockData{
 					if node.IsMasterNode {
 						snap.MasterNodes[key] = node
+					}else{
+						snap.StakingNodes[key] = node
 					}
 				}
 			}
