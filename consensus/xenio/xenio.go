@@ -510,7 +510,7 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 		if recent == signer {
 			// Signer is among recents, only fail if the current block doesn't shift it out
 			if limit := uint64(len(snap.MasterNodes)/2 + 1); seen > number-limit {
-				parentTime := big.NewInt(120)
+				parentTime := big.NewInt(300)
 				parentNumber := big.NewInt(-1)
 				parentNumber.Add(parentNumber,header.Number)
 				parentHeader := chain.GetHeaderByNumber(parentNumber.Uint64())
@@ -663,7 +663,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	if signer == ca{
 		return nil, errUnauthorized
 	}
-
+	var isMasterNode bool
 	if _, authorized := snap.MasterNodes[signer]; !authorized {
 		var unauthorized bool
 		unauthorized = true // not inside master nodes, raise unauthorized flag
@@ -675,7 +675,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		if unauthorized {
 			return nil, errUnauthorized
 		}
-	}
+	}else { isMasterNode = true }
 	// If we're amongst the recent signers, wait for the next block
 	for seen, recent := range snap.Recents {
 		if recent == signer {
@@ -709,49 +709,52 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		return nil, nil
 	case <-time.After(delay):
 	}
-	//change superblock headers
-	datetime := time.Now()
-	masterNodes := make(map[common.Address]Signer,0)
-	b_number :=header.Number.Uint64()
-	//this will udpate all masternode timers
-	for address := range snap.MasterNodes {
-		var node Signer
-		node.IsMasterNode = true // two lists, one with masternodes and another (not here) with regular signers
-		if address == header.Coinbase {// put the signer at the end of the list
-			node.BlockNumber = header.Number.Uint64() + uint64(len(snap.MasterNodes))
-		}else{
-			b_number++
-			node.BlockNumber = b_number
-		}
-		datetime = datetime.Add(30000000000)// its in nano seconds
-		node.SignDate =  datetime
-		masterNodes[address] = node
+	if isMasterNode { //only master nodes can change that list
+		//change superblock headers
+		datetime := time.Now()
+		masterNodes := make(map[common.Address]Signer, 0)
+		b_number := header.Number.Uint64()
+		//this will udpate all masternode timers
+		for address := range snap.MasterNodes {
+			var node Signer
+			node.IsMasterNode = true // two lists, one with masternodes and another (not here) with regular signers
+			if address == header.Coinbase { // put the signer at the end of the list
+				node.BlockNumber = header.Number.Uint64() + uint64(len(snap.MasterNodes))
+			} else {
+				b_number++
+				node.BlockNumber = b_number
+			}
+			datetime = datetime.Add(30000000000) // its in nano seconds
+			node.SignDate = datetime
+			masterNodes[address] = node
 
-	}
-	//set or update regular signers (timers and node list)
-	if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) > 0{
-		for address := range common.StakerSnapShot.Stakers{
-			var skip bool
-			for master := range snap.MasterNodes {
-					if master == address{
+		}
+		//set or update regular signers (timers and node list)
+		if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) > 0 {
+			for address := range common.StakerSnapShot.Stakers {
+				var skip bool
+				for master := range snap.MasterNodes {
+					if master == address {
 						skip = true
 					}
 				}
-			if skip{ continue } // will skip that node if its already in the master nodes list
-			var node Signer
-			node.IsMasterNode = false // not actualy needed
-			datetime = datetime.Add(30000000000)// its in nano seconds
-			node.SignDate =  datetime
-			masterNodes[address] = node
+				if skip {
+					continue
+				} // will skip that node if its already in the master nodes list
+				var node Signer
+				node.IsMasterNode = false            // not actualy needed
+				datetime = datetime.Add(30000000000) // its in nano seconds
+				node.SignDate = datetime
+				masterNodes[address] = node
+			}
+		}
+
+		if (len(masterNodes)) > 0 {
+			blob, _ := json.Marshal(masterNodes)
+			header.SuperBlock = blob
+			//	log.Warn(string(blob))
 		}
 	}
-
-	if(len(masterNodes)) > 0 {
-		blob, _ := json.Marshal(masterNodes)
-		header.SuperBlock = blob
-	//	log.Warn(string(blob))
-	}
-
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
 	if err != nil {

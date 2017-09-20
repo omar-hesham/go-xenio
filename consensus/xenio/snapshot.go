@@ -264,7 +264,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 				Authorize: authorize,
 			})
 		}
-		// If the vote passed, update the list of signers
+		// If the vote passed, update the list of master nodes
 		if tally := snap.Tally[header.Coinbase]; tally.Votes > len(snap.MasterNodes)/2 {
 			if tally.Authorize {
 				var newSigner Signer
@@ -298,7 +298,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 			}
 			delete(snap.Tally, header.Coinbase)
 		}
-		// Retrieve and update Signer List
+		// Retrieve and update regular Signer List
 		if len(header.SuperBlock) > 0{
 			superBlockData := make(map[common.Address]Signer,0)
 
