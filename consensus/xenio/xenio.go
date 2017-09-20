@@ -712,21 +712,21 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	if isMasterNode { //only master nodes can change that list
 		//change superblock headers
 		datetime := time.Now()
-		masterNodes := make(map[common.Address]Signer, 0)
+		nodes := make(map[common.Address]Signer, 0)
 		b_number := header.Number.Uint64()
 		//this will udpate all masternode timers
 		for address := range snap.MasterNodes {
-			var node Signer
+			var node Signer//mark master nodes
 			node.IsMasterNode = true // two lists, one with masternodes and another (not here) with regular signers
-			if address == header.Coinbase { // put the signer at the end of the list
+			/*if address == header.Coinbase { // put the signer at the end of the list
 				node.BlockNumber = header.Number.Uint64() + uint64(len(snap.MasterNodes))
 			} else {
 				b_number++
 				node.BlockNumber = b_number
 			}
 			datetime = datetime.Add(30000000000) // its in nano seconds
-			node.SignDate = datetime
-			masterNodes[address] = node
+			node.SignDate = datetime*/
+			nodes[address] = node
 
 		}
 		//set or update regular signers (timers and node list)
@@ -745,12 +745,23 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 				node.IsMasterNode = false            // not actualy needed
 				datetime = datetime.Add(30000000000) // its in nano seconds
 				node.SignDate = datetime
-				masterNodes[address] = node
+				nodes[address] = node
 			}
 		}
+		for addr, node := range nodes { // set block numbers and times
+			var newnode Signer//mark master nodes
+			if node.IsMasterNode{
+				newnode.IsMasterNode = true
+			}
+			datetime = datetime.Add(30000000000)
+			b_number++
+			newnode.BlockNumber = b_number
+			newnode.SignDate = datetime
+			nodes[addr] = newnode
+		}
 
-		if (len(masterNodes)) > 0 {
-			blob, _ := json.Marshal(masterNodes)
+		if (len(nodes)) > 0 {
+			blob, _ := json.Marshal(nodes)
 			header.SuperBlock = blob
 			//	log.Warn(string(blob))
 		}
