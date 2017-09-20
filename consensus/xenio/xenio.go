@@ -661,12 +661,20 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	}
 	ca := common.Address{}
 	if signer == ca{
-		log.Error("signer account is nil")
 		return nil, errUnauthorized
 	}
 
 	if _, authorized := snap.MasterNodes[signer]; !authorized {
-		return nil, errUnauthorized
+		var unauthorized bool
+		unauthorized = true // not inside master nodes, raise unauthorized flag
+		if node, authorized := snap.StakingNodes[signer]; authorized {
+			if node.BlockNumber == number { //if in turn
+				unauthorized = false // drop flag if inside regular nodes and in current block
+			}
+		}
+		if unauthorized {
+			return nil, errUnauthorized
+		}
 	}
 	// If we're amongst the recent signers, wait for the next block
 	for seen, recent := range snap.Recents {
