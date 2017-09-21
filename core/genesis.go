@@ -324,8 +324,6 @@ func DefaultGenesisBlock() *Genesis {
 
 // DefaultTestnetGenesisBlock returns the Ropsten network genesis block.
 func DefaultTestnetGenesisBlock() *Genesis {
-	return DefaultGenesisBlock() //return default xenio genesis while in dev stage
-
 	log.Warn("Genesis: generating for default TEST network")
 	return &Genesis{
 		Config:     params.TestnetChainConfig,
