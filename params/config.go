@@ -26,7 +26,7 @@ import (
 
 var (
 	MainnetGenesisHash = common.HexToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3") // Mainnet genesis hash to enforce below configs on
-	TestnetGenesisHash = common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d") // Testnet genesis hash to enforce below configs on
+	TestnetGenesisHash = common.HexToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3") // Testnet genesis hash to enforce below configs on
 )
 
 var (
@@ -48,18 +48,22 @@ var (
 
 	// TestnetChainConfig contains the chain parameters to run a node on the Ropsten test network.
 	TestnetChainConfig = &ChainConfig{
-		ChainId:         big.NewInt(3),
-		HomesteadBlock:  big.NewInt(0),
-		DAOForkBlock:    nil,
-		DAOForkSupport:  true,
-		EIP150Block:     big.NewInt(0),
-		EIP150Hash:      common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d"),
-		EIP155Block:     big.NewInt(10),
-		EIP158Block:     big.NewInt(10),
-		XenioBlock:      big.NewInt(math.MaxInt64), // never enable
-		ByzantiumBlock: big.NewInt(math.MaxInt64),
+		ChainId:        big.NewInt(7497),
+		HomesteadBlock: big.NewInt(1), // never enable
+		DAOForkBlock:   nil,           // never enable
+		DAOForkSupport: true,
+		EIP150Block:    big.NewInt(2), // never enable
+		EIP150Hash:     common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000"),
+		EIP155Block:    big.NewInt(3),             // never enable
+		EIP158Block:    big.NewInt(3),             // never enable
+		ByzantiumBlock: big.NewInt(math.MaxInt64), // never enable
+		XenioBlock:     big.NewInt(math.MaxInt64),
 
-		Ethash: new(EthashConfig),
+		Xenio: &XenioConfig{
+			Epoch:  30000,
+			Period: 60,
+			//SuperPeriod:60*30,
+		},
 	}
 
 	// RinkebyChainConfig contains the chain parameters to run a node on the Rinkeby test network.
