@@ -508,13 +508,11 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 		if node, ook := snap.StakingNodes[signer]; ook {// not in masternodes, check staking nodes
 			if node.BlockNumber == number{ // its staking node, check if its out turn!
 				authorized = true// authorized to seal
-				log.Warn("regular block sealer accepted")
 			}else {
 				return errOutOfTurn
 			}
 		}
 		if !authorized {
-			log.Warn("3")
 			return errUnauthorized
 		}
 
