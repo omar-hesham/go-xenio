@@ -664,17 +664,10 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		return nil, errUnauthorized
 	}
 	var isMasterNode bool
-	if _, authorized := snap.MasterNodes[signer]; !authorized {
-		var unauthorized bool
-		unauthorized = true // not inside master nodes, raise unauthorized flag
-		if node, authorized := snap.StakingNodes[signer]; authorized {
+	if node, authorized := snap.MasterNodes[signer]; !authorized {
 			if node.BlockNumber == number { //if in turn
-				unauthorized = false // drop flag if inside regular nodes and in current block
+				return nil, errUnauthorized
 			}
-		}
-		if unauthorized {
-			return nil, errUnauthorized
-		}
 	}else { isMasterNode = true }
 	// If we're amongst the recent signers, wait for the next block
 	for seen, recent := range snap.Recents {
@@ -714,6 +707,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		datetime := time.Now()
 		nodes := make(map[common.Address]Signer, 0)
 		b_number := header.Number.Uint64()
+		master_block_number := b_number
 		//this will udpate all masternode timers
 		for address := range snap.MasterNodes {
 			var node Signer//mark master nodes
@@ -752,10 +746,23 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			var newnode Signer//mark master nodes
 			if node.IsMasterNode{
 				newnode.IsMasterNode = true
+				master_block_number  = master_block_number + 20
+				for _, tmp := range nodes {// see if the number already exists
+					if tmp.BlockNumber == master_block_number{
+						master_block_number++
+					}
+				}
+				newnode.BlockNumber = master_block_number
+			}else{
+				b_number++
+				for _, tmp := range nodes {// see if the number already exists
+					if tmp.BlockNumber == b_number{
+						b_number++
+					}
+				}
+				newnode.BlockNumber = b_number
 			}
 			datetime = datetime.Add(30000000000)
-			b_number++
-			newnode.BlockNumber = b_number
 			newnode.SignDate = datetime
 			nodes[addr] = newnode
 		}
