@@ -32,7 +32,6 @@ import (
 	"github.com/xenioplatform/go-xenio/event"
 	"github.com/xenioplatform/go-xenio/log"
 	"github.com/xenioplatform/go-xenio/params"
-	"math/big"
 )
 
 // Backend wraps all methods required for mining.
