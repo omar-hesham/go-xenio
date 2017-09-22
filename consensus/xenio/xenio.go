@@ -441,7 +441,7 @@ func (c *Xenio) snapshot(chain consensus.ChainReader, number uint64, hash common
 	}
 	snap, err := snap.apply(headers)
 	if err != nil {
-		log.Error("snap headers")
+		log.Error("snapshot apply headers error (xenio.go snapshot function")
 		return nil, err
 	}
 	c.recents.Add(snap.Hash, snap)
@@ -514,6 +514,7 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 			}
 		}
 		if !authorized {
+			log.Warn("3")
 			return errUnauthorized
 		}
 
@@ -676,18 +677,17 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		return nil, errUnauthorized
 	}
 	var isMasterNode bool
-	var inturn bool
-	if node, authorized := snap.MasterNodes[signer]; !authorized {
-			if node.BlockNumber != number { //if in turn
+	if _, authorized := snap.MasterNodes[signer]; !authorized {
+		if stakernode, stakerauthorized := snap.StakingNodes[signer]; stakerauthorized {
+			if stakernode.BlockNumber == snap.Number+1 { //if in turn
 			}else{
-				inturn = true
+				return nil, errOutOfTurn
 			}
+		}else{
+			return nil, errUnauthorized
+		}
 	}else {
-		inturn = true
 		isMasterNode = true
-	}
-	if !inturn{
-		return nil, errOutOfTurn
 	}
 	// If we're amongst the recent signers, wait for the next block
 	for seen, recent := range snap.Recents {

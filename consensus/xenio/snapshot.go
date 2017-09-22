@@ -224,15 +224,16 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 		if err != nil {
 			return nil, err
 		}
-		if _, ok := snap.MasterNodes[signer]; !ok {
-			return nil, errUnauthorized
-		}
-		/*for _, recent := range snap.Recents {
-			if recent == signer {
-				log.Error("snap recents 2")
+		if _, authorized := snap.MasterNodes[signer]; !authorized {
+			if stakernode, stakerauthorized := snap.StakingNodes[signer]; stakerauthorized {
+				if stakernode.BlockNumber == number { //if in turn
+				}else{
+					return nil, errOutOfTurn
+				}
+			}else{
 				return nil, errUnauthorized
 			}
-		}*/
+		}
 		snap.Recents[number] = signer
 
 		// Header authorized, discard any previous votes from the signer
