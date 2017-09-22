@@ -677,10 +677,12 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	}
 	var isMasterNode bool
 	if node, authorized := snap.MasterNodes[signer]; !authorized {
-			if node.BlockNumber == number { //if in turn
+			if node.BlockNumber != number { //if in turn
 				return nil, errOutOfTurn
 			}
-	}else { isMasterNode = true }
+	}else {
+			isMasterNode = true
+	}
 	// If we're amongst the recent signers, wait for the next block
 	for seen, recent := range snap.Recents {
 		if recent == signer {
