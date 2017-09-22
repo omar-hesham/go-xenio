@@ -75,9 +75,14 @@ func StakerCast(stakers []common.StakerTransmit) {
 				newStaker.LastSeen = time.Unix(lastSeen, 0).UTC()
 				newStaker.FirstSeen = time.Unix(firstSeen, 0).UTC()
 
+				// Handle case where clients haven't recorded firstSeen
+				if newStaker.FirstSeen.Unix() == 0 {
+					newStaker.FirstSeen = newStaker.LastSeen
+				}
+
 				if StakerExists(value.Address) {
-					// Keep existing firstSeen value if we've seen this staker before time in list
-					if newStaker.FirstSeen.After(common.StakerSnapShot.Stakers[value.Address].FirstSeen) {
+					// Keep existing firstSeen value if we've seen this staker before time in list, unless existing firstSeen is default Unix Time
+					if newStaker.FirstSeen.After(common.StakerSnapShot.Stakers[value.Address].FirstSeen) && common.StakerSnapShot.Stakers[value.Address].FirstSeen.Unix() != 0 {
 						newStaker.FirstSeen = common.StakerSnapShot.Stakers[value.Address].FirstSeen
 					}
 					// Keep existing lastSeen value if we've seen this staker after time in list
@@ -170,7 +175,7 @@ func (api *API) AddStakerToSnapshot(address common.Address) {
 	}
 	var staker common.Staker
 	staker.LastSeen = time.Unix(time.Now().UTC().Unix(), 0).UTC()
-	if !StakerExists(address) {
+	if !StakerExists(address) || common.StakerSnapShot.Stakers[address].FirstSeen.Unix() == 0 {
 		staker.FirstSeen = staker.LastSeen
 	}
 	common.StakerSnapShot.Stakers[address] = staker
