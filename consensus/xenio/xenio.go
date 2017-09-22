@@ -503,8 +503,20 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 	if err != nil {
 		return err
 	}
-	if _, ok := snap.MasterNodes[signer]; !ok {
-		return errUnauthorized
+	if _, ok := snap.MasterNodes[signer]; !ok { //check if we are inside masternodes
+		var authorized bool
+		if node, ook := snap.StakingNodes[signer]; ook {// not in masternodes, check staking nodes
+			if node.BlockNumber == number{ // its staking node, check if its out turn!
+				authorized = true// authorized to seal
+				log.Warn("regular block sealer accepted")
+			}else {
+				return errOutOfTurn
+			}
+		}
+		if !authorized {
+			return errUnauthorized
+		}
+
 	}
 	for seen, recent := range snap.Recents {
 		if recent == signer {
@@ -666,7 +678,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	var isMasterNode bool
 	if node, authorized := snap.MasterNodes[signer]; !authorized {
 			if node.BlockNumber == number { //if in turn
-				return nil, errUnauthorized
+				return nil, errOutOfTurn
 			}
 	}else { isMasterNode = true }
 	// If we're amongst the recent signers, wait for the next block
