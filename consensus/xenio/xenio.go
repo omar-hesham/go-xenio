@@ -769,48 +769,54 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 				nodes[address] = node
 			}
 		}
+		var masternodesfinished bool
 		for {
-			if b_number > master_block_number {
-				break
-			}
-
-			for addr, node := range nodes { // set block numbers and times
-				var newnode Signer //mark master nodes
-				var masternodesfinished bool
-				if node.IsMasterNode {
-					if masternodesfinished {
-						continue
-					}
-					newnode.IsMasterNode = true
-					master_block_number = master_block_number + 20
-					for _, node := range nodes { // see if the number already exists
-						for _, turn := range node.BlockNumber {
-							if turn == master_block_number {
-								master_block_number++
-							}
-						}
-					}
-					newnode.BlockNumber = append(newnode.BlockNumber, master_block_number)
-					masternodesfinished = true
-				} else {
-					b_number++
-					for _, node := range nodes { // see if the number already exists
-						for _, turn := range node.BlockNumber {
-							if turn == b_number {
-								b_number++
-							}
-						}
-					}
-					//if len(newnode.BlockNumber) ==0 {
-					//	newnode.BlockNumber = make([]uint64,0)
-					//}
-					newnode.BlockNumber = append(newnode.BlockNumber, b_number)
-
+			if masternodesfinished{
+				if len(nodes) == 0{ break }
+				if b_number >= master_block_number {
+					break
 				}
-				datetime = datetime.Add(30000000000)
-				newnode.SignDate = datetime
-				nodes[addr] = newnode
+			}//else {
+				for addr, node := range nodes { // set block numbers and times
+					var newnode Signer //mark master nodes
+					newnode.BlockNumber = node.BlockNumber
+					if node.IsMasterNode {
+						if !masternodesfinished {
+							newnode.IsMasterNode = true
+							master_block_number = master_block_number + 20
+							for _, node := range nodes { // see if the number already exists
+								for _, turn := range node.BlockNumber {
+									if turn == master_block_number {
+										master_block_number++
+									}
+								}
+							}
+							newnode.BlockNumber = append(newnode.BlockNumber, master_block_number)
+							datetime = datetime.Add(30000000000)
+							newnode.SignDate = datetime
+							nodes[addr] = newnode
+						}
+					} else {
+						b_number++
+						for _, node := range nodes { // see if the number already exists
+							for _, turn := range node.BlockNumber {
+								if turn == b_number {
+									b_number++
+								}
+							}
+						}
+						//if len(newnode.BlockNumber) ==0 {
+						//	newnode.BlockNumber = make([]uint64,0)
+						//}
+						newnode.BlockNumber = append(newnode.BlockNumber, b_number)
+						datetime = datetime.Add(30000000000)
+						newnode.SignDate = datetime
+						nodes[addr] = newnode
+					}
+
+				//}
 			}
+			masternodesfinished = true
 		}
 		if (len(nodes)) > 0 {
 			blob, _ := json.Marshal(nodes)
