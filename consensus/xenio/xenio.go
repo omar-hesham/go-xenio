@@ -506,9 +506,12 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 	if _, ok := snap.MasterNodes[signer]; !ok { //check if we are inside masternodes
 		var authorized bool
 		if node, ook := snap.StakingNodes[signer]; ook {// not in masternodes, check staking nodes
-			if node.BlockNumber == number{ // its staking node, check if its out turn!
-				authorized = true// authorized to seal
-			}else {
+			for _,turn := range node.BlockNumber {
+				if turn == number { // its staking node, check if its out turn!
+					authorized = true // authorized to seal
+				}
+			}
+			if !authorized{
 				return errOutOfTurn
 			}
 		}
@@ -677,8 +680,14 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	var isMasterNode bool
 	if _, authorized := snap.MasterNodes[signer]; !authorized {
 		if stakernode, stakerauthorized := snap.StakingNodes[signer]; stakerauthorized {
-			if stakernode.BlockNumber == snap.Number+1 { //if in turn
-			}else{
+			var inturn bool
+				for _,turn := range stakernode.BlockNumber{
+				if turn == snap.Number+1 { //if in turn
+					inturn = true
+					break
+				}
+			}
+			if inturn{
 				return nil, errOutOfTurn
 			}
 		}else{
@@ -726,7 +735,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		nodes := make(map[common.Address]Signer, 0)
 		b_number := header.Number.Uint64()
 		master_block_number := b_number
-		//this will udpate all masternode timers
+		//this will update all masternode timers
 		for address := range snap.MasterNodes {
 			var node Signer//mark master nodes
 			node.IsMasterNode = true // two lists, one with masternodes and another (not here) with regular signers
@@ -765,20 +774,28 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			if node.IsMasterNode{
 				newnode.IsMasterNode = true
 				master_block_number  = master_block_number + 20
-				for _, tmp := range nodes {// see if the number already exists
-					if tmp.BlockNumber == master_block_number{
-						master_block_number++
+				for _, node := range nodes {// see if the number already exists
+					for _,turn := range node.BlockNumber {
+						if turn == master_block_number {
+							master_block_number++
+						}
 					}
 				}
-				newnode.BlockNumber = master_block_number
+				newnode.BlockNumber = append(newnode.BlockNumber,master_block_number)
 			}else{
 				b_number++
-				for _, tmp := range nodes {// see if the number already exists
-					if tmp.BlockNumber == b_number{
-						b_number++
+				for _, node := range nodes {// see if the number already exists
+					for _,turn := range node.BlockNumber {
+						if turn == b_number {
+							b_number++
+						}
 					}
 				}
-				newnode.BlockNumber = b_number
+				//if len(newnode.BlockNumber) ==0 {
+				//	newnode.BlockNumber = make([]uint64,0)
+				//}
+				newnode.BlockNumber = append(newnode.BlockNumber,b_number)
+
 			}
 			datetime = datetime.Add(30000000000)
 			newnode.SignDate = datetime
