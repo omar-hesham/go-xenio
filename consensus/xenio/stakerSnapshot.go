@@ -26,7 +26,6 @@ import (
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/core/state"
 	//"github.com/xenioplatform/go-xenio/log"
-
 )
 
 // loadSnapshot loads an existing snapshot from the database.
@@ -76,13 +75,13 @@ func StakerCast(stakers []common.StakerTransmit) {
 				newStaker.FirstSeen = time.Unix(firstSeen, 0).UTC()
 
 				// Handle case where clients haven't recorded firstSeen
-				if newStaker.FirstSeen.Unix() == 0 {
+				if newStaker.FirstSeen.Unix() == -62135596800 { // default Unix Time
 					newStaker.FirstSeen = newStaker.LastSeen
 				}
 
 				if StakerExists(value.Address) {
 					// Keep existing firstSeen value if we've seen this staker before time in list, unless existing firstSeen is default Unix Time
-					if newStaker.FirstSeen.After(common.StakerSnapShot.Stakers[value.Address].FirstSeen) && common.StakerSnapShot.Stakers[value.Address].FirstSeen.Unix() != 0 {
+					if newStaker.FirstSeen.After(common.StakerSnapShot.Stakers[value.Address].FirstSeen) && common.StakerSnapShot.Stakers[value.Address].FirstSeen.Unix() != -62135596800 {
 						newStaker.FirstSeen = common.StakerSnapShot.Stakers[value.Address].FirstSeen
 					}
 					// Keep existing lastSeen value if we've seen this staker after time in list
@@ -175,8 +174,10 @@ func (api *API) AddStakerToSnapshot(address common.Address) {
 	}
 	var staker common.Staker
 	staker.LastSeen = time.Unix(time.Now().UTC().Unix(), 0).UTC()
-	if !StakerExists(address) || common.StakerSnapShot.Stakers[address].FirstSeen.Unix() == 0 {
+	if !StakerExists(address) || common.StakerSnapShot.Stakers[address].FirstSeen.Unix() == -62135596800 { // default Unix Time
 		staker.FirstSeen = staker.LastSeen
+	} else {
+		staker.FirstSeen = common.StakerSnapShot.Stakers[address].FirstSeen
 	}
 	common.StakerSnapShot.Stakers[address] = staker
 }
