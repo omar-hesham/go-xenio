@@ -770,7 +770,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			}
 		}
 		for {
-			if b_number >= master_block_number {
+			if b_number > master_block_number {
 				break
 			}
 
