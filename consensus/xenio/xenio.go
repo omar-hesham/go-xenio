@@ -695,6 +695,9 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			break
 		}
 	}
+	if signingNode.IsMasterNode && len(snap.StakingNodes) == 0{
+		inturn = true // if no one is validated as a staker a masternode should take turn
+	}
 	if !inturn{ // give out of turn error if its not our block
 		//todo check if the block is delayed
 		return nil, errOutOfTurn
