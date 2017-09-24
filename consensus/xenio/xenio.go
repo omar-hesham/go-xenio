@@ -778,9 +778,8 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		var masternodesfinished bool
 		for {
 			if masternodesfinished{
-				if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) > 0 { break }
+				if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) == 0 { break }
 				if b_number >= master_block_number {
-
 					break
 				}
 			}
