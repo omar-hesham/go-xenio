@@ -149,10 +149,6 @@ func readProtocolHandshake(rw MsgReader, our *protoHandshake) (*protoHandshake, 
 		rlp.Decode(msg.Payload, &reason)
 		return nil, reason[0]
 	}
-	//if msg.Code == handshakeMsg {
-	//	//return nil, fmt.Errorf("expected handshake, got %x", msg.Code)
-	//	log.Warn("No Xenio peer tried to connect.")
-	//}
 	if msg.Code != handshakeMsgXNO {
 		return nil, fmt.Errorf("expected handshake, got %x", msg.Code)
 	}
