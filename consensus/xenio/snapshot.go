@@ -83,6 +83,7 @@ func newSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, number uint
 	}
 	var newSigner Signer
 	for i, signer := range signers {
+		newSigner.IsMasterNode = true
 		newSigner.BlockNumber = make([]uint64, 1)
 		newSigner.BlockNumber[0] = number + uint64(i + 1) // Block Zero not in play!
 		newSigner.SignDate = time.Unix(time.Now().UTC().Unix()+int64(i)*int64(config.Period), 0).UTC()
