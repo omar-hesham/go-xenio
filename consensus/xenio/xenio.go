@@ -699,8 +699,15 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		inturn = true // if no one is validated as a staker a masternode should take turn
 	}
 	if !inturn{ // give out of turn error if its not our block
-		//todo check if the block is delayed
-		return nil, errOutOfTurn
+		dt := time.Unix(chain.CurrentHeader().Time.Int64(), 0)
+		for _, node := range snap.StakingNodes{ // counts how many nodes are prior to ours
+			if node.BlockNumber[0] < signingNode.BlockNumber[0]{//assuming that block array is in order
+				dt = dt.Add(30000000000)
+			}
+		}
+		if dt.Unix() > time.Now().Unix(){
+			return nil, errOutOfTurn
+		}
 	}
 
 	// If we're amongst the recent signers, wait for the next block
@@ -771,12 +778,12 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		var masternodesfinished bool
 		for {
 			if masternodesfinished{
-				if len(nodes) == 0{ break }
-				if len(snap.StakingNodes) == 0 { break }
+				if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) > 0 { break }
 				if b_number >= master_block_number {
+
 					break
 				}
-			}//else {
+			}
 				for addr, node := range nodes { // set block numbers and times
 					var newnode Signer //mark master nodes
 					newnode.BlockNumber = node.BlockNumber
@@ -805,16 +812,11 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 								}
 							}
 						}
-						//if len(newnode.BlockNumber) ==0 {
-						//	newnode.BlockNumber = make([]uint64,0)
-						//}
 						newnode.BlockNumber = append(newnode.BlockNumber, b_number)
 						datetime = datetime.Add(30000000000)
 						newnode.SignDate = datetime
 						nodes[addr] = newnode
 					}
-
-				//}
 			}
 			masternodesfinished = true
 		}
