@@ -42,6 +42,7 @@ import (
 	"github.com/xenioplatform/go-xenio/crypto/sha3"
 	"github.com/xenioplatform/go-xenio/p2p/discover"
 	"github.com/xenioplatform/go-xenio/rlp"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 const (
@@ -149,7 +150,7 @@ func readProtocolHandshake(rw MsgReader, our *protoHandshake) (*protoHandshake, 
 		rlp.Decode(msg.Payload, &reason)
 		return nil, reason[0]
 	}
-	if msg.Code != handshakeMsg {
+	if msg.Code != handshakeMsgXNO {
 		return nil, fmt.Errorf("expected handshake, got %x", msg.Code)
 	}
 	var hs protoHandshake
