@@ -703,10 +703,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		return nil, errOutOfTurn
 	}
 
-
-
-
-
 	// If we're amongst the recent signers, wait for the next block
 	for seen, recent := range snap.Recents {
 		if recent == signer {
@@ -750,14 +746,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		for address := range snap.MasterNodes {
 			var node Signer//mark master nodes
 			node.IsMasterNode = true // two lists, one with masternodes and another (not here) with regular signers
-			/*if address == header.Coinbase { // put the signer at the end of the list
-				node.BlockNumber = header.Number.Uint64() + uint64(len(snap.MasterNodes))
-			} else {
-				b_number++
-				node.BlockNumber = b_number
-			}
-			datetime = datetime.Add(30000000000) // its in nano seconds
-			node.SignDate = datetime*/
 			nodes[address] = node
 
 		}
@@ -784,6 +772,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		for {
 			if masternodesfinished{
 				if len(nodes) == 0{ break }
+				if len(snap.StakingNodes) == 0 { break }
 				if b_number >= master_block_number {
 					break
 				}
