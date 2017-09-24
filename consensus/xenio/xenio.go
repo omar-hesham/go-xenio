@@ -677,25 +677,33 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	if signer == ca{
 		return nil, errUnauthorized
 	}
-	var isMasterNode bool
-	if _, authorized := snap.MasterNodes[signer]; !authorized {
+	var signingNode Signer // find the node into the snapshot and assign it to a var
+	if superNode, authorized := snap.MasterNodes[signer]; !authorized {
 		if stakernode, stakerauthorized := snap.StakingNodes[signer]; stakerauthorized {
-			var inturn bool
-				for _,turn := range stakernode.BlockNumber{
-				if turn == snap.Number+1 { //if in turn
-					inturn = true
-					break
-				}
-			}
-			if inturn{
-				return nil, errOutOfTurn
-			}
+			signingNode = stakernode
 		}else{
 			return nil, errUnauthorized
 		}
 	}else {
-		isMasterNode = true
+		signingNode = superNode
 	}
+
+	var inturn bool //see if the node has this block number assigned to it
+	for _,turn := range signingNode.BlockNumber{
+		if turn == snap.Number+1 { //if in turn
+			inturn = true
+			break
+		}
+	}
+	if !inturn{ // give out of turn error if its not our block
+		//todo check if the block is delayed
+		return nil, errOutOfTurn
+	}
+
+
+
+
+
 	// If we're amongst the recent signers, wait for the next block
 	for seen, recent := range snap.Recents {
 		if recent == signer {
@@ -729,7 +737,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		return nil, nil
 	case <-time.After(delay):
 	}
-	if isMasterNode { //only master nodes can change that list
+	if signingNode.IsMasterNode { //only master nodes can change that list
 		//change superblock headers
 		datetime := time.Now()
 		nodes := make(map[common.Address]Signer, 0)
