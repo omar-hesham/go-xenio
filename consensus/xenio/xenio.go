@@ -546,7 +546,7 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 		dt := time.Unix(chain.CurrentHeader().Time.Int64(), 0)
 		for _, node := range snap.StakingNodes{ // counts how many nodes are prior to ours
 			if node.BlockNumber[0] < signingNode.BlockNumber[0]{//assuming that block array is in order
-				dt = dt.Add(30000000000)
+				dt = dt.Add(120000000000)
 			}
 		}
 		if dt.Unix() > time.Now().Unix(){
@@ -716,7 +716,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		dt := time.Unix(chain.CurrentHeader().Time.Int64(), 0)
 		for _, node := range snap.StakingNodes{ // counts how many nodes are prior to ours
 			if node.BlockNumber[0] < signingNode.BlockNumber[0]{//assuming that block array is in order
-				dt = dt.Add(30000000000)
+				dt = dt.Add(120000000000)
 			}
 		}
 		if dt.Unix() > time.Now().Unix(){
@@ -784,7 +784,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 				} // will skip that node if its already in the master nodes list
 				var node Signer
 				node.IsMasterNode = false            // not actualy needed
-				datetime = datetime.Add(30000000000) // its in nano seconds
+				datetime = datetime.Add(120000000000) // its in nano seconds
 				node.SignDate = datetime
 				nodes[address] = node
 			}
@@ -812,7 +812,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 								}
 							}
 							newnode.BlockNumber = append(newnode.BlockNumber, master_block_number)
-							datetime = datetime.Add(30000000000)
+							datetime = datetime.Add(120000000000)
 							newnode.SignDate = datetime
 							nodes[addr] = newnode
 						}
@@ -826,7 +826,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 							}
 						}
 						newnode.BlockNumber = append(newnode.BlockNumber, b_number)
-						datetime = datetime.Add(30000000000)
+						datetime = datetime.Add(120000000000)
 						newnode.SignDate = datetime
 						nodes[addr] = newnode
 					}
