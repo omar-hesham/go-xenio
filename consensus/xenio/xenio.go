@@ -725,7 +725,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	}
 
 	// If we're amongst the recent signers, wait for the next block
-	for seen, recent := range snap.Recents {
+	for _, recent := range snap.Recents {
 		if recent == signer {
 			nextTime := big.NewInt(120)
 			nextTime.Add(nextTime, chain.CurrentHeader().Time)
