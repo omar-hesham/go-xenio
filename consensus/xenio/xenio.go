@@ -27,6 +27,9 @@ import (
 	"sync"
 	"time"
 
+	"encoding/json"
+
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/xenioplatform/go-xenio/accounts"
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/common/hexutil"
@@ -40,8 +43,6 @@ import (
 	"github.com/xenioplatform/go-xenio/params"
 	"github.com/xenioplatform/go-xenio/rlp"
 	"github.com/xenioplatform/go-xenio/rpc"
-	lru "github.com/hashicorp/golang-lru"
-	"encoding/json"
 )
 
 const (
@@ -56,7 +57,7 @@ const (
 var (
 	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
 	blockPeriod = uint64(15)    // Default minimum difference between two consecutive block's timestamps
-	superPeriod = uint64(20*60)
+	superPeriod = uint64(20 * 60)
 
 	extraVanity = 32 // Fixed number of extra-data prefix bytes reserved for signer vanity
 	extraSeal   = 65 // Fixed number of extra-data suffix bytes reserved for signer seal
@@ -70,8 +71,8 @@ var (
 	diffNoTurn = big.NewInt(1) // Block difficulty for out-of-turn signatures
 
 	blockReward *big.Int = big.NewInt(5e+18)
-	big8  = big.NewInt(8)
-	big32 = big.NewInt(32)
+	big8                 = big.NewInt(8)
+	big32                = big.NewInt(32)
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -202,7 +203,7 @@ func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, er
 // Ethereum testnet following the Ropsten attacks.
 type Xenio struct {
 	config *params.XenioConfig // Consensus engine configuration parameters
-	db     ethdb.Database       // Database to store and retrieve snapshot checkpoints
+	db     ethdb.Database      // Database to store and retrieve snapshot checkpoints
 
 	recents    *lru.ARCCache // Snapshots for recent block to speed up reorgs
 	signatures *lru.ARCCache // Signatures of recent blocks to speed up mining
@@ -505,10 +506,10 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 	}
 	if _, ok := snap.MasterNodes[signer]; !ok { //check if we are inside masternodes
 		var authorized bool
-		if node, ook := snap.StakingNodes[signer]; ook {// not in masternodes, check staking nodes
-			if node.BlockNumber == number{ // its staking node, check if its out turn!
-				authorized = true// authorized to seal
-			}else {
+		if node, ook := snap.StakingNodes[signer]; ook { // not in masternodes, check staking nodes
+			if node.BlockNumber == number { // its staking node, check if its out turn!
+				authorized = true // authorized to seal
+			} else {
 				return errOutOfTurn
 			}
 		}
@@ -523,16 +524,16 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 			if limit := uint64(len(snap.MasterNodes)/2 + 1); seen > number-limit {
 				parentTime := big.NewInt(300)
 				parentNumber := big.NewInt(-1)
-				parentNumber.Add(parentNumber,header.Number)
+				parentNumber.Add(parentNumber, header.Number)
 				parentHeader := chain.GetHeaderByNumber(parentNumber.Uint64())
-				if parentHeader == nil{
+				if parentHeader == nil {
 					break
 					//return errOrphanChild
 				}
 				parentTime.Add(parentTime, parentHeader.Time)
-				if parentTime.Cmp(header.Time) < 1{
+				if parentTime.Cmp(header.Time) < 1 {
 					log.Trace("a signer has delayed his work, his turn has been skipped")
-				}else {
+				} else {
 					return errOutOfTurn
 				}
 			}
@@ -671,20 +672,20 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		return nil, err
 	}
 	ca := common.Address{}
-	if signer == ca{
+	if signer == ca {
 		return nil, errUnauthorized
 	}
 	var isMasterNode bool
 	if _, authorized := snap.MasterNodes[signer]; !authorized {
 		if stakernode, stakerauthorized := snap.StakingNodes[signer]; stakerauthorized {
 			if stakernode.BlockNumber == snap.Number+1 { //if in turn
-			}else{
+			} else {
 				return nil, errOutOfTurn
 			}
-		}else{
+		} else {
 			return nil, errUnauthorized
 		}
-	}else {
+	} else {
 		isMasterNode = true
 	}
 	// If we're amongst the recent signers, wait for the next block
@@ -728,7 +729,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		master_block_number := b_number
 		//this will udpate all masternode timers
 		for address := range snap.MasterNodes {
-			var node Signer//mark master nodes
+			var node Signer          //mark master nodes
 			node.IsMasterNode = true // two lists, one with masternodes and another (not here) with regular signers
 			/*if address == header.Coinbase { // put the signer at the end of the list
 				node.BlockNumber = header.Number.Uint64() + uint64(len(snap.MasterNodes))
@@ -763,20 +764,20 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 				})
 		}
 		for addr, node := range nodes { // set block numbers and times
-			var newnode Signer//mark master nodes
-			if node.IsMasterNode{
+			var newnode Signer //mark master nodes
+			if node.IsMasterNode {
 				newnode.IsMasterNode = true
-				master_block_number  = master_block_number + 20
-				for _, tmp := range nodes {// see if the number already exists
-					if tmp.BlockNumber == master_block_number{
+				master_block_number = master_block_number + 20
+				for _, tmp := range nodes { // see if the number already exists
+					if tmp.BlockNumber == master_block_number {
 						master_block_number++
 					}
 				}
 				newnode.BlockNumber = master_block_number
-			}else{
+			} else {
 				b_number++
-				for _, tmp := range nodes {// see if the number already exists
-					if tmp.BlockNumber == b_number{
+				for _, tmp := range nodes { // see if the number already exists
+					if tmp.BlockNumber == b_number {
 						b_number++
 					}
 				}

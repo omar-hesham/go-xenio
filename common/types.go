@@ -34,13 +34,13 @@ import (
 const (
 	HashLength    = 32
 	AddressLength = 20
-	StakerTTL	  = 1200 // seconds
+	StakerTTL     = 1200 // seconds
 )
 
 var (
-	hashT    = reflect.TypeOf(Hash{})
-	addressT = reflect.TypeOf(Address{})
-	Coinbase = Address{} //Global: used from other packages
+	hashT          = reflect.TypeOf(Hash{})
+	addressT       = reflect.TypeOf(Address{})
+	Coinbase       = Address{}     //Global: used from other packages
 	StakerSnapShot *StakerSnapshot //Global: used from other packages
 )
 
@@ -257,14 +257,14 @@ type StakerSnapshot struct {
 }
 
 type Staker struct {
-	FirstSeen		time.Time			`json:"firstseen"`
-	LastSeen		time.Time			`json:"lastseen"`
-	ExtraData       string              `json:"extradata"`
+	FirstSeen time.Time `json:"firstseen"`
+	LastSeen  time.Time `json:"lastseen"`
+	ExtraData string    `json:"extradata"`
 }
 
 type StakerTransmit struct {
-	Address 		Address				`json:"address"`
-	FirstSeen       string              `json:"firstseen"`
-	LastSeen		string				`json:"lastseen"`
-	ExtraData       string              `json:"extradata"`
+	Address   Address `json:"address"`
+	FirstSeen string  `json:"firstseen"`
+	LastSeen  string  `json:"lastseen"`
+	ExtraData string  `json:"extradata"`
 }
