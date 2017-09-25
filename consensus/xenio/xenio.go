@@ -616,14 +616,14 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 	}
 	//PoN Rewards
 	if number >= 1 {
-		if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
-			if len(common.StakerSnapShot.Stakers) >= 0 {
-				for key := range common.StakerSnapShot.Stakers {
-					if !StakerExpired(key) {
-						header.RewardList = append(header.RewardList, key)
+		if common.StakerSnapShot != nil {
+			common.StakerSnapShot.Stakers.Range(
+				func(address, staker interface{}) bool {
+					if !StakerExpired(address.(common.Address)) {
+						header.RewardList = append(header.RewardList, address.(common.Address))
 					}
-				}
-			}
+					return true
+				})
 		}
 	}
 	return nil
@@ -742,23 +742,25 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 
 		}
 		//set or update regular signers (timers and node list)
-		if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) > 0 {
-			for address := range common.StakerSnapShot.Stakers {
-				var skip bool
-				for master := range snap.MasterNodes {
-					if master == address {
-						skip = true
+		if common.StakerSnapShot != nil {
+			common.StakerSnapShot.Stakers.Range(
+				func(address, staker interface{}) bool {
+					var skip bool
+					for master := range snap.MasterNodes {
+						if master == address {
+							skip = true
+						}
 					}
-				}
-				if skip {
-					continue
-				} // will skip that node if its already in the master nodes list
-				var node Signer
-				node.IsMasterNode = false            // not actualy needed
-				datetime = datetime.Add(30000000000) // its in nano seconds
-				node.SignDate = datetime
-				nodes[address] = node
-			}
+					if skip {
+						return true
+					} // will skip that node if its already in the master nodes list
+					var node Signer
+					node.IsMasterNode = false            // not actualy needed
+					datetime = datetime.Add(30000000000) // its in nano seconds
+					node.SignDate = datetime
+					nodes[address.(common.Address)] = node
+					return true
+				})
 		}
 		for addr, node := range nodes { // set block numbers and times
 			var newnode Signer//mark master nodes
