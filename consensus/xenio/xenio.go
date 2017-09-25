@@ -503,23 +503,6 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 	if err != nil {
 		return err
 	}
-	if _, ok := snap.MasterNodes[signer]; !ok { //check if we are inside masternodes
-		var authorized bool
-		if node, ook := snap.StakingNodes[signer]; ook {// not in masternodes, check staking nodes
-			for _,turn := range node.BlockNumber {
-				if turn == number { // its staking node, check if its out turn!
-					authorized = true // authorized to seal
-				}
-			}
-			if !authorized{
-				return errOutOfTurn
-			}
-		}
-		if !authorized {
-			return errUnauthorized
-		}
-
-	}
 
 	var signingNode Signer // find the node into the snapshot and assign it to a var
 	if superNode, authorized := snap.MasterNodes[signer]; !authorized {
@@ -550,19 +533,10 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 			}
 		}
 		if dt.Unix() > time.Now().Unix(){
+			log.Warn("here")
 			return errOutOfTurn
 		}
 	}
-
-	// Ensure that the difficulty corresponds to the turn-ness of the signer
-	//not valid.... xenio has two signer lists!!!!
-	/*inturn := snap.inturn(header.Number.Uint64(), signer)
-	if inturn && header.Difficulty.Cmp(diffInTurn) != 0 {
-		return errInvalidDifficulty
-	}
-	if !inturn && header.Difficulty.Cmp(diffNoTurn) != 0 {
-		return errInvalidDifficulty
-	}*/
 	return nil
 }
 
