@@ -520,35 +520,49 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 		}
 
 	}
-	for seen, recent := range snap.Recents {
-		if recent == signer {
-			// Signer is among recents, only fail if the current block doesn't shift it out
-			if limit := uint64(len(snap.MasterNodes)/2 + 1); seen > number-limit {
-				parentTime := big.NewInt(300)
-				parentNumber := big.NewInt(-1)
-				parentNumber.Add(parentNumber,header.Number)
-				parentHeader := chain.GetHeaderByNumber(parentNumber.Uint64())
-				if parentHeader == nil{
-					break
-					//return errOrphanChild
-				}
-				parentTime.Add(parentTime, parentHeader.Time)
-				if parentTime.Cmp(header.Time) < 1{
-					log.Trace("a signer has delayed his work, his turn has been skipped")
-				}else {
-					return errOutOfTurn
-				}
-			}
+
+	var signingNode Signer // find the node into the snapshot and assign it to a var
+	if superNode, authorized := snap.MasterNodes[signer]; !authorized {
+		if stakernode, stakerauthorized := snap.StakingNodes[signer]; stakerauthorized {
+			signingNode = stakernode
+		}else{
+			return errUnauthorized
+		}
+	}else {
+		signingNode = superNode
+	}
+
+	var inturn bool //see if the node has this block number assigned to it
+	for _,turn := range signingNode.BlockNumber{
+		if turn == snap.Number+1 { //if in turn
+			inturn = true
+			break
 		}
 	}
+	if signingNode.IsMasterNode && len(snap.StakingNodes) == 0{
+		inturn = true // if no one is validated as a staker a masternode should take turn
+	}
+	if !inturn{ // give out of turn error if its not our block
+		dt := time.Unix(chain.CurrentHeader().Time.Int64(), 0)
+		for _, node := range snap.StakingNodes{ // counts how many nodes are prior to ours
+			if node.BlockNumber[0] < signingNode.BlockNumber[0]{//assuming that block array is in order
+				dt = dt.Add(30000000000)
+			}
+		}
+		if dt.Unix() > time.Now().Unix(){
+			return errOutOfTurn
+		}
+	}
+
 	// Ensure that the difficulty corresponds to the turn-ness of the signer
-	inturn := snap.inturn(header.Number.Uint64(), signer)
+	//not valid.... xenio has two signer lists!!!!
+	/*inturn := snap.inturn(header.Number.Uint64(), signer)
 	if inturn && header.Difficulty.Cmp(diffInTurn) != 0 {
 		return errInvalidDifficulty
 	}
 	if !inturn && header.Difficulty.Cmp(diffNoTurn) != 0 {
 		return errInvalidDifficulty
-	}
+	}*/
 	return nil
 }
 
