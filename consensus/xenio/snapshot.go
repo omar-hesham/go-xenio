@@ -62,7 +62,7 @@ type Snapshot struct {
 }
 
 type Signer struct {
-	BlockNumber  uint64						`json:"blocknumber"` // Block number assigned for signing
+	BlockNumber  []uint64					`json:"blocknumber"` // Block number assigned for signing
 	SignDate 	 time.Time					`json:"signdate"`    // Date Time for Block signing
 	IsMasterNode bool                       `json:"ismasternode"`// indicates of the node is regular or not
 }
@@ -83,7 +83,9 @@ func newSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, number uint
 	}
 	var newSigner Signer
 	for i, signer := range signers {
-		newSigner.BlockNumber = number + uint64(i + 1) // Block Zero not in play!
+		newSigner.IsMasterNode = true
+		newSigner.BlockNumber = make([]uint64, 1)
+		newSigner.BlockNumber[0] = number + uint64(i + 1) // Block Zero not in play!
 		newSigner.SignDate = time.Unix(time.Now().UTC().Unix()+int64(i)*int64(config.Period), 0).UTC()
 		snap.MasterNodes[signer] = newSigner
 	}
@@ -226,8 +228,14 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 		}
 		if _, authorized := snap.MasterNodes[signer]; !authorized {
 			if stakernode, stakerauthorized := snap.StakingNodes[signer]; stakerauthorized {
-				if stakernode.BlockNumber == number { //if in turn
-				}else{
+				var inturn bool
+				for _,turn := range stakernode.BlockNumber{
+					if turn == number { //if in turn
+						inturn=true
+						break
+					}
+				}
+				if!inturn {
 					return nil, errOutOfTurn
 				}
 			}else{

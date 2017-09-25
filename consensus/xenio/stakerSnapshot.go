@@ -76,7 +76,7 @@ func StakerCast(stakers []common.StakerTransmit) {
 				newStaker.FirstSeen = time.Unix(firstSeen, 0).UTC()
 
 				// Handle case where clients haven't recorded firstSeen
-				if newStaker.FirstSeen.Unix() == 0 {
+				if newStaker.FirstSeen.Unix() == -62135596800 { // default Unix Time
 					newStaker.FirstSeen = newStaker.LastSeen
 				}
 
@@ -182,6 +182,8 @@ func (api *API) AddStakerToSnapshot(address common.Address) {
 	var existingStaker, exists = common.StakerSnapShot.Stakers.Load(address)
 	if !exists || existingStaker.(common.Staker).FirstSeen.Unix() == 0 {
 		staker.FirstSeen = staker.LastSeen
+	} else {
+		staker.FirstSeen = common.StakerSnapShot.Stakers[address].FirstSeen
 	}
 	common.StakerSnapShot.Stakers.Store(address, staker)
 }

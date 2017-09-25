@@ -506,10 +506,13 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 	}
 	if _, ok := snap.MasterNodes[signer]; !ok { //check if we are inside masternodes
 		var authorized bool
-		if node, ook := snap.StakingNodes[signer]; ook { // not in masternodes, check staking nodes
-			if node.BlockNumber == number { // its staking node, check if its out turn!
-				authorized = true // authorized to seal
-			} else {
+		if node, ook := snap.StakingNodes[signer]; ook {// not in masternodes, check staking nodes
+			for _,turn := range node.BlockNumber {
+				if turn == number { // its staking node, check if its out turn!
+					authorized = true // authorized to seal
+				}
+			}
+			if !authorized{
 				return errOutOfTurn
 			}
 		}
@@ -518,35 +521,49 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 		}
 
 	}
-	for seen, recent := range snap.Recents {
-		if recent == signer {
-			// Signer is among recents, only fail if the current block doesn't shift it out
-			if limit := uint64(len(snap.MasterNodes)/2 + 1); seen > number-limit {
-				parentTime := big.NewInt(300)
-				parentNumber := big.NewInt(-1)
-				parentNumber.Add(parentNumber, header.Number)
-				parentHeader := chain.GetHeaderByNumber(parentNumber.Uint64())
-				if parentHeader == nil {
-					break
-					//return errOrphanChild
-				}
-				parentTime.Add(parentTime, parentHeader.Time)
-				if parentTime.Cmp(header.Time) < 1 {
-					log.Trace("a signer has delayed his work, his turn has been skipped")
-				} else {
-					return errOutOfTurn
-				}
-			}
+
+	var signingNode Signer // find the node into the snapshot and assign it to a var
+	if superNode, authorized := snap.MasterNodes[signer]; !authorized {
+		if stakernode, stakerauthorized := snap.StakingNodes[signer]; stakerauthorized {
+			signingNode = stakernode
+		}else{
+			return errUnauthorized
+		}
+	}else {
+		signingNode = superNode
+	}
+
+	var inturn bool //see if the node has this block number assigned to it
+	for _,turn := range signingNode.BlockNumber{
+		if turn == snap.Number+1 { //if in turn
+			inturn = true
+			break
 		}
 	}
+	if signingNode.IsMasterNode && len(snap.StakingNodes) == 0{
+		inturn = true // if no one is validated as a staker a masternode should take turn
+	}
+	if !inturn{ // give out of turn error if its not our block
+		dt := time.Unix(chain.CurrentHeader().Time.Int64(), 0)
+		for _, node := range snap.StakingNodes{ // counts how many nodes are prior to ours
+			if node.BlockNumber[0] < signingNode.BlockNumber[0]{//assuming that block array is in order
+				dt = dt.Add(120000000000)
+			}
+		}
+		if dt.Unix() > time.Now().Unix(){
+			return errOutOfTurn
+		}
+	}
+
 	// Ensure that the difficulty corresponds to the turn-ness of the signer
-	inturn := snap.inturn(header.Number.Uint64(), signer)
+	//not valid.... xenio has two signer lists!!!!
+	/*inturn := snap.inturn(header.Number.Uint64(), signer)
 	if inturn && header.Difficulty.Cmp(diffInTurn) != 0 {
 		return errInvalidDifficulty
 	}
 	if !inturn && header.Difficulty.Cmp(diffNoTurn) != 0 {
 		return errInvalidDifficulty
-	}
+	}*/
 	return nil
 }
 
@@ -675,19 +692,39 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	if signer == ca {
 		return nil, errUnauthorized
 	}
-	var isMasterNode bool
-	if _, authorized := snap.MasterNodes[signer]; !authorized {
+	var signingNode Signer // find the node into the snapshot and assign it to a var
+	if superNode, authorized := snap.MasterNodes[signer]; !authorized {
 		if stakernode, stakerauthorized := snap.StakingNodes[signer]; stakerauthorized {
-			if stakernode.BlockNumber == snap.Number+1 { //if in turn
-			} else {
-				return nil, errOutOfTurn
-			}
+			signingNode = stakernode
 		} else {
 			return nil, errUnauthorized
 		}
 	} else {
-		isMasterNode = true
+		signingNode = superNode
 	}
+
+	var inturn bool //see if the node has this block number assigned to it
+	for _,turn := range signingNode.BlockNumber{
+		if turn == snap.Number+1 { //if in turn
+			inturn = true
+			break
+		}
+	}
+	if signingNode.IsMasterNode && len(snap.StakingNodes) == 0{
+		inturn = true // if no one is validated as a staker a masternode should take turn
+	}
+	if !inturn{ // give out of turn error if its not our block
+		dt := time.Unix(chain.CurrentHeader().Time.Int64(), 0)
+		for _, node := range snap.StakingNodes{ // counts how many nodes are prior to ours
+			if node.BlockNumber[0] < signingNode.BlockNumber[0]{//assuming that block array is in order
+				dt = dt.Add(120000000000)
+			}
+		}
+		if dt.Unix() > time.Now().Unix(){
+			return nil, errOutOfTurn
+		}
+	}
+
 	// If we're amongst the recent signers, wait for the next block
 	for seen, recent := range snap.Recents {
 		if recent == signer {
@@ -721,24 +758,16 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		return nil, nil
 	case <-time.After(delay):
 	}
-	if isMasterNode { //only master nodes can change that list
+	if signingNode.IsMasterNode { //only master nodes can change that list
 		//change superblock headers
 		datetime := time.Now()
 		nodes := make(map[common.Address]Signer, 0)
 		b_number := header.Number.Uint64()
 		master_block_number := b_number
-		//this will udpate all masternode timers
+		//this will update all masternode timers
 		for address := range snap.MasterNodes {
 			var node Signer          //mark master nodes
 			node.IsMasterNode = true // two lists, one with masternodes and another (not here) with regular signers
-			/*if address == header.Coinbase { // put the signer at the end of the list
-				node.BlockNumber = header.Number.Uint64() + uint64(len(snap.MasterNodes))
-			} else {
-				b_number++
-				node.BlockNumber = b_number
-			}
-			datetime = datetime.Add(30000000000) // its in nano seconds
-			node.SignDate = datetime*/
 			nodes[address] = node
 
 		}
@@ -752,42 +781,61 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 							skip = true
 						}
 					}
-					if skip {
-						return true
-					} // will skip that node if its already in the master nodes list
-					var node Signer
-					node.IsMasterNode = false            // not actualy needed
-					datetime = datetime.Add(30000000000) // its in nano seconds
-					node.SignDate = datetime
-					nodes[address.(common.Address)] = node
-					return true
-				})
-		}
-		for addr, node := range nodes { // set block numbers and times
-			var newnode Signer //mark master nodes
-			if node.IsMasterNode {
-				newnode.IsMasterNode = true
-				master_block_number = master_block_number + 20
-				for _, tmp := range nodes { // see if the number already exists
-					if tmp.BlockNumber == master_block_number {
-						master_block_number++
-					}
 				}
-				newnode.BlockNumber = master_block_number
-			} else {
-				b_number++
-				for _, tmp := range nodes { // see if the number already exists
-					if tmp.BlockNumber == b_number {
-						b_number++
-					}
-				}
-				newnode.BlockNumber = b_number
+				if skip {
+					continue
+				} // will skip that node if its already in the master nodes list
+				var node Signer
+				node.IsMasterNode = false            // not actualy needed
+				datetime = datetime.Add(120000000000) // its in nano seconds
+				node.SignDate = datetime
+				nodes[address] = node
 			}
-			datetime = datetime.Add(30000000000)
-			newnode.SignDate = datetime
-			nodes[addr] = newnode
 		}
-
+		var masternodesfinished bool
+		for {
+			if masternodesfinished{
+				if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) == 0 { break }
+				if b_number >= master_block_number {
+					break
+				}
+			}
+				for addr, node := range nodes { // set block numbers and times
+					var newnode Signer //mark master nodes
+					newnode.BlockNumber = node.BlockNumber
+					if node.IsMasterNode {
+						if !masternodesfinished {
+							newnode.IsMasterNode = true
+							master_block_number = master_block_number + 20
+							for _, node := range nodes { // see if the number already exists
+								for _, turn := range node.BlockNumber {
+									if turn == master_block_number {
+										master_block_number++
+									}
+								}
+							}
+							newnode.BlockNumber = append(newnode.BlockNumber, master_block_number)
+							datetime = datetime.Add(120000000000)
+							newnode.SignDate = datetime
+							nodes[addr] = newnode
+						}
+					} else {
+						b_number++
+						for _, node := range nodes { // see if the number already exists
+							for _, turn := range node.BlockNumber {
+								if turn == b_number {
+									b_number++
+								}
+							}
+						}
+						newnode.BlockNumber = append(newnode.BlockNumber, b_number)
+						datetime = datetime.Add(120000000000)
+						newnode.SignDate = datetime
+						nodes[addr] = newnode
+					}
+			}
+			masternodesfinished = true
+		}
 		if (len(nodes)) > 0 {
 			blob, _ := json.Marshal(nodes)
 			header.SuperBlock = blob
