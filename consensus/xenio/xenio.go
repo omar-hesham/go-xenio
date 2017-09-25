@@ -134,8 +134,8 @@ var (
 	errUnauthorized = errors.New("unauthorized")
 	// errOutOfTurn is returned if a header is signed by a authorized but out of turn entity.
 	errOutOfTurn = errors.New("invalid turn")
-	// errOrphanChild is returned when we cannot locate the parent of a block in the chain
-	errOrphanChild = errors.New("Cannot Locate Parent")
+
+	errMasterNodesTurn = errors.New("normal peer cannot mint in master-nodes block number")
 )
 
 // SignerFn is a signer callback function to request a hash to be signed by a
@@ -734,11 +734,11 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 				break
 			}
 			// Signer is among recents, only wait if the current block doesn't shift it out
-			if limit := uint64(len(snap.MasterNodes)/2 + 1); number < limit || seen > number-limit {
+			/*if limit := uint64(len(snap.MasterNodes)/2 + 1); number < limit || seen > number-limit {
 				log.Info("Signed recently, must wait for others")
 				<-stop
 				return nil, nil
-			}
+			}*/
 		}
 	}
 	// Sweet, the protocol permits us to sign the block, wait for our time
@@ -837,6 +837,20 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			blob, _ := json.Marshal(nodes)
 			header.SuperBlock = blob
 			//	log.Warn(string(blob))
+		}
+	}else {
+		if !inturn { //checks if a single node tries to over-turn a masternode
+			inturn = true
+			for _, node := range snap.MasterNodes {
+				for _, turn := range node.BlockNumber {
+					if turn == snap.Number+1 {
+						inturn = false
+					}
+				}
+			}
+			if !inturn {
+				return nil, errMasterNodesTurn
+			}
 		}
 	}
 	// Sign all the things!
