@@ -49,7 +49,7 @@ const (
 	inmemorySnapshots  = 128  // Number of recent vote snapshots to keep in memory
 	inmemorySignatures = 4096 // Number of recent block signatures to keep in memory
 
-	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
+	wiggleTime = time.Duration(2) * time.Minute // Random delay (per signer) to allow concurrent signers
 )
 
 // Clique proof-of-authority protocol constants.
@@ -492,6 +492,7 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 	if number == 0 {
 		return errUnknownBlock
 	}
+
 	// Retrieve the snapshot needed to verify this header and cache it
 	snap, err := c.snapshot(chain, number-1, header.ParentHash, parents)
 	if err != nil {
@@ -504,39 +505,24 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 		return err
 	}
 
-	var signingNode Signer // find the node into the snapshot and assign it to a var
-	if superNode, authorized := snap.MasterNodes[signer]; !authorized {
-		if stakernode, stakerauthorized := snap.StakingNodes[signer]; stakerauthorized {
-			signingNode = stakernode
+	// Get authorised node. Check whether the signer address corresponds to a validated master, or staking node.
+	signingNode, isAuthorised := snap.getSigningNode(signer)
+	if !isAuthorised { return errUnauthorized }
+
+	// Check whether the authorised node is next in turn. Give out-of-turn error if the signing node does not contain the next in line block.
+	if !signingNode.isInTurn(snap){
+
+		// estimate the delivery time of previous blocks of all nodes prior to the signing node
+		estDelayTime := snap.estimatePriorDelayTime(chain, signingNode, wiggleTime)
+
+		// check whether the estimated delay time exceeds the current time
+		if estDelayTime.Unix() > time.Now().Unix(){
+			return errOutOfTurn
 		}else{
-			return errUnauthorized
+			log.Warn("Block Minting is Late, Trying to Out-of-Turn Seal")
 		}
-	}else {
-		signingNode = superNode
 	}
 
-	var inturn bool //see if the node has this block number assigned to it
-	for _,turn := range signingNode.BlockNumber{
-		if turn == snap.Number+1 { //if in turn
-			inturn = true
-			break
-		}
-	}
-	if signingNode.IsMasterNode && len(snap.StakingNodes) == 0{
-		inturn = true // if no one is validated as a staker a masternode should take turn
-	}
-	if !inturn{ // give out of turn error if its not our block
-		dt := time.Unix(chain.CurrentHeader().Time.Int64(), 0)
-		for _, node := range snap.StakingNodes{ // counts how many nodes are prior to ours
-			if node.BlockNumber[0] < signingNode.BlockNumber[0]{//assuming that block array is in order
-				dt = dt.Add(120000000000)
-			}
-		}
-		if dt.Unix() > time.Now().Unix(){
-			log.Warn("here")
-			return errOutOfTurn
-		}
-	}
 	return nil
 }
 
@@ -670,34 +656,20 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	if !isAuthorised { return nil, errUnauthorized }
 
 	// Checks whether the authorised node is next in turn. Gives out-of-turn error if the signing node does not contain the next in line block.
-	if !snap.isInTurn(signingNode){
+	if !signingNode.isInTurn(snap){
 
-		// count how many nodes are prior to the signing node
-		priorNodes := 0
-		for _, node := range snap.StakingNodes{
-			//assuming that block arrays are in order
-			if node.BlockNumber[0] < signingNode.BlockNumber[0]{ priorNodes++ }
-		}
-
-		// add 2mins for each prior node
-		dt := time.Unix(chain.CurrentHeader().Time.Int64(), 0).Add(time.Minute*time.Duration(2*priorNodes))
+		// estimate the delivery time of previous blocks of all nodes prior to the signing node
+		estDelayTime := snap.estimatePriorDelayTime(chain, signingNode, wiggleTime)
 
 		// check whether the estimated time exceeds the current time
-		if dt.Unix() > time.Now().Unix(){
+		if estDelayTime.Unix() > time.Now().Unix(){
 			return nil, errOutOfTurn
 		}else{
 			log.Warn("Block Minting is Late, Trying to Out-of-Turn Seal")
 		}
 
-		if !signingNode.IsMasterNode { //checks if a single node tries to over-turn a masternode
-			for _, node := range snap.MasterNodes {
-				for _, turn := range node.BlockNumber {
-					if turn == snap.Number+1 {
-						return nil, errMasterNodesTurn
-					}
-				}
-			}
-		}
+		//checks if a single node tries to over-turn a masternode
+		if signingNode.isOverTurner(snap) {	return nil, errMasterNodesTurn }
 	}
 
 	// If we're amongst the recent signers, wait for the next block

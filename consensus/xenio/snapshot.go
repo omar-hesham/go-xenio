@@ -25,6 +25,7 @@ import (
 
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/consensus"
 	"github.com/xenioplatform/go-xenio/ethdb"
 	"github.com/xenioplatform/go-xenio/params"
 	"github.com/xenioplatform/go-xenio/log"
@@ -393,7 +394,7 @@ func (s *Snapshot) getSigningNode(signer common.Address) (Signer, bool) {
 }
 
 // Checks whether the signing node is next in turn
-func (s *Snapshot) isInTurn (signingNode Signer) bool{
+func (signingNode Signer) isInTurn (s *Snapshot) bool{
 
 	// if no validated stakers exist, a master node takes turn
 	if signingNode.IsMasterNode && len(s.StakingNodes) == 0 { return true }
@@ -404,6 +405,47 @@ func (s *Snapshot) isInTurn (signingNode Signer) bool{
 	}
 	return false
 }
+
+// Count how many nodes in the snapshot are prior to the signing node
+func (s *Snapshot) getPriorNodes(signingNode Signer) int {
+	priorNodes := 0
+	for _, node := range s.StakingNodes{
+		//assuming that block arrays are in order
+		if node.BlockNumber[0] < signingNode.BlockNumber[0]{ priorNodes++ }
+	}
+	return priorNodes
+}
+
+// Estimate the delivery time of previous blocks of all nodes prior to the signing node
+func (s *Snapshot) estimatePriorDelayTime(chain consensus.ChainReader, signingNode Signer, wiggleTime time.Duration) time.Time {
+
+	// count nodes prior to the signing node
+	priorNodes := s.getPriorNodes(signingNode)
+
+	// add 2mins for each prior node
+	dt := time.Unix(chain.CurrentHeader().Time.Int64(), 0).Add(wiggleTime*time.Duration(priorNodes))
+
+	return dt
+}
+
+// Checks whether a staking node tries to over-turn a master node
+func (signingNode Signer) isOverTurner (s *Snapshot) bool {
+	if !signingNode.IsMasterNode { //if staking node
+		for _, node := range s.MasterNodes {
+			for _, turn := range node.BlockNumber {
+				if turn == s.Number+1 {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+
+
+
+
 
 
 
