@@ -488,9 +488,6 @@ func (c *Xenio) VerifySeal(chain consensus.ChainReader, header *types.Header) er
 // headers that aren't yet part of the local blockchain to generate the snapshots
 // from.
 func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
-
-	log.Warn("Verify")
-
 	// Verifying the genesis block is not supported
 	number := header.Number.Uint64()
 	if number == 0 {
