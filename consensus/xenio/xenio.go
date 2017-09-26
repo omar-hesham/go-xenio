@@ -653,6 +653,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	signingNode, isAuthorised := snap.getSigningNode(signer)
 	if !isAuthorised { return nil, errUnauthorized }
 
+	delay := wiggleTime
 	// Checks whether the authorised node is next in turn. Gives out-of-turn error if the signing node does not contain the next in line block.
 	if !signingNode.isInTurn(snap){
 
@@ -663,6 +664,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			return nil, errOutOfTurn
 		}else{
 			log.Warn("Block Minting is Late, Trying to Out-of-Turn Seal")
+			delay = delay/2 //that's added here in case the peer is not synced blocks, it will wait a bit for the syncing but it will sign a bit faster than a normal block time
 		}
 
 		//checks if a single node tries to over-turn a master node
@@ -672,7 +674,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	select {
 	case <-stop:
 		return nil, nil
-	case <-time.After(wiggleTime):
+	case <-time.After(delay):
 	}
 
 	if signingNode.IsMasterNode { //only master nodes can change that list
