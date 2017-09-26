@@ -512,15 +512,23 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 
 	// Check whether the authorised node is next in turn. Give out-of-turn error if the signing node does not contain the next in line block.
 	if !signingNode.isInTurn(snap){
-
-		// estimate the delivery time of previous blocks of all nodes prior to the signing node
-		estDelayTime := snap.estimatePriorDelayTime(chain, signingNode, wiggleTime)
-		// check whether the estimated delay time exceeds the current time
-		if estDelayTime.Unix() > time.Now().Unix(){
+		if !signingNode.IsMasterNode{
 			return errOutOfTurn
+		}else{
+			headerTime := time.Unix(chain.CurrentHeader().Time.Int64(),0)
+			//time.Unix(chain.GetHeaderByNumber(chain.CurrentHeader().Number.Uint64()-1).Time.Int64(),0)
+			headerTime = headerTime.Add(wiggleTime*2)
+			a, _ := json.Marshal(headerTime.Unix())
+			b, _ := json.Marshal(time.Now().Unix())
+			log.Warn(string(a)+" > "+string(b))
+			if headerTime.Unix() < time.Now().Unix(){
+				log.Warn("elapsed")
+			}else{
+				return errOutOfTurn
+			}
 		}
-	}
 
+	}
 	return nil
 }
 
@@ -655,26 +663,30 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 
 //	delay := chain.Config().Xenio.Period
 	// Checks whether the authorised node is next in turn. Gives out-of-turn error if the signing node does not contain the next in line block.
+
 	if !signingNode.isInTurn(snap){
+		if !signingNode.IsMasterNode{
+			return nil,nil
+		}else{
+			headerTime := time.Unix(chain.CurrentHeader().Time.Int64(),0)
+				//time.Unix(chain.GetHeaderByNumber(chain.CurrentHeader().Number.Uint64()-1).Time.Int64(),0)
+			headerTime = headerTime.Add(wiggleTime*2)
+			a, _ := json.Marshal(headerTime.Unix())
+			b, _ := json.Marshal(time.Now().Unix())
+			log.Warn(string(a)+" > "+string(b))
+			if headerTime.Unix() < time.Now().Unix(){
+				log.Warn("elapsed")
+			}else{
+				return nil,nil
+			}
+		}
 
-		// estimate the delivery time of previous blocks of all nodes prior to the signing node
-//		estDelayTime := snap.estimatePriorDelayTime(chain, signingNode, wiggleTime)
-		// check whether the estimated time exceeds the current time
-//		if estDelayTime.Unix() > time.Now().Unix(){
-			return nil,nil// errOutOfTurn
-//		}else{
-//			log.Warn("Block Minting is Late, Trying to Out-of-Turn Seal")
-	//		delay = delay/2 //that's added here in case the peer is not synced blocks, it will wait a bit for the syncing but it will sign a bit faster than a normal block time
-		//}
-
-		//checks if a single node tries to over-turn a master node
-		//if signingNode.isOverTurner(snap) {	return nil, errMasterNodesTurn }
 	}
 
 	select {
 	case <-stop:
 		return nil, nil
-	case <-time.After(time.Second * 60):
+	case <-time.After(wiggleTime):
 	}
 
 	if signingNode.IsMasterNode { //only master nodes can change that list
