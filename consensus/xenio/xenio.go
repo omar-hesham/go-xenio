@@ -665,42 +665,44 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	if signer == ca{
 		return nil, errUnauthorized
 	}
-	var signingNode Signer // find the node into the snapshot and assign it to a var
-	if superNode, authorized := snap.MasterNodes[signer]; !authorized {
-		if stakernode, stakerauthorized := snap.StakingNodes[signer]; stakerauthorized {
-			signingNode = stakernode
-		}else{
-			return nil, errUnauthorized
-		}
-	}else {
-		signingNode = superNode
-	}
+	// Get authorised node. Check whether the signer address corresponds to a validated master, or staking node.
+	signingNode, isAuthorised := snap.getSigningNode(signer)
+	if !isAuthorised { return nil, errUnauthorized }
 
-	var inturn bool //see if the node has this block number assigned to it
-	for _,turn := range signingNode.BlockNumber{
-		if turn == snap.Number+1 { //if in turn
-			inturn = true
-			break
+	// Checks whether the authorised node is next in turn. Gives out-of-turn error if the signing node does not contain the next in line block.
+	if !snap.isInTurn(signingNode){
+
+		// count how many nodes are prior to the signing node
+		priorNodes := 0
+		for _, node := range snap.StakingNodes{
+			//assuming that block arrays are in order
+			if node.BlockNumber[0] < signingNode.BlockNumber[0]{ priorNodes++ }
 		}
-	}
-	if signingNode.IsMasterNode && len(snap.StakingNodes) == 0{
-		inturn = true // if no one is validated as a staker a masternode should take turn
-	}
-	if !inturn{ // give out of turn error if its not our block
-		dt := time.Unix(chain.CurrentHeader().Time.Int64(), 0)
-		for _, node := range snap.StakingNodes{ // counts how many nodes are prior to ours
-			if node.BlockNumber[0] < signingNode.BlockNumber[0]{//assuming that block array is in order
-				dt = dt.Add(120000000000)
-			}
-		}
+
+		// add 2mins for each prior node
+		dt := time.Unix(chain.CurrentHeader().Time.Int64(), 0).Add(time.Minute*time.Duration(2*priorNodes))
+
+		// check whether the estimated time exceeds the current time
 		if dt.Unix() > time.Now().Unix(){
 			return nil, errOutOfTurn
+		}else{
+			log.Warn("Block Minting is Late, Trying to Out-of-Turn Seal")
+		}
+
+		if !signingNode.IsMasterNode { //checks if a single node tries to over-turn a masternode
+			for _, node := range snap.MasterNodes {
+				for _, turn := range node.BlockNumber {
+					if turn == snap.Number+1 {
+						return nil, errMasterNodesTurn
+					}
+				}
+			}
 		}
 	}
 
 	// If we're amongst the recent signers, wait for the next block
-	for _, recent := range snap.Recents {
-		if recent == signer {
+	//for _, recent := range snap.Recents {
+	/*	if recent == signer {
 			nextTime := big.NewInt(120)
 			nextTime.Add(nextTime, chain.CurrentHeader().Time)
 			if nextTime.Cmp(big.NewInt(time.Now().Unix())) < 1 {
@@ -708,29 +710,35 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 				break
 			}
 			// Signer is among recents, only wait if the current block doesn't shift it out
-			/*if limit := uint64(len(snap.MasterNodes)/2 + 1); number < limit || seen > number-limit {
-				log.Info("Signed recently, must wait for others")
-				<-stop
-				return nil, nil
-			}*/
+			//if limit := uint64(len(snap.MasterNodes)/2 + 1); number < limit || seen > number-limit {
+			//	log.Info("Signed recently, must wait for others")
+			//	<-stop
+			//	return nil, nil
+			//}
 		}
-	}
+	}*/
+
+
 	// Sweet, the protocol permits us to sign the block, wait for our time
-	delay := time.Unix(header.Time.Int64(), 0).Sub(time.Now())
-	if header.Difficulty.Cmp(diffNoTurn) == 0 {
+	//delay := time.Unix(header.Time.Int64(), 0).Sub(time.Now())
+
+	/*if header.Difficulty.Cmp(diffNoTurn) == 0 {
 		// It's not our turn explicitly to sign, delay it a bit
 		wiggle := time.Duration(len(snap.MasterNodes)/2+1) * wiggleTime
 		delay += time.Duration(rand.Int63n(int64(wiggle)))
 
 		log.Trace("Out-of-turn signing requested", "wiggle", common.PrettyDuration(wiggle))
 	}
-	log.Trace("Waiting for slot to sign and propagate", "delay", common.PrettyDuration(delay))
 
-	select {
-	case <-stop:
-		return nil, nil
-	case <-time.After(delay):
-	}
+	log.Trace("Waiting for slot to sign and propagate", "delay", common.PrettyDuration(delay))
+	*/
+
+	//select {
+	//case <-stop:
+	//	return nil, nil
+	//case <-time.After(delay):
+	//}
+
 	if signingNode.IsMasterNode { //only master nodes can change that list
 		//change superblock headers
 		datetime := time.Now()
@@ -811,20 +819,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			blob, _ := json.Marshal(nodes)
 			header.SuperBlock = blob
 			//	log.Warn(string(blob))
-		}
-	}else {
-		if !inturn { //checks if a single node tries to over-turn a masternode
-			inturn = true
-			for _, node := range snap.MasterNodes {
-				for _, turn := range node.BlockNumber {
-					if turn == snap.Number+1 {
-						inturn = false
-					}
-				}
-			}
-			if !inturn {
-				return nil, errMasterNodesTurn
-			}
 		}
 	}
 	// Sign all the things!

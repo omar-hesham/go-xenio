@@ -377,3 +377,33 @@ func (s *Snapshot) inturn(number uint64, signer common.Address) bool {
 	}
 	return (number % uint64(len(signers))) == uint64(offset)
 }
+
+// Checks whether the node is authorised
+//func isAuthorisedNode(snap *Snapshot, signer common.Address) bool {
+//	_, isAuthorizedMaster := snap.MasterNodes[signer]
+//	_, isAuthorizedStaking := snap.StakingNodes[signer]
+//	return isAuthorizedMaster || isAuthorizedStaking
+//}
+
+// Locates the singer in the snapshot and returns the signing node
+func (s *Snapshot) getSigningNode(signer common.Address) (Signer, bool) {
+	if signingNode, isAuthorized := s.MasterNodes[signer]; isAuthorized { return signingNode, isAuthorized } //Check master nodes
+	if signingNode, isAuthorized := s.StakingNodes[signer]; isAuthorized { return signingNode, isAuthorized }//Check staking nodes
+	return Signer{}, false	//Not authorised node
+}
+
+// Checks whether the signing node is next in turn
+func (s *Snapshot) isInTurn (signingNode Signer) bool{
+
+	// if no validated stakers exist, a master node takes turn
+	if signingNode.IsMasterNode && len(s.StakingNodes) == 0 { return true }
+
+	// Check if the authorised node already contains the next in turn block
+	for _, turn := range signingNode.BlockNumber{
+		if turn == s.Number + 1 { return true }
+	}
+	return false
+}
+
+
+

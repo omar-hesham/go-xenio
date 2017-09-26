@@ -44,7 +44,7 @@ const (
 	resultQueueSize  = 10
 	miningLogAtDepth = 5
 
-	awakenTime = 120 * time.Second
+	awakenTime = 65 * time.Second
 
 	// txChanSize is the size of channel listening to TxPreEvent.
 	// The number is referenced from the size of tx pool.
