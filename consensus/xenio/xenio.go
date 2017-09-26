@@ -518,15 +518,9 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 
 		// estimate the delivery time of previous blocks of all nodes prior to the signing node
 		estDelayTime := snap.estimatePriorDelayTime(chain, signingNode, wiggleTime)
-		blob, _ := json.Marshal(estDelayTime.Unix())
-		log.Warn("Estimated Delay Time (verify): " + string(blob))
-		blob, _ = json.Marshal(time.Now().Unix())
-		log.Warn("Estimated Now Time (verify): " + string(blob) )
 		// check whether the estimated delay time exceeds the current time
 		if estDelayTime.Unix() > time.Now().Unix(){
 			return errOutOfTurn
-		}else{
-			log.Warn("Block Minting is Late, Trying to Out-of-Turn Seal")
 		}
 	}
 
@@ -667,10 +661,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 
 		// estimate the delivery time of previous blocks of all nodes prior to the signing node
 		estDelayTime := snap.estimatePriorDelayTime(chain, signingNode, wiggleTime)
-		blob, _ := json.Marshal(estDelayTime.Unix())
-		log.Warn("Estimated Delay Time (verify): " + string(blob))
-		blob, _ = json.Marshal(time.Now().Unix())
-		log.Warn("Estimated Now Time (verify): " + string(blob) )
 		// check whether the estimated time exceeds the current time
 		if estDelayTime.Unix() > time.Now().Unix(){
 			return nil, errOutOfTurn
@@ -681,31 +671,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		//checks if a single node tries to over-turn a master node
 		if signingNode.isOverTurner(snap) {	return nil, errMasterNodesTurn }
 	}
-
-	// If we're amongst the recent signers, wait for the next block
-	/*for _, recent := range snap.Recents {
-		if recent == signer {
-			nextTime := big.NewInt(60)
-			nextTime.Add(nextTime, chain.CurrentHeader().Time)
-			if nextTime.Cmp(big.NewInt(time.Now().Unix())) < 1 {
-				log.Warn("Block Minting is Late, Trying to Out-of-Turn Seal")
-				break
-			}
-			// Signer is among recents, only wait if the current block doesn't shift it out
-			//if limit := uint64(len(snap.MasterNodes)/2 + 1); number < limit || seen > number-limit {
-			//	log.Info("Signed recently, must wait for others")
-			//	<-stop
-			//	return nil, nil
-			//}
-		}
-	}*/
-
-
-	// Sweet, the protocol permits us to sign the block, wait for our time
-
-	//blob1, _ := json.Marshal(delay)
-	//log.Warn("Estimated Delay Time: " + string(blob1) )
-
 
 	select {
 	case <-stop:

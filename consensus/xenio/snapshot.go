@@ -418,15 +418,10 @@ func (s *Snapshot) getPriorNodes(signingNode Signer) int {
 
 // Estimate the delivery time of previous blocks of all nodes prior to the signing node
 func (s *Snapshot) estimatePriorDelayTime(chain consensus.ChainReader, signingNode Signer, wiggleTime time.Duration) time.Time {
-
 	// count nodes prior to the signing node
 	priorNodes := s.getPriorNodes(signingNode)
-
 	// add 2mins for each prior node
 	dt := time.Unix(chain.CurrentHeader().Time.Int64(), 0).Add(wiggleTime*time.Duration(2 * priorNodes))
-
-	log.Warn("HERE: estimatePriorDelayTime")
-
 	return dt
 }
 
