@@ -663,7 +663,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 
 //	delay := chain.Config().Xenio.Period
 	// Checks whether the authorised node is next in turn. Gives out-of-turn error if the signing node does not contain the next in line block.
-
+	var dontChangeSuperBlockHeaders bool
 	if !signingNode.isInTurn(snap){
 		if !signingNode.IsMasterNode{
 			return nil,nil
@@ -676,6 +676,13 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			log.Warn(string(a)+" > "+string(b))
 			if headerTime.Unix() < time.Now().Unix(){
 				log.Warn("elapsed")
+				for _, node := range snap.StakingNodes{
+					for _, numb := range node.BlockNumber{
+						if numb == chain.CurrentHeader().Number.Uint64(){
+							dontChangeSuperBlockHeaders = true
+						}
+					}
+				}
 			}else{
 				return nil,nil
 			}
@@ -689,7 +696,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	case <-time.After(wiggleTime):
 	}
 
-	if signingNode.IsMasterNode { //only master nodes can change that list
+	if signingNode.IsMasterNode && !dontChangeSuperBlockHeaders { //only master nodes can change that list
 		//change superblock headers
 		datetime := time.Now()
 		nodes := make(map[common.Address]Signer, 0)
