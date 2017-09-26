@@ -661,7 +661,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 //		estDelayTime := snap.estimatePriorDelayTime(chain, signingNode, wiggleTime)
 		// check whether the estimated time exceeds the current time
 //		if estDelayTime.Unix() > time.Now().Unix(){
-			return nil, errOutOfTurn
+			return nil,nil// errOutOfTurn
 //		}else{
 //			log.Warn("Block Minting is Late, Trying to Out-of-Turn Seal")
 	//		delay = delay/2 //that's added here in case the peer is not synced blocks, it will wait a bit for the syncing but it will sign a bit faster than a normal block time

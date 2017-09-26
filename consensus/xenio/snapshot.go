@@ -407,19 +407,31 @@ func (signingNode Signer) isInTurn (s *Snapshot) bool{
 }
 
 // Count how many nodes in the snapshot are prior to the signing node
-func (s *Snapshot) getPriorNodes(signingNode Signer) int {
+func (s *Snapshot) getPriorNodes(signingNode Signer, currentBlockNumber uint64) int {
 	priorNodes := 0
-	for _, node := range s.StakingNodes{
-		//assuming that block arrays are in order
-		if node.BlockNumber[0] < signingNode.BlockNumber[0]{ priorNodes++ }
+	minBlock := uint64(0)
+	for _, numb := range signingNode.BlockNumber{
+		if numb < currentBlockNumber{ continue }
+		if minBlock < numb { minBlock = numb}
 	}
+	if minBlock > 0{
+		for _, node := range s.StakingNodes{
+			//assuming that block arrays are in order
+			for _, numb := range node.BlockNumber{
+				if numb < currentBlockNumber{ continue }
+				if minBlock < numb { priorNodes++ }
+			}
+		}
+	}
+	blob, _ := json.Marshal(priorNodes)
+	log.Warn(string(blob))
 	return priorNodes
 }
 
 // Estimate the delivery time of previous blocks of all nodes prior to the signing node
 func (s *Snapshot) estimatePriorDelayTime(chain consensus.ChainReader, signingNode Signer, wiggleTime time.Duration) time.Time {
 	// count nodes prior to the signing node
-	priorNodes := s.getPriorNodes(signingNode)
+	priorNodes := s.getPriorNodes(signingNode,chain.CurrentHeader().Number.Uint64())
 	// add 2mins for each prior node
 	dt := time.Unix(chain.CurrentHeader().Time.Int64(), 0).Add(wiggleTime*time.Duration(2 * priorNodes))
 	return dt
