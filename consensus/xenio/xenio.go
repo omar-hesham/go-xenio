@@ -50,7 +50,7 @@ const (
 	inmemorySnapshots  = 128  // Number of recent vote snapshots to keep in memory
 	inmemorySignatures = 4096 // Number of recent block signatures to keep in memory
 
-	wiggleTime = time.Minute // Random delay (per signer) to allow concurrent signers
+	wiggleTime = time.Minute // delay
 )
 
 // Clique proof-of-authority protocol constants.
@@ -699,7 +699,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 						skip = true
 					}
 				}
-				if skip {
+				if skip || StakerExpired(address){
 					continue
 				} // will skip that node if its already in the master nodes list
 				var node Signer
