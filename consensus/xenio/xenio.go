@@ -42,6 +42,7 @@ import (
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
 	"encoding/json"
+
 )
 
 const (
@@ -49,7 +50,7 @@ const (
 	inmemorySnapshots  = 128  // Number of recent vote snapshots to keep in memory
 	inmemorySignatures = 4096 // Number of recent block signatures to keep in memory
 
-	wiggleTime = time.Duration(2) * time.Minute // Random delay (per signer) to allow concurrent signers
+	wiggleTime = time.Minute // Random delay (per signer) to allow concurrent signers
 )
 
 // Clique proof-of-authority protocol constants.
@@ -487,6 +488,9 @@ func (c *Xenio) VerifySeal(chain consensus.ChainReader, header *types.Header) er
 // headers that aren't yet part of the local blockchain to generate the snapshots
 // from.
 func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
+
+	log.Warn("Verify")
+
 	// Verifying the genesis block is not supported
 	number := header.Number.Uint64()
 	if number == 0 {
@@ -514,7 +518,10 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 
 		// estimate the delivery time of previous blocks of all nodes prior to the signing node
 		estDelayTime := snap.estimatePriorDelayTime(chain, signingNode, wiggleTime)
-
+		blob, _ := json.Marshal(estDelayTime.Unix())
+		log.Warn("Estimated Delay Time (verify): " + string(blob))
+		blob, _ = json.Marshal(time.Now().Unix())
+		log.Warn("Estimated Now Time (verify): " + string(blob) )
 		// check whether the estimated delay time exceeds the current time
 		if estDelayTime.Unix() > time.Now().Unix(){
 			return errOutOfTurn
@@ -660,7 +667,10 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 
 		// estimate the delivery time of previous blocks of all nodes prior to the signing node
 		estDelayTime := snap.estimatePriorDelayTime(chain, signingNode, wiggleTime)
-
+		blob, _ := json.Marshal(estDelayTime.Unix())
+		log.Warn("Estimated Delay Time (verify): " + string(blob))
+		blob, _ = json.Marshal(time.Now().Unix())
+		log.Warn("Estimated Now Time (verify): " + string(blob) )
 		// check whether the estimated time exceeds the current time
 		if estDelayTime.Unix() > time.Now().Unix(){
 			return nil, errOutOfTurn
@@ -668,14 +678,14 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			log.Warn("Block Minting is Late, Trying to Out-of-Turn Seal")
 		}
 
-		//checks if a single node tries to over-turn a masternode
+		//checks if a single node tries to over-turn a master node
 		if signingNode.isOverTurner(snap) {	return nil, errMasterNodesTurn }
 	}
 
 	// If we're amongst the recent signers, wait for the next block
-	//for _, recent := range snap.Recents {
-	/*	if recent == signer {
-			nextTime := big.NewInt(120)
+	/*for _, recent := range snap.Recents {
+		if recent == signer {
+			nextTime := big.NewInt(60)
 			nextTime.Add(nextTime, chain.CurrentHeader().Time)
 			if nextTime.Cmp(big.NewInt(time.Now().Unix())) < 1 {
 				log.Warn("Block Minting is Late, Trying to Out-of-Turn Seal")
@@ -692,24 +702,16 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 
 
 	// Sweet, the protocol permits us to sign the block, wait for our time
-	//delay := time.Unix(header.Time.Int64(), 0).Sub(time.Now())
 
-	/*if header.Difficulty.Cmp(diffNoTurn) == 0 {
-		// It's not our turn explicitly to sign, delay it a bit
-		wiggle := time.Duration(len(snap.MasterNodes)/2+1) * wiggleTime
-		delay += time.Duration(rand.Int63n(int64(wiggle)))
+	//blob1, _ := json.Marshal(delay)
+	//log.Warn("Estimated Delay Time: " + string(blob1) )
 
-		log.Trace("Out-of-turn signing requested", "wiggle", common.PrettyDuration(wiggle))
+
+	select {
+	case <-stop:
+		return nil, nil
+	case <-time.After(wiggleTime):
 	}
-
-	log.Trace("Waiting for slot to sign and propagate", "delay", common.PrettyDuration(delay))
-	*/
-
-	//select {
-	//case <-stop:
-	//	return nil, nil
-	//case <-time.After(delay):
-	//}
 
 	if signingNode.IsMasterNode { //only master nodes can change that list
 		//change superblock headers

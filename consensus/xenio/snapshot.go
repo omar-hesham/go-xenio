@@ -423,7 +423,9 @@ func (s *Snapshot) estimatePriorDelayTime(chain consensus.ChainReader, signingNo
 	priorNodes := s.getPriorNodes(signingNode)
 
 	// add 2mins for each prior node
-	dt := time.Unix(chain.CurrentHeader().Time.Int64(), 0).Add(wiggleTime*time.Duration(priorNodes))
+	dt := time.Unix(chain.CurrentHeader().Time.Int64(), 0).Add(wiggleTime*time.Duration(2 * priorNodes))
+
+	log.Warn("HERE: estimatePriorDelayTime")
 
 	return dt
 }
