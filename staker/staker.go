@@ -32,7 +32,6 @@ import (
 	"github.com/xenioplatform/go-xenio/event"
 	"github.com/xenioplatform/go-xenio/log"
 	"github.com/xenioplatform/go-xenio/params"
-	"time"
 )
 
 // Backend wraps all methods required for mining.
@@ -124,7 +123,7 @@ func (self *Staker) Start(coinbase common.Address) {
 
 	self.watcher.start()
 	self.watcher.commitNewWork()
-
+/*
 	wakeChan := time.NewTicker(awakenTime).C
 	stopChan := make(chan struct{})
 
@@ -148,6 +147,7 @@ func (self *Staker) Start(coinbase common.Address) {
 			return
 		}
 	}
+*/
 }
 
 
