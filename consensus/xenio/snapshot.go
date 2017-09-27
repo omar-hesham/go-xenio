@@ -50,16 +50,17 @@ type Tally struct {
 
 // Snapshot is the state of the authorization voting at a given point in time.
 type Snapshot struct {
-	config   *params.XenioConfig // Consensus engine parameters to fine tune behavior
-	sigcache *lru.ARCCache        // Cache of recent block signatures to speed up ecrecover
+	config         *params.XenioConfig // Consensus engine parameters to fine tune behavior
+	sigcache       *lru.ARCCache        // Cache of recent block signatures to speed up ecrecover
 
-	Number       uint64                      `json:"number"`      // Block number where the snapshot was created
-	Hash         common.Hash                 `json:"hash"`        // Block hash where the snapshot was created
-	MasterNodes  map[common.Address]Signer   `json:"masternodes"` // Set of authorized super signing nodes at this moment
-	StakingNodes map[common.Address]Signer   `json:"stakingnodes"`// Set of normal signers
-	Recents      map[uint64]common.Address   `json:"recents"`     // Set of recent signers for spam protections
-	Votes        []*Vote                     `json:"votes"`       // List of votes cast in chronological order
-	Tally        map[common.Address]Tally    `json:"tally"`       // Current vote tally to avoid recalculating
+	Number         uint64                      `json:"number"`      // Block number where the snapshot was created
+	Hash           common.Hash                 `json:"hash"`        // Block hash where the snapshot was created
+	MasterNodes    map[common.Address]Signer   `json:"masternodes"` // Set of authorized super signing nodes at this moment
+	StakingNodes   map[common.Address]Signer   `json:"stakingnodes"`// Set of normal signers
+	Recents        map[uint64]common.Address   `json:"recents"`     // Set of recent signers for spam protections
+	Votes          []*Vote                     `json:"votes"`       // List of votes cast in chronological order
+	Tally          map[common.Address]Tally    `json:"tally"`       // Current vote tally to avoid recalculating
+	LastSuperBlock time.Time                   `json:"lastsuperbloctime"` // the time of the last known superblock
 }
 
 type Signer struct {
@@ -309,6 +310,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 						snap.StakingNodes[key] = node
 					}
 				}
+				snap.LastSuperBlock =time.Unix(header.Time.Int64(),0)
 			}
 		}
 
