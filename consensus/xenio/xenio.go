@@ -670,14 +670,14 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			headerTime := time.Unix(chain.CurrentHeader().Time.Int64(),0)
 				//time.Unix(chain.GetHeaderByNumber(chain.CurrentHeader().Number.Uint64()-1).Time.Int64(),0)
 			headerTime = headerTime.Add(wiggleTime*2)
-			a, _ := json.Marshal(headerTime.Unix())
-			b, _ := json.Marshal(time.Now().Unix())
-			log.Warn(string(a)+" > "+string(b))
+			//a, _ := json.Marshal(headerTime.Unix())
+			//b, _ := json.Marshal(time.Now().Unix())
+			//log.Warn(string(a)+" > "+string(b))
 			if headerTime.Unix() < time.Now().Unix(){
-				log.Warn("elapsed")
+				log.Warn("The staker has his work delayed")
 				for _, node := range snap.StakingNodes{
 					for _, numb := range node.BlockNumber{
-						if numb == chain.CurrentHeader().Number.Uint64(){
+						if numb == header.Number.Uint64(){
 							dontChangeSuperBlockHeaders = true
 						}
 					}
