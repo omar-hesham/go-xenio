@@ -718,25 +718,26 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		}
 
 		// for staking nodes
-		for {
+		if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
+			for {
+				if len(common.StakerSnapShot.Stakers) == 0{ break }
+					for address := range common.StakerSnapShot.Stakers {
+						// Skip this node, if it is already in the master nodes list
+						if _, isMasterNode := snap.MasterNodes[address]; isMasterNode || StakerExpired(address) { continue }
 
-			for address := range common.StakerSnapShot.Stakers {
-				// Skip this node, if it is already in the master nodes list
-				if _, isMasterNode := snap.MasterNodes[address]; isMasterNode || StakerExpired(address) { continue }
-
-				// Add a new node to the nodes list
-				var stakingNode Signer
-				current_block_number++
-				if isDuplicated(current_block_number, nodes){ current_block_number++ }
-				if current_block_number >= master_block_number { break }
-				stakingNode.BlockNumber = append(stakingNode.BlockNumber, current_block_number) // update block numbers
-				stakingNode.IsMasterNode = false // mark it as regular
-				nodes[address] = stakingNode // add it to the list
+						// Add a new node to the nodes list
+						var stakingNode Signer
+						current_block_number++
+						if isDuplicated(current_block_number, nodes){ current_block_number++ }
+						if current_block_number >= master_block_number { break }
+						stakingNode.BlockNumber = append(stakingNode.BlockNumber, current_block_number) // update block numbers
+						stakingNode.IsMasterNode = false // mark it as regular
+						nodes[address] = stakingNode // add it to the list
 
 
-			}
-			if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) == 0 { break }
-			if current_block_number >= master_block_number { break }
+					}
+					if current_block_number >= master_block_number { break }
+				}
 		}
 		if (len(nodes)) > 0 {
 			blob, _ := json.Marshal(nodes)
