@@ -30,6 +30,8 @@ import (
 	"github.com/xenioplatform/go-xenio/params"
 	"github.com/xenioplatform/go-xenio/log"
 	lru "github.com/hashicorp/golang-lru"
+	"math/big"
+	"github.com/xenioplatform/go-xenio/common/number"
 )
 
 // Vote represents a single vote that an authorized signer made to modify the
@@ -451,7 +453,15 @@ func (signingNode Signer) isOverTurner (s *Snapshot) bool {
 	return false
 }
 
-
+// Checks whether the given block number already exists in the nodes list
+func isDuplicated (block_number uint64, nodes map[common.Address]Signer) bool {
+	for _, node := range nodes {
+		for _, turn := range node.BlockNumber {
+			if turn == block_number { return true }
+		}
+	}
+	return false
+}
 
 
 

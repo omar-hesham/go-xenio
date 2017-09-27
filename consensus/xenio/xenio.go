@@ -697,80 +697,45 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	}
 
 	if signingNode.IsMasterNode && !dontChangeSuperBlockHeaders { //only master nodes can change that list
-		//change superblock headers
-		datetime := time.Now()
-		nodes := make(map[common.Address]Signer, 0)
-		b_number := header.Number.Uint64()
-		master_block_number := b_number
-		//this will update all masternode timers
-		for address := range snap.MasterNodes {
-			var node Signer//mark master nodes
-			node.IsMasterNode = true // two lists, one with masternodes and another (not here) with regular signers
-			nodes[address] = node
 
+		// change super block headers
+		current_block_number := header.Number.Uint64()
+		master_block_number := current_block_number
+
+		// update all master node timers
+		// create two lists, one with master nodes and another one with staking nodes
+
+		// for master nodes
+		// Add a new node to the nodes list
+		nodes := make(map[common.Address]Signer, 0) // new list
+		for address := range snap.MasterNodes {
+			var node Signer // create a new node
+			master_block_number += 20
+			if isDuplicated(master_block_number, nodes){ master_block_number++ }
+			node.BlockNumber = append(node.BlockNumber, master_block_number) // update block numbers
+			node.IsMasterNode = true  // mark it as a master node
+			nodes[address] = node // add it to the list
 		}
-		//set or update regular signers (timers and node list)
-		if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) > 0 {
-			for address := range common.StakerSnapShot.Stakers {
-				var skip bool
-				for master := range snap.MasterNodes {
-					if master == address {
-						skip = true
-					}
-				}
-				if skip || StakerExpired(address){
-					continue
-				} // will skip that node if its already in the master nodes list
-				var node Signer
-				node.IsMasterNode = false            // not actualy needed
-				datetime = datetime.Add(120000000000) // its in nano seconds
-				node.SignDate = datetime
-				nodes[address] = node
-			}
-		}
-		var masternodesfinished bool
+
 		for {
-			if masternodesfinished{
-				if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) == 0 { break }
-				if b_number >= master_block_number {
-					break
-				}
+			//set or update regular signers (timers and node list)
+			// for staking nodes
+			//if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) > 0 { //staking nodes list is not empty
+			for address := range common.StakerSnapShot.Stakers {
+				// Skip this node, if it is already in the master nodes list
+				if _, isMasterNode := snap.MasterNodes[address]; isMasterNode || StakerExpired(address) { continue }
+
+				// Add a new node to the nodes list
+				var node Signer
+				current_block_number++
+				if isDuplicated(current_block_number, nodes){ current_block_number++ }
+				node.BlockNumber = append(node.BlockNumber, current_block_number) // update block numbers
+				node.IsMasterNode = false // mark it as regular
+				nodes[address] = node // add it to the list
 			}
-				for addr, node := range nodes { // set block numbers and times
-					var newnode Signer //mark master nodes
-					newnode.BlockNumber = node.BlockNumber
-					if node.IsMasterNode {
-						if !masternodesfinished {
-							newnode.IsMasterNode = true
-							master_block_number = master_block_number + 20
-							for _, node := range nodes { // see if the number already exists
-								for _, turn := range node.BlockNumber {
-									if turn == master_block_number {
-										master_block_number++
-									}
-								}
-							}
-							newnode.BlockNumber = append(newnode.BlockNumber, master_block_number)
-							datetime = datetime.Add(120000000000)
-							newnode.SignDate = datetime
-							nodes[addr] = newnode
-						}
-					} else {
-						b_number++
-						for _, node := range nodes { // see if the number already exists
-							for _, turn := range node.BlockNumber {
-								if turn == b_number {
-									b_number++
-								}
-							}
-						}
-						newnode.BlockNumber = append(newnode.BlockNumber, b_number)
-						datetime = datetime.Add(120000000000)
-						newnode.SignDate = datetime
-						nodes[addr] = newnode
-					}
-			}
-			masternodesfinished = true
+			//}
+			if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) == 0 { break }
+			if current_block_number >= master_block_number { break }
 		}
 		if (len(nodes)) > 0 {
 			blob, _ := json.Marshal(nodes)
