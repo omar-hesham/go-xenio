@@ -60,7 +60,7 @@ type Snapshot struct {
 	Recents        map[uint64]common.Address   `json:"recents"`     // Set of recent signers for spam protections
 	Votes          []*Vote                     `json:"votes"`       // List of votes cast in chronological order
 	Tally          map[common.Address]Tally    `json:"tally"`       // Current vote tally to avoid recalculating
-	LastSuperBlock time.Time                   `json:"lastsuperbloctime"` // the time of the last known superblock
+	LastSuperBlock time.Time                   `json:"lastsuperblocktime"` // the time of the last known superblock
 }
 
 type Signer struct {
