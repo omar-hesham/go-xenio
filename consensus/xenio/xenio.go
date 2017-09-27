@@ -42,7 +42,6 @@ import (
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
 	"encoding/json"
-
 )
 
 const (
@@ -721,20 +720,19 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
 			for {
 				if len(common.StakerSnapShot.Stakers) == 0{ break }
+
 					for address := range common.StakerSnapShot.Stakers {
 						// Skip this node, if it is already in the master nodes list
-						if _, isMasterNode := snap.MasterNodes[address]; isMasterNode || StakerExpired(address) { continue }
+						if _, isMasterNode := snap.MasterNodes[address]; isMasterNode /* || StakerExpired(address) */ { continue }
 
 						// Add a new node to the nodes list
-						var stakingNode Signer
+						stakingNode := nodes[address]
 						current_block_number++
 						if isDuplicated(current_block_number, nodes){ current_block_number++ }
 						if current_block_number >= master_block_number { break }
 						stakingNode.BlockNumber = append(stakingNode.BlockNumber, current_block_number) // update block numbers
 						stakingNode.IsMasterNode = false // mark it as regular
 						nodes[address] = stakingNode // add it to the list
-
-
 					}
 					if current_block_number >= master_block_number { break }
 				}
