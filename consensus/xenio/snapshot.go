@@ -30,8 +30,6 @@ import (
 	"github.com/xenioplatform/go-xenio/params"
 	"github.com/xenioplatform/go-xenio/log"
 	lru "github.com/hashicorp/golang-lru"
-	"math/big"
-	"github.com/xenioplatform/go-xenio/common/number"
 )
 
 // Vote represents a single vote that an authorized signer made to modify the
