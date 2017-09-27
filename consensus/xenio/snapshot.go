@@ -397,10 +397,6 @@ func (s *Snapshot) getSigningNode(signer common.Address) (Signer, bool) {
 
 // Checks whether the signing node is next in turn
 func (signingNode Signer) isInTurn (s *Snapshot) bool{
-
-	// if no validated stakers exist, a master node takes turn
-	if signingNode.IsMasterNode && len(s.StakingNodes) == 0 { return true }
-
 	// Check if the authorised node already contains the next in turn block
 	for _, turn := range signingNode.BlockNumber{
 		if turn == s.Number + 1 { return true }
