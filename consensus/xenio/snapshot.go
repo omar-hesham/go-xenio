@@ -463,6 +463,3 @@ func isDuplicated (block_number uint64, nodes map[common.Address]Signer) bool {
 
 
 
-
-
-

@@ -699,17 +699,17 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	if signingNode.IsMasterNode && !dontChangeSuperBlockHeaders { //only master nodes can change that list
 
 		// change super block headers
-		current_block_number := header.Number.Uint64()
-		master_block_number := current_block_number
+		var current_block_number, master_block_number  uint64
+		current_block_number = header.Number.Uint64()
+		master_block_number = header.Number.Uint64()
 
-		// update all master node timers
-		// create two lists, one with master nodes and another one with staking nodes
+		// create a node list with master and staking nodes
+		nodes := make(map[common.Address]Signer, 0) // new list
 
 		// for master nodes
-		// Add a new node to the nodes list
-		nodes := make(map[common.Address]Signer, 0) // new list
 		for address := range snap.MasterNodes {
-			var node Signer // create a new node
+			// create a new node and add it to the list
+			var node Signer
 			master_block_number += 20
 			if isDuplicated(master_block_number, nodes){ master_block_number++ }
 			node.BlockNumber = append(node.BlockNumber, master_block_number) // update block numbers
@@ -717,10 +717,8 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			nodes[address] = node // add it to the list
 		}
 
+		// for staking nodes
 		for {
-			//set or update regular signers (timers and node list)
-			// for staking nodes
-			//if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) > 0 { //staking nodes list is not empty
 			for address := range common.StakerSnapShot.Stakers {
 				// Skip this node, if it is already in the master nodes list
 				if _, isMasterNode := snap.MasterNodes[address]; isMasterNode || StakerExpired(address) { continue }
@@ -733,7 +731,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 				node.IsMasterNode = false // mark it as regular
 				nodes[address] = node // add it to the list
 			}
-			//}
 			if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) == 0 { break }
 			if current_block_number >= master_block_number { break }
 		}
@@ -743,6 +740,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			//	log.Warn(string(blob))
 		}
 	}
+
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
 	if err != nil {
