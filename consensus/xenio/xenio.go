@@ -658,14 +658,17 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	signingNode, isAuthorised := snap.getSigningNode(signer)
 	if !isAuthorised { return nil, errUnauthorized }
 
+	// Estimate delay time by adding a small amount of noise
+	estimatedTime := time.Unix(chain.CurrentHeader().Time.Int64(),0).Add(time.Duration(chain.Config().Xenio.Period)*time.Second)
+
 	// Checks whether the authorised node is next in turn. Gives out-of-turn error if the signing node does not contain the next in line block.
 	var dontChangeSuperBlockHeaders bool
 	if !signingNode.isInTurn(snap){
 		if !signingNode.IsMasterNode{ return nil,nil }
-		headerTime := time.Unix(chain.CurrentHeader().Time.Int64(),0).Add(wiggleTime*2)
+		estimatedTime = estimatedTime.Add(wiggleTime)
 		//time.Unix(chain.GetHeaderByNumber(chain.CurrentHeader().Number.Uint64()-1).Time.Int64(),0)
 
-		if headerTime.Unix() >= time.Now().Unix(){ return nil,nil }
+		if estimatedTime.Unix() >= time.Now().Unix(){ return nil,nil }
 		for _, node := range snap.StakingNodes{
 			for _, numb := range node.BlockNumber{
 				if numb == header.Number.Uint64(){
@@ -678,8 +681,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	}
 
 
-	// Estimate delay time by adding a small amount of noise
-	estimatedTime := time.Unix(chain.CurrentHeader().Time.Int64(),0).Add(time.Duration(chain.Config().Xenio.Period)*time.Second)
 	delayTime := estimatedTime.Unix() - time.Now().Unix()
 	remainingSeconds, _ := json.Marshal(delayTime)
 	if delayTime < 0 {
