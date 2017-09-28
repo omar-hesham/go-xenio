@@ -516,13 +516,12 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 			return errOutOfTurn
 		}else{
 			headerTime := time.Unix(chain.CurrentHeader().Time.Int64(),0)
-			//time.Unix(chain.GetHeaderByNumber(chain.CurrentHeader().Number.Uint64()-1).Time.Int64(),0)
-			headerTime = headerTime.Add(wiggleTime*2)
+			headerTime = headerTime.Add(time.Duration(chain.Config().Xenio.Period)*time.Second)
 			//a, _ := json.Marshal(headerTime.Unix())
 			//b, _ := json.Marshal(time.Now().Unix())
 			//log.Warn(string(a)+" > "+string(b))
 			if headerTime.Unix() >= time.Now().Unix(){
-				return errOutOfTurn
+				return ErrInvalidTimestamp
 			}
 		}
 
@@ -682,6 +681,10 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 
 	// Estimate delay time by adding a small amount of noise
 	delayTime := time.Duration(float32(chain.Config().Xenio.Period) + addAdditiveNoise(noiseScalingFactor)) * time.Second
+
+	a, _ := json.Marshal(chain.Config().Xenio.Period)
+	//b, _ := json.Marshal(time.Now().Unix())
+	log.Warn(string(a))
 
 	select {
 	case <-stop:
