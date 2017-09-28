@@ -682,10 +682,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	// Estimate delay time by adding a small amount of noise
 	delayTime := time.Duration(float32(chain.Config().Xenio.Period) + addAdditiveNoise(noiseScalingFactor)) * time.Second
 
-	a, _ := json.Marshal(chain.Config().Xenio.Period)
-	//b, _ := json.Marshal(time.Now().Unix())
-	log.Warn(string(a))
-
 	select {
 	case <-stop:
 		return nil, nil
