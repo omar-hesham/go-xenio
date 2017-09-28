@@ -34,6 +34,7 @@ const (
 	HashLength    = 32
 	AddressLength = 20
 	StakerTTL	  = 1200 // seconds
+	MasterBlockIcrement = 20 // changes in the numbering of master block numbers
 )
 
 var (

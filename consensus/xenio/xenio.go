@@ -42,6 +42,7 @@ import (
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
 	"encoding/json"
+	"math"
 )
 
 const (
@@ -710,6 +711,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		// update block numbers of nodes list
 		// for master nodes
 		var master_block_number, max_block_number uint64
+		master_block_number = common.MasterBlockIcrement * header.Number.Uint64()/common.MasterBlockIcrement // intialisation, division rounds it down
 		for address, node := range snap.MasterNodes {
 			// create a new node and add it to the list
 			var masterNode Signer
@@ -717,7 +719,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 
 			if masterNode.BlockNumber[0] <= header.Number.Uint64() { // pass, if there is already a future block in the list
 				for {
-					master_block_number += 20
+					master_block_number += common.MasterBlockIcrement
 					if !isDuplicated(master_block_number, nodes) {
 						break
 					}
