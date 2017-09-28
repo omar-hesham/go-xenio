@@ -680,12 +680,15 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 
 
 	// Estimate delay time by adding a small amount of noise
-	delayTime := time.Duration(float32(chain.Config().Xenio.Period) + addAdditiveNoise(noiseScalingFactor)) * time.Second
+	estimatedTime := time.Unix(chain.CurrentHeader().Time.Int64(),0).Add(time.Duration(chain.Config().Xenio.Period)*time.Second)
+	delayTime := estimatedTime.Unix() - time.Now().Unix()
+	remainingSeconds,_ := json.Marshal(delayTime)
+	log.Info("Mining block in " + string(remainingSeconds) + " seconds")
 
 	select {
 	case <-stop:
 		return nil, nil
-	case <-time.After(delayTime):
+	case <-time.After(time.Duration(delayTime)*time.Second):
 	}
 
 	if signingNode.IsMasterNode && !dontChangeSuperBlockHeaders { //only master nodes can change that list
