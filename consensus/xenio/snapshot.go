@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"time"
+	"math/rand"
 
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/core/types"
@@ -87,7 +88,7 @@ func newSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, number uint
 	for i, signer := range signers {
 		newSigner.IsMasterNode = true
 		newSigner.BlockNumber = make([]uint64, 1)
-		newSigner.BlockNumber[0] = number + uint64(i + 1) // Block Zero not in play!
+		newSigner.BlockNumber[0] = number + uint64(20*i)
 		newSigner.SignDate = time.Unix(time.Now().UTC().Unix()+int64(i)*int64(config.Period), 0).UTC()
 		snap.MasterNodes[signer] = newSigner
 	}
@@ -459,5 +460,9 @@ func isDuplicated (block_number uint64, nodes map[common.Address]Signer) bool {
 	return false
 }
 
-
+// add additive noise that is scaled by a given factor
+func addAdditiveNoise(scalingFactor float32) float32{
+	noiseSource := rand.NewSource(time.Now().UnixNano()) // random seed based on the current time
+	return scalingFactor * (2 * rand.New(noiseSource).Float32() - 1) // generate a random number in [-1,1] and rescale it by the given scaling factor
+}
 

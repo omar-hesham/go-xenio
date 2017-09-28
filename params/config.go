@@ -99,7 +99,7 @@ var (
 					Xenio: &XenioConfig{
 						Epoch:      30000,
 						Period: 	60,
-						//SuperPeriod:60*30,
+						SuperPeriod:60*20,
 						},
 			}
 	// AllProtocolChanges contains every protocol change (EIPs)

@@ -50,6 +50,7 @@ const (
 	inmemorySignatures = 4096 // Number of recent block signatures to keep in memory
 
 	wiggleTime = time.Minute // delay
+	noiseScalingFactor = 0.1 // scale of noise
 )
 
 // Clique proof-of-authority protocol constants.
@@ -660,82 +661,100 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	signingNode, isAuthorised := snap.getSigningNode(signer)
 	if !isAuthorised { return nil, errUnauthorized }
 
-//	delay := chain.Config().Xenio.Period
 	// Checks whether the authorised node is next in turn. Gives out-of-turn error if the signing node does not contain the next in line block.
 	var dontChangeSuperBlockHeaders bool
 	if !signingNode.isInTurn(snap){
-		if !signingNode.IsMasterNode{
-			return nil,nil
-		}else{
-			headerTime := time.Unix(chain.CurrentHeader().Time.Int64(),0)
-				//time.Unix(chain.GetHeaderByNumber(chain.CurrentHeader().Number.Uint64()-1).Time.Int64(),0)
-			headerTime = headerTime.Add(wiggleTime*2)
-			//a, _ := json.Marshal(headerTime.Unix())
-			//b, _ := json.Marshal(time.Now().Unix())
-			//log.Warn(string(a)+" > "+string(b))
-			if headerTime.Unix() < time.Now().Unix(){
-				log.Warn("The staker has his work delayed")
-				for _, node := range snap.StakingNodes{
-					for _, numb := range node.BlockNumber{
-						if numb == header.Number.Uint64(){
-							dontChangeSuperBlockHeaders = true
-						}
-					}
+		if !signingNode.IsMasterNode{ return nil,nil }
+		headerTime := time.Unix(chain.CurrentHeader().Time.Int64(),0).Add(wiggleTime*2)
+		//time.Unix(chain.GetHeaderByNumber(chain.CurrentHeader().Number.Uint64()-1).Time.Int64(),0)
+
+		if headerTime.Unix() >= time.Now().Unix(){ return nil,nil }
+		log.Warn("Block has been delayed")
+		for _, node := range snap.StakingNodes{
+			for _, numb := range node.BlockNumber{
+				if numb == header.Number.Uint64(){
+					dontChangeSuperBlockHeaders = true
 				}
-			}else{
-				return nil,nil
 			}
 		}
-
 	}
+
+	// Estimate delay time by adding a small amount of noise
+	delayTime := time.Duration(float32(chain.Config().Xenio.Period) + addAdditiveNoise(noiseScalingFactor)) * time.Second
 
 	select {
 	case <-stop:
 		return nil, nil
-	case <-time.After(wiggleTime):
+	case <-time.After(delayTime):
 	}
 
 	if signingNode.IsMasterNode && !dontChangeSuperBlockHeaders { //only master nodes can change that list
 
-		// change super block headers
-		var current_block_number, master_block_number  uint64
-		current_block_number = header.Number.Uint64()
-		master_block_number = header.Number.Uint64()
-
 		// create a node list with master and staking nodes
 		nodes := make(map[common.Address]Signer, 0) // new list
 
+		// initialise nodes list from snapshot
+		// add master nodes to nodes list
+		for address, node := range snap.MasterNodes{
+			//Deep copy
+			var masterNode Signer
+			masterNode.BlockNumber = node.BlockNumber
+			masterNode.IsMasterNode = node.IsMasterNode
+			masterNode.SignDate = node.SignDate
+			nodes[address] = masterNode
+		}
+
+		// update block numbers of nodes list
 		// for master nodes
-		for address := range snap.MasterNodes {
+		var master_block_number, max_block_number uint64
+		for address, node := range snap.MasterNodes {
 			// create a new node and add it to the list
 			var masterNode Signer
-			master_block_number += 20
-			if isDuplicated(master_block_number, nodes){ master_block_number++ }
-			masterNode.BlockNumber = append(masterNode.BlockNumber, master_block_number) // update block numbers
+			masterNode.BlockNumber = node.BlockNumber
+
+			if masterNode.BlockNumber[0] <= header.Number.Uint64() { // pass, if there is already a future block in the list
+				for {
+					master_block_number += 20
+					if !isDuplicated(master_block_number, nodes) {
+						break
+					}
+				}
+				masterNode.BlockNumber[0] = master_block_number
+			}
 			masterNode.IsMasterNode = true  // mark it as a master node
 			nodes[address] = masterNode // add it to the list
 		}
 
+
+		for _,node := range nodes {
+			if node.BlockNumber[0] > max_block_number{ max_block_number = node.BlockNumber[0]}
+		}
+
 		// for staking nodes
-		if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
+		stakerSnap := common.StakerSnapShot // keep order of staker's fixed
+		if stakerSnap != nil && stakerSnap.Stakers != nil {
+
+			current_block_number := header.Number.Uint64() //initialise block number
 			for {
-				if len(common.StakerSnapShot.Stakers) == 0{ break }
+				if len(stakerSnap.Stakers) == 0{ break }
+				a, _ := json.Marshal(current_block_number)
+				b, _ := json.Marshal(max_block_number)
+				log.Warn(string(a)+" >= "+string(b))
+				if current_block_number >= max_block_number { break }
 
-					for address := range common.StakerSnapShot.Stakers {
-						// Skip this node, if it is already in the master nodes list
-						if _, isMasterNode := snap.MasterNodes[address]; isMasterNode /* || StakerExpired(address) */ { continue }
-
-						// Add a new node to the nodes list
-						stakingNode := nodes[address]
-						current_block_number++
-						if isDuplicated(current_block_number, nodes){ current_block_number++ }
-						if current_block_number >= master_block_number { break }
-						stakingNode.BlockNumber = append(stakingNode.BlockNumber, current_block_number) // update block numbers
-						stakingNode.IsMasterNode = false // mark it as regular
-						nodes[address] = stakingNode // add it to the list
-					}
-					if current_block_number >= master_block_number { break }
+				for address := range stakerSnap.Stakers {
+					// Skip this node, if it is already in the master nodes list
+					if _, isMasterNode := snap.MasterNodes[address]; isMasterNode /* || StakerExpired(address) */ { continue }
+					// Add a new node to the nodes list
+					stakingNode := nodes[address]
+					current_block_number++
+					if isDuplicated(current_block_number, nodes){ current_block_number++ }
+					if current_block_number >= max_block_number { break }
+					stakingNode.BlockNumber = append(stakingNode.BlockNumber, current_block_number) // update block numbers
+					stakingNode.IsMasterNode = false // mark it as regular
+					nodes[address] = stakingNode // add it to the list
 				}
+			}
 		}
 		if (len(nodes)) > 0 {
 			blob, _ := json.Marshal(nodes)
