@@ -300,7 +300,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 			superBlockData := make(map[common.Address]Signer,0)
 
 			if err := json.Unmarshal(header.SuperBlock,&superBlockData); err != nil {
-				log.Trace(err.Error())
+				log.Error(err.Error())
 			}else{
 				snap.StakingNodes = nil //clear old list
 				snap.StakingNodes = make(map[common.Address]Signer,0)

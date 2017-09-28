@@ -521,9 +521,7 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 			//a, _ := json.Marshal(headerTime.Unix())
 			//b, _ := json.Marshal(time.Now().Unix())
 			//log.Warn(string(a)+" > "+string(b))
-			if headerTime.Unix() < time.Now().Unix(){
-				log.Warn("The staker has his work delayed")
-			}else{
+			if headerTime.Unix() >= time.Now().Unix(){
 				return errOutOfTurn
 			}
 		}
@@ -710,7 +708,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		// update block numbers of nodes list
 		// for master nodes
 		var master_block_number, max_block_number uint64
-		master_block_number = common.MasterBlockIncrement * header.Number.Uint64()/common.MasterBlockIncrement // intialisation, division rounds it down
+		master_block_number = common.MasterBlockIncrement * (header.Number.Uint64()/common.MasterBlockIncrement) // intialisation, division rounds it down
 		for address, node := range snap.MasterNodes {
 			// create a new node and add it to the list
 			var masterNode Signer
