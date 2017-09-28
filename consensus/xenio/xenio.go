@@ -666,7 +666,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		//time.Unix(chain.GetHeaderByNumber(chain.CurrentHeader().Number.Uint64()-1).Time.Int64(),0)
 
 		if headerTime.Unix() >= time.Now().Unix(){ return nil,nil }
-		log.Warn("Block has been delayed")
 		for _, node := range snap.StakingNodes{
 			for _, numb := range node.BlockNumber{
 				if numb == header.Number.Uint64(){
@@ -682,8 +681,13 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	// Estimate delay time by adding a small amount of noise
 	estimatedTime := time.Unix(chain.CurrentHeader().Time.Int64(),0).Add(time.Duration(chain.Config().Xenio.Period)*time.Second)
 	delayTime := estimatedTime.Unix() - time.Now().Unix()
-	remainingSeconds,_ := json.Marshal(delayTime)
-	log.Info("Mining block in " + string(remainingSeconds) + " seconds")
+	remainingSeconds, _ := json.Marshal(delayTime)
+	if delayTime < 0 {
+		remainingSeconds, _ = json.Marshal(-1 * delayTime)
+		log.Info("Mining block is delayed by " + string(remainingSeconds) + " seconds")
+	}else{
+		log.Info("Mining block in " + string(remainingSeconds) + " seconds")
+	}
 
 	select {
 	case <-stop:
