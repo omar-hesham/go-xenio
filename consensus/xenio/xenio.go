@@ -677,7 +677,10 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 				}
 			}
 		}
+	}else{
+		log.Warn("We are next to mint a block")
 	}
+
 
 	// Estimate delay time by adding a small amount of noise
 	delayTime := time.Duration(float32(chain.Config().Xenio.Period) + addAdditiveNoise(noiseScalingFactor)) * time.Second
@@ -737,9 +740,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			current_block_number := header.Number.Uint64() //initialise block number
 			for {
 				if len(stakerSnap.Stakers) == 0{ break }
-				a, _ := json.Marshal(current_block_number)
-				b, _ := json.Marshal(max_block_number)
-				log.Warn(string(a)+" >= "+string(b))
 				if current_block_number >= max_block_number { break }
 
 				for address := range stakerSnap.Stakers {
