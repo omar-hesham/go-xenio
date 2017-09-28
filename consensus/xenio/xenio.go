@@ -70,7 +70,7 @@ var (
 	diffInTurn = big.NewInt(2) // Block difficulty for in-turn signatures
 	diffNoTurn = big.NewInt(1) // Block difficulty for out-of-turn signatures
 
-	blockReward *big.Int = big.NewInt(5e+18)
+	blockReward *big.Int = big.NewInt(0) // big.NewInt(5e+18)
 	big8  = big.NewInt(8)
 	big32 = big.NewInt(32)
 )
@@ -612,7 +612,7 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 // Finalize implements consensus.Engine, ensuring no uncles are set, nor block
 // rewards given, and returns the final block.
 func (c *Xenio) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
-	AccumulateRewards(state, header, uncles)
+	AccumulateRewards(state, header, txs, uncles)
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 
@@ -785,8 +785,9 @@ func (c *Xenio) APIs(chain consensus.ChainReader) []rpc.API {
 	}}
 }
 
-func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*types.Header) {
-	reward := new(big.Int).Set(blockReward)
+func AccumulateRewards(state *state.StateDB, header *types.Header, txs []*types.Transaction, uncles []*types.Header) {
+	reward := calculateReward(txs)
+
 	//r := new(big.Int)
 	/*for _, uncle := range uncles {
 		r.Add(uncle.Number, big8)
@@ -798,7 +799,10 @@ func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*typ
 		r.Div(blockReward, big32)
 		reward.Add(reward, r)
 	}*/
-	if len(header.RewardList) >= 1 {
+
+	//log.Warn(header.Number.String() + " blockReward " + reward.String() + " weis")
+
+	if len(header.RewardList) >= 1 &&  reward.Int64() != 0 {
 		// fee=sum(fees)/stakers
 		reward.Div(reward, big.NewInt(int64(len(header.RewardList))))
 		for _, address := range header.RewardList {
@@ -809,5 +813,14 @@ func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*typ
 			//}
 		}
 	}
+}
 
+func calculateReward(txs []*types.Transaction) *big.Int {
+	reward := new(big.Int)
+	if len(txs) > 0 {
+		for i := range txs {
+			reward.Add(reward, txs[i].Fee())
+		}
+	}
+	return reward
 }
