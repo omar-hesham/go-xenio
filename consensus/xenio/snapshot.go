@@ -88,7 +88,7 @@ func newSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, number uint
 	for i, signer := range signers {
 		newSigner.IsMasterNode = true
 		newSigner.BlockNumber = make([]uint64, 1)
-		newSigner.BlockNumber[0] = number + uint64(common.MasterBlockIcrement*i)
+		newSigner.BlockNumber[0] = number + uint64(common.MasterBlockIncrement*i)
 		newSigner.SignDate = time.Unix(time.Now().UTC().Unix()+int64(i)*int64(config.Period), 0).UTC()
 		snap.MasterNodes[signer] = newSigner
 	}
