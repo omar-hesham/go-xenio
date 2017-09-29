@@ -173,6 +173,24 @@ func (api *API) GetStakerSnapshot() *common.StakerSnapshot {
 	return common.StakerSnapShot
 }
 
+func (api *API) GetStakerSnapshotJS() interface{} {
+	var (
+		snapshot   = api.GetStakerSnapshot()
+		stakerList = make(map[common.Address]common.Staker)
+	)
+
+	snapshot.Stakers.Range(
+		func(address, staker interface{}) bool {
+			stakerList[address.(common.Address)] = staker.(common.Staker)
+			return true
+		})
+
+	return map[string]interface{}{
+		"created": common.StakerSnapShot.Created,
+		"stakers": stakerList,
+	}
+}
+
 func (api *API) AddStakerToSnapshot(address common.Address) {
 	if common.StakerSnapShot == nil {
 		api.GetStakerSnapshot()
