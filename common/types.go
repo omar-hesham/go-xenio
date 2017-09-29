@@ -24,6 +24,7 @@ import (
 	"math/big"
 	"math/rand"
 	"reflect"
+	"sync"
 	"time"
 
 	"github.com/xenioplatform/go-xenio/common/hexutil"
@@ -252,8 +253,19 @@ func (a UnprefixedAddress) MarshalText() ([]byte, error) {
 }
 
 type StakerSnapshot struct {
-	Created			time.Time			`json:"created"`	// the block number that this staker list will be effective
-	Stakers 		map[Address]Staker  `json:"stakers"`	// Set of ppl that stake at the current moment
+	Created time.Time `json:"created"` // the block number that this staker list will be effective
+	Stakers sync.Map  `json:"stakers"` // Set of ppl that stake at the current moment
+}
+
+// HasStakers returns true if there is at least one staker in list
+func (s *StakerSnapshot) HasStakers() bool {
+	var hasStakers bool
+	s.Stakers.Range(
+		func(a, s interface{}) bool {
+			hasStakers = true
+			return false
+		})
+	return hasStakers
 }
 
 type Staker struct {

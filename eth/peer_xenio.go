@@ -47,15 +47,22 @@ func (p *peer) TransmitCoinbase(adr common.Address) error {
 }
 func (p *peer) TransmitNodeList() error {
 	p.Log().Trace("Transmitting NodeList")
-	if common.StakerSnapShot != nil && len(common.StakerSnapShot.Stakers) > 0 {
+	if common.StakerSnapShot != nil && common.StakerSnapShot.HasStakers() {
 		var toSend []common.StakerTransmit
-		for key, value := range common.StakerSnapShot.Stakers {
-			if xenio.StakerExpired(key) == false {
-				_lasttime := fmt.Sprint(value.LastSeen.Unix())
-				_firsttime := fmt.Sprint(value.FirstSeen.Unix())
-				toSend = append(toSend, common.StakerTransmit{key,_firsttime, _lasttime, ""})
-			}
+		common.StakerSnapShot.Stakers.Range(
+			func(address, staker interface{}) bool {
+				if xenio.StakerExpired(address.(common.Address)) == false {
+					_lasttime := fmt.Sprint(staker.(common.Staker).LastSeen.Unix())
+					_firsttime := fmt.Sprint(staker.(common.Staker).FirstSeen.Unix())
+					toSend = append(toSend, common.StakerTransmit{
+						Address:   address.(common.Address),
+						FirstSeen: _firsttime,
+						LastSeen:  _lasttime,
+						ExtraData: "",
+					})
 		}
+				return true
+			})
 		return p2p.Send(p.rw, TransmitNodeList, toSend)
 	} else {
 		return nil
