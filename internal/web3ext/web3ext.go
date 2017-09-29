@@ -163,6 +163,12 @@ web3._extend({
 			name: 'addStakerToSnapshot',
 			call: 'xenio_addStakerToSnapshot',
 			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'getRewardsList',
+			call: 'xenio_getRewardsList',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter]
 		})
   ],
 	properties:

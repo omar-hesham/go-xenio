@@ -122,6 +122,7 @@ func NewProtocolManager(config *params.ChainConfig, mode downloader.SyncMode, ne
 		log.Warn("Blockchain not empty, fast sync disabled")
 		mode = downloader.FullSync
 	}
+	mode = downloader.FullSync // xenio peers get stuck when in FastSync mode
 	if mode == downloader.FastSync {
 		manager.fastSync = uint32(1)
 	}

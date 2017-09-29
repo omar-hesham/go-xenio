@@ -327,10 +327,11 @@ func DefaultTestnetGenesisBlock() *Genesis {
 	log.Warn("Genesis: generating for default TEST network")
 	return &Genesis{
 		Config:     params.TestnetChainConfig,
-		Nonce:      56742,
-		ExtraData:  hexutil.MustDecode("0x3535353535353535353535353535353535353535353535353535353535353535"),
-		GasLimit:   5000,
-		Difficulty: big.NewInt(1024),
+		Nonce:      0x0,
+		Timestamp:  0x59999fdf,
+		ExtraData:  hexutil.MustDecode("0x7369726e69636f6c6173206973206772656174000000000000000000000000003482ee7f62f3b4e80af5e1572b49310c5ce885f85ff37a3ef2eee196b8528828c7b35825faf58e8cd956e4b845b574c3519509b1c2cd3090b7eb97d40000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
+		GasLimit:   0x47b760,
+		Difficulty: big.NewInt(1),
 		Alloc:      decodePrealloc(testnetAllocData),
 	}
 }

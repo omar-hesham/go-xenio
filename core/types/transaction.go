@@ -261,6 +261,12 @@ func (tx *Transaction) Cost() *big.Int {
 	return total
 }
 
+// Fee returns gasprice * gaslimit.
+func (tx *Transaction) Fee() *big.Int {
+	txFee := new(big.Int).Mul(tx.data.Price, tx.data.GasLimit)
+	return txFee
+}
+
 func (tx *Transaction) RawSignatureValues() (*big.Int, *big.Int, *big.Int) {
 	return tx.data.V, tx.data.R, tx.data.S
 }

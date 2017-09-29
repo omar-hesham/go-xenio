@@ -41,7 +41,7 @@ import (
 	"github.com/xenioplatform/go-xenio/rlp"
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
-	"strconv"
+	"encoding/json"
 )
 
 const (
@@ -49,7 +49,8 @@ const (
 	inmemorySnapshots  = 128  // Number of recent vote snapshots to keep in memory
 	inmemorySignatures = 4096 // Number of recent block signatures to keep in memory
 
-	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
+	wiggleTime = time.Minute // delay
+	noiseScalingFactor = 0.1 // scale of noise
 )
 
 // Clique proof-of-authority protocol constants.
@@ -69,7 +70,7 @@ var (
 	diffInTurn = big.NewInt(2) // Block difficulty for in-turn signatures
 	diffNoTurn = big.NewInt(1) // Block difficulty for out-of-turn signatures
 
-	blockReward *big.Int = big.NewInt(5e+18)
+	blockReward *big.Int = big.NewInt(0) // big.NewInt(5e+18)
 	big8  = big.NewInt(8)
 	big32 = big.NewInt(32)
 )
@@ -134,8 +135,8 @@ var (
 	errUnauthorized = errors.New("unauthorized")
 	// errOutOfTurn is returned if a header is signed by a authorized but out of turn entity.
 	errOutOfTurn = errors.New("invalid turn")
-	// errOrphanChild is returned when we cannot locate the parent of a block in the chain
-	errOrphanChild = errors.New("Cannot Locate Parent")
+
+	errMasterNodesTurn = errors.New("normal peer cannot mint in master-nodes block number")
 )
 
 // SignerFn is a signer callback function to request a hash to be signed by a
@@ -365,8 +366,8 @@ func (c *Xenio) verifyCascadingFields(chain consensus.ChainReader, header *types
 	}
 	// If the block is a checkpoint block, verify the signer list
 	if number%c.config.Epoch == 0 {
-		signers := make([]byte, len(snap.Signers)*common.AddressLength)
-		for i, signer := range snap.signers() {
+		signers := make([]byte, len(snap.MasterNodes)*common.AddressLength)
+		for i, signer := range snap.masterNodes() {
 			copy(signers[i*common.AddressLength:], signer[:])
 		}
 		extraSuffix := len(header.Extra) - extraSeal
@@ -441,10 +442,21 @@ func (c *Xenio) snapshot(chain consensus.ChainReader, number uint64, hash common
 	}
 	snap, err := snap.apply(headers)
 	if err != nil {
-		log.Error("snap headers")
+		log.Error("snapshot apply headers error (xenio.go snapshot function")
 		return nil, err
 	}
 	c.recents.Add(snap.Hash, snap)
+
+	//// Retrieve and update Signer List
+	//genesis := chain.GetHeaderByNumber(0)
+	//if err := c.VerifyHeader(chain, genesis, false); err != nil {
+	//	return nil, err
+	//}
+	//signers := make([]common.Address, (len(genesis.Extra)-extraVanity-extraSeal)/common.AddressLength)
+	//for i := 0; i < len(signers); i++ {
+	//	copy(signers[i][:], genesis.Extra[extraVanity+i*common.AddressLength:])
+	//}
+	//snap = updateSigners(snap, c.config, number, genesis.Time, signers)
 
 	// If we've generated a new checkpoint snapshot, save to disk
 	if snap.Number%checkpointInterval == 0 && len(headers) > 0 {
@@ -481,6 +493,7 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 	if number == 0 {
 		return errUnknownBlock
 	}
+
 	// Retrieve the snapshot needed to verify this header and cache it
 	snap, err := c.snapshot(chain, number-1, header.ParentHash, parents)
 	if err != nil {
@@ -492,38 +505,26 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 	if err != nil {
 		return err
 	}
-	if _, ok := snap.Signers[signer]; !ok {
-		return errUnauthorized
-	}
-	for seen, recent := range snap.Recents {
-		if recent == signer {
-			// Signer is among recents, only fail if the current block doesn't shift it out
-			if limit := uint64(len(snap.Signers)/2 + 1); seen > number-limit {
-				parentTime := big.NewInt(120)
-				parentNumber := big.NewInt(-1)
-				parentNumber.Add(parentNumber,header.Number)
-				parentNumberUINT, _ := strconv.ParseUint(parentNumber.String(),10,64) // TODO: find a better way to do this
-				parentHeader := chain.GetHeaderByNumber(parentNumberUINT)
-				if parentHeader == nil{
-					break
-					//return errOrphanChild
-				}
-				parentTime.Add(parentTime, parentHeader.Time)
-				if parentTime.Cmp(header.Time) < 1{
-					log.Trace("a signer has delayed his work, his turn has been skipped")
-				}else {
-					return errOutOfTurn
-				}
+
+	// Get authorised node. Check whether the signer address corresponds to a validated master, or staking node.
+	signingNode, isAuthorised := snap.getSigningNode(signer)
+	if !isAuthorised { return errUnauthorized }
+
+	// Check whether the authorised node is next in turn. Give out-of-turn error if the signing node does not contain the next in line block.
+	if !signingNode.isInTurn(snap){
+		if !signingNode.IsMasterNode{
+			return errOutOfTurn
+		}else{
+			headerTime := time.Unix(chain.CurrentHeader().Time.Int64(),0)
+			headerTime = headerTime.Add(time.Duration(chain.Config().Xenio.Period)*time.Second)
+			//a, _ := json.Marshal(headerTime.Unix())
+			//b, _ := json.Marshal(time.Now().Unix())
+			//log.Warn(string(a)+" > "+string(b))
+			if headerTime.Unix() >= time.Now().Unix(){
+				return ErrInvalidTimestamp
 			}
 		}
-	}
-	// Ensure that the difficulty corresponds to the turn-ness of the signer
-	inturn := snap.inturn(header.Number.Uint64(), signer)
-	if inturn && header.Difficulty.Cmp(diffInTurn) != 0 {
-		return errInvalidDifficulty
-	}
-	if !inturn && header.Difficulty.Cmp(diffNoTurn) != 0 {
-		return errInvalidDifficulty
+
 	}
 	return nil
 }
@@ -575,7 +576,7 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 	header.Extra = header.Extra[:extraVanity]
 
 	if number%c.config.Epoch == 0 {
-		for _, signer := range snap.signers() {
+		for _, signer := range snap.masterNodes() {
 			header.Extra = append(header.Extra, signer[:]...)
 		}
 	}
@@ -593,7 +594,6 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 	if header.Time.Int64() < time.Now().Unix() {
 		header.Time = big.NewInt(time.Now().Unix())
 	}
-
 	//PoN Rewards
 	if number >= 1 {
 		if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
@@ -612,7 +612,7 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 // Finalize implements consensus.Engine, ensuring no uncles are set, nor block
 // rewards given, and returns the final block.
 func (c *Xenio) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
-	AccumulateRewards(state, header, uncles)
+	AccumulateRewards(state, header, txs, uncles)
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 
@@ -652,46 +652,123 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	}
 	ca := common.Address{}
 	if signer == ca{
-		log.Error("signer account is nil")
 		return nil, errUnauthorized
 	}
+	// Get authorised node. Check whether the signer address corresponds to a validated master, or staking node.
+	signingNode, isAuthorised := snap.getSigningNode(signer)
+	if !isAuthorised { return nil, errUnauthorized }
 
-	if _, authorized := snap.Signers[signer]; !authorized {
-		return nil, errUnauthorized
-	}
-	// If we're amongst the recent signers, wait for the next block
-	for seen, recent := range snap.Recents {
-		if recent == signer {
-			nextTime := big.NewInt(120)
-			nextTime.Add(nextTime, chain.CurrentHeader().Time)
-			if nextTime.Cmp(big.NewInt(time.Now().Unix())) < 1 {
-				log.Warn("Block Minting is Late, Trying to Out-of-Turn Seal")
-				break
-			}
-			// Signer is among recents, only wait if the current block doesn't shift it out
-			if limit := uint64(len(snap.Signers)/2 + 1); number < limit || seen > number-limit {
-				log.Info("Signed recently, must wait for others")
-				<-stop
-				return nil, nil
+	// Estimate delay time by adding a small amount of noise
+	estimatedTime := time.Unix(chain.CurrentHeader().Time.Int64(),0).Add(time.Duration(chain.Config().Xenio.Period)*time.Second)
+
+	// Checks whether the authorised node is next in turn. Gives out-of-turn error if the signing node does not contain the next in line block.
+	var dontChangeSuperBlockHeaders bool
+	if !signingNode.isInTurn(snap){
+		if !signingNode.IsMasterNode{ return nil,nil }
+		estimatedTime = estimatedTime.Add(wiggleTime)
+		//time.Unix(chain.GetHeaderByNumber(chain.CurrentHeader().Number.Uint64()-1).Time.Int64(),0)
+
+		if estimatedTime.Unix() >= time.Now().Unix(){ return nil,nil }
+		for _, node := range snap.StakingNodes{
+			for _, numb := range node.BlockNumber{
+				if numb == header.Number.Uint64(){
+					dontChangeSuperBlockHeaders = true
+				}
 			}
 		}
+	}else{
+		log.Warn("We are next to mint a block")
 	}
-	// Sweet, the protocol permits us to sign the block, wait for our time
-	delay := time.Unix(header.Time.Int64(), 0).Sub(time.Now())
-	if header.Difficulty.Cmp(diffNoTurn) == 0 {
-		// It's not our turn explicitly to sign, delay it a bit
-		wiggle := time.Duration(len(snap.Signers)/2+1) * wiggleTime
-		delay += time.Duration(rand.Int63n(int64(wiggle)))
 
-		log.Trace("Out-of-turn signing requested", "wiggle", common.PrettyDuration(wiggle))
+
+	delayTime := estimatedTime.Unix() - time.Now().Unix()
+	remainingSeconds, _ := json.Marshal(delayTime)
+	if delayTime < 0 {
+		remainingSeconds, _ = json.Marshal(-1 * delayTime)
+		log.Info("Mining block is delayed by " + string(remainingSeconds) + " seconds")
+	}else{
+		log.Info("Mining block in " + string(remainingSeconds) + " seconds")
 	}
-	log.Trace("Waiting for slot to sign and propagate", "delay", common.PrettyDuration(delay))
 
 	select {
 	case <-stop:
 		return nil, nil
-	case <-time.After(delay):
+	case <-time.After(time.Duration(delayTime)*time.Second):
 	}
+
+	if signingNode.IsMasterNode && !dontChangeSuperBlockHeaders { //only master nodes can change that list
+
+		// create a node list with master and staking nodes
+		nodes := make(map[common.Address]Signer, 0) // new list
+
+		// initialise nodes list from snapshot
+		// add master nodes to nodes list
+		for address, node := range snap.MasterNodes{
+			//Deep copy
+			var masterNode Signer
+			masterNode.BlockNumber = node.BlockNumber
+			masterNode.IsMasterNode = node.IsMasterNode
+			masterNode.SignDate = node.SignDate
+			nodes[address] = masterNode
+		}
+
+		// update block numbers of nodes list
+		// for master nodes
+		var master_block_number, max_block_number uint64
+		master_block_number = common.MasterBlockIncrement * (header.Number.Uint64()/common.MasterBlockIncrement) // intialisation, division rounds it down
+		for address, node := range snap.MasterNodes {
+			// create a new node and add it to the list
+			var masterNode Signer
+			masterNode.BlockNumber = node.BlockNumber
+
+			if masterNode.BlockNumber[0] <= header.Number.Uint64() { // pass, if there is already a future block in the list
+				for {
+					master_block_number += common.MasterBlockIncrement
+					if !isDuplicated(master_block_number, nodes) {
+						break
+					}
+				}
+				masterNode.BlockNumber[0] = master_block_number
+			}
+			masterNode.IsMasterNode = true  // mark it as a master node
+			nodes[address] = masterNode // add it to the list
+		}
+
+
+		for _,node := range nodes {
+			if node.BlockNumber[0] > max_block_number{ max_block_number = node.BlockNumber[0]}
+		}
+
+		// for staking nodes
+		stakerSnap := common.StakerSnapShot // keep order of staker's fixed
+		if stakerSnap != nil && stakerSnap.Stakers != nil {
+
+			current_block_number := header.Number.Uint64() //initialise block number
+			for {
+				if len(stakerSnap.Stakers) == 0{ break }
+				if current_block_number >= max_block_number { break }
+
+				for address := range stakerSnap.Stakers {
+					// Skip this node, if it is already in the master nodes list
+					if _, isMasterNode := snap.MasterNodes[address]; isMasterNode /* || StakerExpired(address) */ { continue }
+					// Add a new node to the nodes list
+					stakingNode := nodes[address]
+					current_block_number++
+					if isDuplicated(current_block_number, nodes){ current_block_number++ }
+					if current_block_number >= max_block_number { break }
+					stakingNode.BlockNumber = append(stakingNode.BlockNumber, current_block_number) // update block numbers
+					stakingNode.IsMasterNode = false // mark it as regular
+					nodes[address] = stakingNode // add it to the list
+				}
+			}
+		}
+		if (len(nodes)) > 0 {
+			blob, _ := json.Marshal(nodes)
+			header.SuperBlock = blob
+			//	log.Warn(string(blob))
+		}
+	}
+
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
 	if err != nil {
@@ -713,8 +790,9 @@ func (c *Xenio) APIs(chain consensus.ChainReader) []rpc.API {
 	}}
 }
 
-func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*types.Header) {
-	reward := new(big.Int).Set(blockReward)
+func AccumulateRewards(state *state.StateDB, header *types.Header, txs []*types.Transaction, uncles []*types.Header) {
+	reward := calculateReward(txs)
+
 	//r := new(big.Int)
 	/*for _, uncle := range uncles {
 		r.Add(uncle.Number, big8)
@@ -726,14 +804,28 @@ func AccumulateRewards(state *state.StateDB, header *types.Header, uncles []*typ
 		r.Div(blockReward, big32)
 		reward.Add(reward, r)
 	}*/
-	if len(header.RewardList) >= 1 {
+
+	//log.Warn(header.Number.String() + " blockReward " + reward.String() + " weis")
+
+	if len(header.RewardList) >= 1 &&  reward.Int64() != 0 {
+		// fee=sum(fees)/stakers
+		reward.Div(reward, big.NewInt(int64(len(header.RewardList))))
 		for _, address := range header.RewardList {
 			//if HasCoins(address, state) {
-				state.AddBalance(address, reward)
-				//cb, _ := json.Marshal(address)
-				//log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
+			state.AddBalance(address, reward)
+			//cb, _ := json.Marshal(address)
+			//log.Warn(string(cb) + " rewarded " + reward.String() + " weis")
 			//}
 		}
 	}
+}
 
+func calculateReward(txs []*types.Transaction) *big.Int {
+	reward := new(big.Int)
+	if len(txs) > 0 {
+		for i := range txs {
+			reward.Add(reward, txs[i].Fee())
+		}
+	}
+	return reward
 }

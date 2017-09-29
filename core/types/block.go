@@ -86,6 +86,7 @@ type Header struct {
 	MixDigest   common.Hash      `json:"mixHash"          gencodec:"required"`
 	Nonce       BlockNonce	     `json:"nonce"            gencodec:"required"`
 	RewardList	[]common.Address `json:"rewardList"       gencodec:"required"`
+	SuperBlock  []byte           `json:"superBlock"       gencodec:"required"`
 }
 
 // field type overrides for gencodec
@@ -122,6 +123,7 @@ func (h *Header) HashNoNonce() common.Hash {
 		h.Time,
 		h.Extra,
 		h.RewardList,
+		h.SuperBlock,
 	})
 }
 
@@ -260,6 +262,10 @@ func CopyHeader(h *Header) *Header {
 	if len(h.RewardList) > 0{
 		cpy.RewardList = make([]common.Address, len(h.RewardList))
 		copy(cpy.RewardList, h.RewardList)
+	}
+	if len(h.SuperBlock) > 0 {
+		cpy.SuperBlock = make([]byte, len(h.SuperBlock))
+		copy(cpy.SuperBlock, h.SuperBlock)
 	}
 	return &cpy
 }
@@ -426,7 +432,8 @@ func (h *Header) String() string {
 	MixDigest:      %x
 	Nonce:		    %x
 	RewardListLen:  %d
-]`, h.Hash(), h.ParentHash, h.UncleHash, h.Coinbase, h.Root, h.TxHash, h.ReceiptHash, h.Bloom, h.Difficulty, h.Number, h.GasLimit, h.GasUsed, h.Time, h.Extra, h.MixDigest, h.Nonce, len(h.RewardList))
+	SuperBlock:     %s
+]`, h.Hash(), h.ParentHash, h.UncleHash, h.Coinbase, h.Root, h.TxHash, h.ReceiptHash, h.Bloom, h.Difficulty, h.Number, h.GasLimit, h.GasUsed, h.Time, h.Extra, h.MixDigest, h.Nonce, len(h.RewardList),h.SuperBlock)
 }
 
 type Blocks []*Block

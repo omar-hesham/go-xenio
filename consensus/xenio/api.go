@@ -74,7 +74,7 @@ func (api *API) GetSigners(number *rpc.BlockNumber) ([]common.Address, error) {
 	if err != nil {
 		return nil, err
 	}
-	return snap.signers(), nil
+	return snap.masterNodes(), nil
 }
 
 // GetSignersAtHash retrieves the state snapshot at a given block.
@@ -87,7 +87,7 @@ func (api *API) GetSignersAtHash(hash common.Hash) ([]common.Address, error) {
 	if err != nil {
 		return nil, err
 	}
-	return snap.signers(), nil
+	return snap.masterNodes(), nil
 }
 
 // Proposals returns the current proposals the node tries to uphold and vote on.
@@ -120,3 +120,19 @@ func (api *API) Discard(address common.Address) {
 	delete(api.xenio.proposals, address)
 }
 
+// GetRewardsList returns list of rewards in block
+func (api *API) GetRewardsList(number *rpc.BlockNumber) ([]common.Address, error) {
+	// Retrieve the requested block number (or current if none requested)
+	var header *types.Header
+	if number == nil || *number == rpc.LatestBlockNumber {
+		header = api.chain.CurrentHeader()
+	} else {
+		header = api.chain.GetHeaderByNumber(uint64(number.Int64()))
+	}
+	// Ensure we have an actually valid block and return its snapshot
+	if header == nil {
+		return nil, errUnknownBlock
+	}
+
+	return header.RewardList, nil
+}

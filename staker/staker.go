@@ -32,7 +32,7 @@ import (
 	"github.com/xenioplatform/go-xenio/event"
 	"github.com/xenioplatform/go-xenio/log"
 	"github.com/xenioplatform/go-xenio/params"
-	"math/big"
+	"time"
 )
 
 // Backend wraps all methods required for mining.
@@ -108,21 +108,10 @@ out:
 	}
 }
 
-func areBigEqualNumbers(a *big.Int, b *big.Int) (bool){
-	if a.String()==b.String() {
-		return true
-	}else{
-		return false
-
-	}
-
-}
-
 func (self *Staker) Start(coinbase common.Address) {
 	atomic.StoreInt32(&self.shouldStart, 1)
 	self.watcher.setEtherbase(coinbase)
 	self.coinbase = coinbase
-	dbs, _:=self.eth.BlockChain().State()
 
 	if atomic.LoadInt32(&self.canStart) == 0 {
 		log.Info("Network syncing, will start staker afterwards")
@@ -130,16 +119,36 @@ func (self *Staker) Start(coinbase common.Address) {
 	}
 
 	atomic.StoreInt32(&self.staking, 1)
-	coins := dbs.GetBalance(self.coinbase)
-
-	if areBigEqualNumbers(coins,big.NewInt(0)){
-		log.Error("Your balance is 0 and you wont be able to stake in the feature")
-	}
 
 	log.Info("Starting staking operation")
 
 	self.watcher.start()
 	self.watcher.commitNewWork()
+
+	wakeChan := time.NewTicker(awakenTime).C
+	stopChan := make(chan struct{})
+
+	for {
+		select {
+		//default:
+		//	if self.staking == 0 {
+		//		close(stopChan)
+		//		break
+		//	}
+		case <-wakeChan:
+			if self.staking == 0 {
+				close(stopChan)
+				break
+			}
+			//log.Info("awaking staker")
+			self.watcher.start()
+			self.watcher.commitNewWork()
+		case <-stopChan:
+			//log.Info("stoping staker")
+			return
+		}
+	}
+
 }
 
 
