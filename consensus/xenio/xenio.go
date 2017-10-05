@@ -508,19 +508,28 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 
 	// Get authorised node. Check whether the signer address corresponds to a validated master, or staking node.
 	signingNode, isAuthorised := snap.getSigningNode(signer)
-	if !isAuthorised { return errUnauthorized }
+	if !isAuthorised {
+		return errUnauthorized
+	}
 
 	// Check whether the authorised node is next in turn. Give out-of-turn error if the signing node does not contain the next in line block.
-	if !signingNode.isInTurn(snap){
-		if !signingNode.IsMasterNode{
+	if !signingNode.isInTurn(snap) {
+		if !signingNode.IsMasterNode {
 			return errOutOfTurn
-		}else{
-			headerTime := time.Unix(chain.CurrentHeader().Time.Int64(),0)
-			headerTime = headerTime.Add(time.Duration(chain.Config().Xenio.Period)*time.Second)
+		} else {
+			headerTime := time.Unix(chain.CurrentHeader().Time.Int64(), 0).UTC()
+			// During FastSync the header in the chain may be more recent than the block we are checking
+			if headerTime.After(time.Unix(header.Time.Int64(), 0).UTC()) {
+				headerTime = time.Unix(header.Time.Int64(), 0).UTC()
+			}
+			// Verify past block's timestamp
+			if number != chain.CurrentHeader().Number.Uint64() {
+				headerTime = headerTime.Add(time.Duration(chain.Config().Xenio.Period) * time.Second).UTC()
+			}
 			//a, _ := json.Marshal(headerTime.Unix())
 			//b, _ := json.Marshal(time.Now().Unix())
 			//log.Warn(string(a)+" > "+string(b))
-			if headerTime.Unix() >= time.Now().Unix(){
+			if headerTime.UTC().Unix() >= time.Now().UTC().Unix() {
 				return ErrInvalidTimestamp
 			}
 		}
