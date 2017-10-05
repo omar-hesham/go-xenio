@@ -14,7 +14,7 @@ For prerequisites and detailed build instructions please read the
 [Installation Instructions](https://github.com/xenioplatform/go-xenio/wiki/Building-Xenio)
 on the wiki.
 
-Building xenio-cli requires both an installation of Go (version 1.7 or later) and a C compiler.
+Building xenio-cli requires both an installation of Go (version 1.9 or later) and a C compiler.
 You can install them using your favorite package manager.
 Once the dependencies are installed, run
 
