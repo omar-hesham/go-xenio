@@ -27,15 +27,18 @@ import (
 	"time"
 
 	"github.com/xenioplatform/go-xenio/common/mclock"
+	"github.com/xenioplatform/go-xenio/event"
 	"github.com/xenioplatform/go-xenio/log"
 	"github.com/xenioplatform/go-xenio/p2p/discover"
 	"github.com/xenioplatform/go-xenio/rlp"
 )
 
 const (
-	baseProtocolVersion    = 4
+	baseProtocolVersion    = 5
 	baseProtocolLength     = uint64(16)
 	baseProtocolMaxMsgSize = 2 * 1024
+
+	snappyProtocolVersion = 5
 
 	pingInterval = 15 * time.Second
 )
@@ -63,6 +66,38 @@ type protoHandshake struct {
 	Rest []rlp.RawValue `rlp:"tail"`
 }
 
+// PeerEventType is the type of peer events emitted by a p2p.Server
+type PeerEventType string
+
+const (
+	// PeerEventTypeAdd is the type of event emitted when a peer is added
+	// to a p2p.Server
+	PeerEventTypeAdd PeerEventType = "add"
+
+	// PeerEventTypeDrop is the type of event emitted when a peer is
+	// dropped from a p2p.Server
+	PeerEventTypeDrop PeerEventType = "drop"
+
+	// PeerEventTypeMsgSend is the type of event emitted when a
+	// message is successfully sent to a peer
+	PeerEventTypeMsgSend PeerEventType = "msgsend"
+
+	// PeerEventTypeMsgRecv is the type of event emitted when a
+	// message is received from a peer
+	PeerEventTypeMsgRecv PeerEventType = "msgrecv"
+)
+
+// PeerEvent is an event emitted when peers are either added or dropped from
+// a p2p.Server or when a message is sent or received on a peer connection
+type PeerEvent struct {
+	Type     PeerEventType   `json:"type"`
+	Peer     discover.NodeID `json:"peer"`
+	Error    string          `json:"error,omitempty"`
+	Protocol string          `json:"protocol,omitempty"`
+	MsgCode  *uint64         `json:"msg_code,omitempty"`
+	MsgSize  *uint32         `json:"msg_size,omitempty"`
+}
+
 // Peer represents a connected remote node.
 type Peer struct {
 	rw      *conn
@@ -74,6 +109,9 @@ type Peer struct {
 	ProtoErr chan error
 	Closed   chan struct{}
 	disc     chan DiscReason
+
+	// events receives message send / receive events if set
+	events *event.Feed
 }
 
 // NewPeer returns a peer for testing purposes.
@@ -299,9 +337,13 @@ func (p *Peer) startProtocols(writeStart <-chan struct{}, writeErr chan<- error)
 		proto.closed = p.Closed
 		proto.wstart = writeStart
 		proto.werr = writeErr
+		var rw MsgReadWriter = proto
+		if p.events != nil {
+			rw = newMsgEventer(rw, p.events, p.ID(), proto.Name)
+		}
 		p.log.Trace(fmt.Sprintf("Starting protocol %s/%d", proto.Name, proto.Version))
 		go func() {
-			err := proto.Run(p, proto)
+			err := proto.Run(p, rw)
 			if err == nil {
 				p.log.Trace(fmt.Sprintf("Protocol %s/%d returned", proto.Name, proto.Version))
 				err = errProtocolReturned
