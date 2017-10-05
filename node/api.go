@@ -28,7 +28,7 @@ import (
 	"github.com/xenioplatform/go-xenio/crypto"
 	"github.com/xenioplatform/go-xenio/p2p"
 	"github.com/xenioplatform/go-xenio/p2p/discover"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/xenioplatform/go-xenio/rpc"
 	"github.com/rcrowley/go-metrics"
 )
 

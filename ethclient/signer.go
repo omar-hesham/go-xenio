@@ -20,8 +20,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core/types"
 )
 
 // senderFromServer is a types.Signer that remembers the sender address returned by the RPC
