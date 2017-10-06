@@ -427,6 +427,7 @@ func (self *watcher) commitNewWork() {
 	// Only set the coinbase if we are mining (avoid spurious block rewards)
 	if atomic.LoadInt32(&self.staking) == 1 {
 		header.Coinbase = self.coinbase
+		header.Staker = self.coinbase
 	}
 	if err := self.engine.Prepare(self.chain, header); err != nil {
 		log.Error("Failed to prepare header for mining", "err", err)

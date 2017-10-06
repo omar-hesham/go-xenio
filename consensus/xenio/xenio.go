@@ -157,6 +157,7 @@ func sigHash(header *types.Header) (hash common.Hash) {
 		header.ParentHash,
 		header.UncleHash,
 		header.Coinbase,
+		header.Staker,
 		header.Root,
 		header.TxHash,
 		header.ReceiptHash,
@@ -717,7 +718,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			var masterNode Signer
 			masterNode.BlockNumber = node.BlockNumber
 			masterNode.IsMasterNode = node.IsMasterNode
-			masterNode.SignDate = node.SignDate
 			nodes[address] = masterNode
 		}
 

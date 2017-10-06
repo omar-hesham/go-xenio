@@ -73,6 +73,7 @@ type Header struct {
 	ParentHash  common.Hash      `json:"parentHash"       gencodec:"required"`
 	UncleHash   common.Hash      `json:"sha3Uncles"       gencodec:"required"`
 	Coinbase    common.Address   `json:"miner"            gencodec:"required"`
+	Staker    	common.Address   `json:"staker"           gencodec:"required"`
 	Root        common.Hash      `json:"stateRoot"        gencodec:"required"`
 	TxHash      common.Hash      `json:"transactionsRoot" gencodec:"required"`
 	ReceiptHash common.Hash      `json:"receiptsRoot"     gencodec:"required"`
@@ -112,6 +113,7 @@ func (h *Header) HashNoNonce() common.Hash {
 		h.ParentHash,
 		h.UncleHash,
 		h.Coinbase,
+		h.Staker,
 		h.Root,
 		h.TxHash,
 		h.ReceiptHash,
@@ -326,6 +328,7 @@ func (b *Block) MixDigest() common.Hash   { return b.header.MixDigest }
 func (b *Block) Nonce() uint64            { return binary.BigEndian.Uint64(b.header.Nonce[:]) }
 func (b *Block) Bloom() Bloom             { return b.header.Bloom }
 func (b *Block) Coinbase() common.Address { return b.header.Coinbase }
+func (b *Block) Staker() common.Address   { return b.header.Staker }
 func (b *Block) Root() common.Hash        { return b.header.Root }
 func (b *Block) ParentHash() common.Hash  { return b.header.ParentHash }
 func (b *Block) TxHash() common.Hash      { return b.header.TxHash }
@@ -419,6 +422,7 @@ func (h *Header) String() string {
 	ParentHash:	    %x
 	UncleHash:	    %x
 	Coinbase:	    %x
+	Staker			%x
 	Root:		    %x
 	TxSha		    %x
 	ReceiptSha:	    %x
@@ -433,7 +437,7 @@ func (h *Header) String() string {
 	Nonce:		    %x
 	RewardListLen:  %d
 	SuperBlock:     %s
-]`, h.Hash(), h.ParentHash, h.UncleHash, h.Coinbase, h.Root, h.TxHash, h.ReceiptHash, h.Bloom, h.Difficulty, h.Number, h.GasLimit, h.GasUsed, h.Time, h.Extra, h.MixDigest, h.Nonce, len(h.RewardList),h.SuperBlock)
+]`, h.Hash(), h.ParentHash, h.UncleHash, h.Coinbase, h.Staker, h.Root, h.TxHash, h.ReceiptHash, h.Bloom, h.Difficulty, h.Number, h.GasLimit, h.GasUsed, h.Time, h.Extra, h.MixDigest, h.Nonce, len(h.RewardList),h.SuperBlock)
 }
 
 type Blocks []*Block
