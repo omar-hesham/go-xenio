@@ -430,6 +430,7 @@ func (s *Ethereum) IsListening() bool                  { return true } // Always
 func (s *Ethereum) EthVersion() int                    { return int(s.protocolManager.SubProtocols[0].Version) }
 func (s *Ethereum) NetVersion() uint64                 { return s.networkId }
 func (s *Ethereum) Downloader() *downloader.Downloader { return s.protocolManager.downloader }
+func (s *Ethereum) PeerCount() int                     { return int(s.netRPCService.PeerCount()) }
 
 // Protocols implements node.Service, returning all the currently configured
 // network protocols to start.

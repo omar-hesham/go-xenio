@@ -41,6 +41,7 @@ type Backend interface {
 	BlockChain() *core.BlockChain
 	TxPool() *core.TxPool
 	ChainDb() ethdb.Database
+	PeerCount() int
 }
 
 type Staker struct {
@@ -115,6 +116,11 @@ func (self *Staker) Start(coinbase common.Address) {
 
 	if atomic.LoadInt32(&self.canStart) == 0 {
 		log.Info("Network syncing, will start staker afterwards")
+		return
+	}
+
+	if self.eth.PeerCount() == 0 {
+		log.Info("No peers connected, will start staking when someone connects")
 		return
 	}
 
