@@ -157,6 +157,7 @@ func sigHash(header *types.Header) (hash common.Hash) {
 		header.ParentHash,
 		header.UncleHash,
 		header.Coinbase,
+		header.Staker,
 		header.Root,
 		header.TxHash,
 		header.ReceiptHash,
@@ -508,19 +509,28 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 
 	// Get authorised node. Check whether the signer address corresponds to a validated master, or staking node.
 	signingNode, isAuthorised := snap.getSigningNode(signer)
-	if !isAuthorised { return errUnauthorized }
+	if !isAuthorised {
+		return errUnauthorized
+	}
 
 	// Check whether the authorised node is next in turn. Give out-of-turn error if the signing node does not contain the next in line block.
-	if !signingNode.isInTurn(snap){
-		if !signingNode.IsMasterNode{
+	if !signingNode.isInTurn(snap) {
+		if !signingNode.IsMasterNode {
 			return errOutOfTurn
-		}else{
-			headerTime := time.Unix(chain.CurrentHeader().Time.Int64(),0)
-			headerTime = headerTime.Add(time.Duration(chain.Config().Xenio.Period)*time.Second)
+		} else {
+			headerTime := time.Unix(chain.CurrentHeader().Time.Int64(), 0).UTC()
+			// During FastSync the header in the chain may be more recent than the block we are checking
+			if headerTime.After(time.Unix(header.Time.Int64(), 0).UTC()) {
+				headerTime = time.Unix(header.Time.Int64(), 0).UTC()
+			}
+			// Verify past block's timestamp
+			if number != chain.CurrentHeader().Number.Uint64() {
+				headerTime = headerTime.Add(time.Duration(chain.Config().Xenio.Period) * time.Second).UTC()
+			}
 			//a, _ := json.Marshal(headerTime.Unix())
 			//b, _ := json.Marshal(time.Now().Unix())
 			//log.Warn(string(a)+" > "+string(b))
-			if headerTime.Unix() >= time.Now().Unix(){
+			if headerTime.UTC().Unix() >= time.Now().UTC().Unix() {
 				return ErrInvalidTimestamp
 			}
 		}
@@ -596,16 +606,16 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 	}
 	//PoN Rewards
 	if number >= 1 {
-		if common.StakerSnapShot != nil && common.StakerSnapShot.Stakers != nil {
-			if len(common.StakerSnapShot.Stakers) >= 0 {
-				for key := range common.StakerSnapShot.Stakers {
-					if !StakerExpired(key) {
-						header.RewardList = append(header.RewardList, key)
+		if common.StakerSnapShot != nil {
+			common.StakerSnapShot.Stakers.Range(
+				func(address, staker interface{}) bool {
+					if !StakerExpired(address.(common.Address)) {
+						header.RewardList = append(header.RewardList, address.(common.Address))
 					}
+					return true
+				})
 				}
 			}
-		}
-	}
 	return nil
 }
 
@@ -708,7 +718,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			var masterNode Signer
 			masterNode.BlockNumber = node.BlockNumber
 			masterNode.IsMasterNode = node.IsMasterNode
-			masterNode.SignDate = node.SignDate
 			nodes[address] = masterNode
 		}
 
@@ -741,25 +750,37 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 
 		// for staking nodes
 		stakerSnap := common.StakerSnapShot // keep order of staker's fixed
-		if stakerSnap != nil && stakerSnap.Stakers != nil {
+		if stakerSnap != nil {
 
 			current_block_number := header.Number.Uint64() //initialise block number
 			for {
-				if len(stakerSnap.Stakers) == 0{ break }
-				if current_block_number >= max_block_number { break }
-
-				for address := range stakerSnap.Stakers {
-					// Skip this node, if it is already in the master nodes list
-					if _, isMasterNode := snap.MasterNodes[address]; isMasterNode /* || StakerExpired(address) */ { continue }
-					// Add a new node to the nodes list
-					stakingNode := nodes[address]
-					current_block_number++
-					if isDuplicated(current_block_number, nodes){ current_block_number++ }
-					if current_block_number >= max_block_number { break }
-					stakingNode.BlockNumber = append(stakingNode.BlockNumber, current_block_number) // update block numbers
-					stakingNode.IsMasterNode = false // mark it as regular
-					nodes[address] = stakingNode // add it to the list
+				if !stakerSnap.HasStakers() {
+					break
 				}
+				if current_block_number >= max_block_number {
+					break
+				}
+
+				common.StakerSnapShot.Stakers.Range(
+					func(address, staker interface{}) bool {
+					// Skip this node, if it is already in the master nodes list
+						if _, isMasterNode := snap.MasterNodes[address.(common.Address)]; isMasterNode /* || StakerExpired(address) */ {
+							return true
+						}
+					// Add a new node to the nodes list
+						stakingNode := nodes[address.(common.Address)]
+						current_block_number++
+						if isDuplicated(current_block_number, nodes) {
+					current_block_number++
+						}
+						if current_block_number >= max_block_number {
+							return false
+						}
+					stakingNode.BlockNumber = append(stakingNode.BlockNumber, current_block_number) // update block numbers
+						stakingNode.IsMasterNode = false                                                // mark it as regular
+						nodes[address.(common.Address)] = stakingNode
+						return true
+					})
 			}
 		}
 		if (len(nodes)) > 0 {

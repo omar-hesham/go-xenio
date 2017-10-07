@@ -51,9 +51,7 @@ var (
 
 	// GasTableHomestead contain the gas re-prices for
 	// the homestead phase.
-	//
-	// TODO rename to GasTableEIP150
-	GasTableHomesteadGasRepriceFork = GasTable{
+	GasTableEIP150 = GasTable{
 		ExtcodeSize: 700,
 		ExtcodeCopy: 700,
 		Balance:     400,

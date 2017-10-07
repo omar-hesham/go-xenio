@@ -156,7 +156,7 @@ web3._extend({
 		}),
 		new web3._extend.Method({
 			name: 'getStakerSnapshot',
-			call: 'xenio_getStakerSnapshot',
+			call: 'xenio_getStakerSnapshotJS',
 			params: 0
 		}),
 		new web3._extend.Method({

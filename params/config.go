@@ -18,10 +18,10 @@ package params
 
 import (
 	"fmt"
-	"math"
 	"math/big"
 
 	"github.com/xenioplatform/go-xenio/common"
+	"math"
 )
 
 var (
@@ -41,7 +41,7 @@ var (
 		EIP155Block:     big.NewInt(2675000),
 		EIP158Block:     big.NewInt(2675000),
 		XenioBlock:      big.NewInt(math.MaxInt64), // never enable
-		ByzantiumBlock: big.NewInt(math.MaxInt64), // Don't enable yet
+		ByzantiumBlock: big.NewInt(4370000),
 
 		Ethash: new(EthashConfig),
 	}
@@ -77,7 +77,7 @@ var (
 		EIP155Block:     big.NewInt(3),
 		EIP158Block:     big.NewInt(3),
 		XenioBlock:      big.NewInt(math.MaxInt64), // never enable
-		ByzantiumBlock: big.NewInt(math.MaxInt64), // Don't enable yet
+		ByzantiumBlock: big.NewInt(1035301),
 
 		Clique: &CliqueConfig{
 			Period: 15,
@@ -236,7 +236,7 @@ func (c *ChainConfig) GasTable(num *big.Int) GasTable {
 	case c.IsEIP158(num):
 		return GasTableEIP158
 	case c.IsEIP150(num):
-		return GasTableHomesteadGasRepriceFork
+		return GasTableEIP150
 	default:
 		return GasTableHomestead
 	}
