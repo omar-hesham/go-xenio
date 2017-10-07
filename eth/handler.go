@@ -82,6 +82,8 @@ type ProtocolManager struct {
 	fetcher    *fetcher.Fetcher
 	peers      *peerSet
 
+	waitingPeers []*peer
+
 	SubProtocols []p2p.Protocol
 
 	eventMux      *event.TypeMux
@@ -676,6 +678,12 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		}
 		pm.txpool.AddRemotes(txs)
 	case msg.Code == GetNodeCoinbase:
+		// Transmit Coinbase only if synchronised
+		if atomic.LoadUint32(&pm.acceptTxs) == 0 {
+			pm.waitingPeers = append(pm.waitingPeers, p)
+			p.Log().Warn("Haven't synced yet, adding peer to waiting list")
+			break
+		}
 		p.TransmitCoinbase(common.Coinbase)
 	case msg.Code == GetNodeStakeList:
 		p.Log().Warn("stake list requested from remote peer")

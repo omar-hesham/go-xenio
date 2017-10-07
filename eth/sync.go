@@ -213,4 +213,14 @@ func (pm *ProtocolManager) synchronise(peer *peer) {
 		// more reliably update peers or the local TD state.
 		go pm.BroadcastBlock(head, false)
 	}
+	// Send coinbase to any peers that attempted handshake before syncing with the chain
+	if len(pm.waitingPeers) > 0 {
+		log.Info("Transmitting Coinbase to waiting peers")
+		for _, p := range pm.waitingPeers{
+			p.TransmitCoinbase(common.Coinbase)
+		}
+		// clear the list
+		pm.waitingPeers = nil
+	}
+
 }
