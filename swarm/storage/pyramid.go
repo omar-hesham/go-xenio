@@ -26,7 +26,6 @@ import (
 	"time"
 )
 
-	"github.com/xenioplatform/go-xenio/common"
 /*
    The main idea of a pyramid chunker is to process the input data without knowing the entire size apriori.
    For this to be achieved, the chunker tree is built from the ground up until the data is exhausted.
