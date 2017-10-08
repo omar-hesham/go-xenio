@@ -6,6 +6,10 @@ package xenio
 import (
 	"math/big"
 	"strings"
+	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/accounts/abi"
+	"github.com/xenioplatform/go-xenio/accounts/abi/bind"
 )
 
 // XNOGamesABI is the input ABI used to generate the binding from.
