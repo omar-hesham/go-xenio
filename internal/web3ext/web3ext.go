@@ -160,6 +160,11 @@ web3._extend({
 			params: 0
 		}),
 		new web3._extend.Method({
+			name: 'getGamesList',
+			call: 'xenio_getGamesList',
+			params: 0
+		}),
+		new web3._extend.Method({
 			name: 'addStakerToSnapshot',
 			call: 'xenio_addStakerToSnapshot',
 			params: 1

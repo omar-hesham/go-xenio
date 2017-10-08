@@ -191,6 +191,10 @@ func (api *API) GetStakerSnapshotJS() interface{} {
 	}
 }
 
+func (api *API) GetGamesList() bool{
+	return true
+}
+
 func (api *API) AddStakerToSnapshot(address common.Address) {
 	if common.StakerSnapShot == nil {
 		api.GetStakerSnapshot()
