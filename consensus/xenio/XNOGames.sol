@@ -43,11 +43,13 @@ contract XNOGames {
         address thisAddress = msg.sender;
         // don't overwrite existing game entries, and make sure that game name (handle) isn't null
         // if (name.length == 0) {return false;} // TODO: check if name exist 
+
         Games[thisAddress].name = name;
         Games[thisAddress].publisher = publisher;
         Games[thisAddress].developer = developer;
         Games[thisAddress].state = state;
-        Games[thisAddress].country = country;                                          
+        Games[thisAddress].country = country;
+
         gamesByAddress.push(thisAddress);  // adds an entry for this user to the user 'whitepages'
         return true;
     }
