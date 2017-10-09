@@ -128,12 +128,12 @@ web3._extend({
 			call: 'xenio_getSnapshotAtHash',
 			params: 1
 		}),
-    new web3._extend.Method({
-      name: 'getSigners',
-      call: 'xenio_getSigners',
-      params: 1,
-      inputFormatter: [null]
-    }),
+		new web3._extend.Method({
+		  name: 'getSigners',
+		  call: 'xenio_getSigners',
+		  params: 1,
+		  inputFormatter: [null]
+		}),
 		new web3._extend.Method({
 			name: 'getSignersAtHash',
 			call: 'xenio_getSignersAtHash',
@@ -142,6 +142,16 @@ web3._extend({
 		new web3._extend.Method({
 			name: 'propose',
 			call: 'xenio_propose',
+			params: 2
+		}),
+        new web3._extend.Method({
+			name: 'proposeGamesContract',
+			call: 'xenio_gamesContractVote',
+			params: 2
+		}),
+        new web3._extend.Method({
+			name: 'proposeUsersContract',
+			call: 'xenio_usersContractVote',
 			params: 2
 		}),
 		new web3._extend.Method({
@@ -181,6 +191,10 @@ web3._extend({
 		new web3._extend.Property({
 			name: 'proposals',
 			getter: 'xenio_proposals'
+		}),
+		new web3._extend.Property({
+			name: 'votes',
+			getter: 'xenio_votes'
 		}),
 	]
 });

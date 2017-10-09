@@ -211,7 +211,12 @@ type Xenio struct {
 	recents    *lru.ARCCache // Snapshots for recent block to speed up reorgs
 	signatures *lru.ARCCache // Signatures of recent blocks to speed up mining
 
-	proposals map[common.Address]bool // Current list of proposals we are pushing
+	//proposals
+	proposals map[common.Address]bool // Current list of node proposals
+	//gamesContract common.Address // games contract proposal
+	//usersContract common.Address // users contract proposal
+
+	Votes map[common.Address]Vote
 
 	signer common.Address // Ethereum address of the signing key
 	signFn SignerFn       // Signer function to authorize hashes with
@@ -245,6 +250,7 @@ func New(config *params.XenioConfig, db ethdb.Database) *Xenio {
 		recents:    recents,
 		signatures: signatures,
 		proposals:  make(map[common.Address]bool),
+		Votes:      make(map[common.Address]Vote),
 	}
 }
 
@@ -529,9 +535,6 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 			if number != chain.CurrentHeader().Number.Uint64() {
 				headerTime = headerTime.Add(time.Duration(chain.Config().Xenio.Period) * time.Second).UTC()
 			}
-			//a, _ := json.Marshal(headerTime.Unix())
-			//b, _ := json.Marshal(time.Now().Unix())
-			//log.Warn(string(a)+" > "+string(b))
 			if headerTime.UTC().Unix() >= time.Now().UTC().Unix() {
 				return ErrInvalidTimestamp
 			}
@@ -618,6 +621,14 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 				})
 				}
 			}
+	if len(c.Votes) > 0{
+		blob, err := json.Marshal(c.Votes)
+		if err == nil{
+			header.Votes = blob
+		}else{
+			return err
+		}
+	}
 	return nil
 }
 
