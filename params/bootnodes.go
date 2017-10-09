@@ -35,7 +35,7 @@ var MainnetBootnodes = []string{
 // TestnetBootnodes are the enode URLs of the P2P bootstrap nodes running on the
 // Ropsten test network.
 var TestnetBootnodes = []string{
-	"enode://2a611428e9ad30d3bfb9626e9da40d4e249d27df626c93837e1e8ae31ff7290d16a8d4f1c3d8968715070cd6f0d9af1e5c852b85eb6fd4881dd8289f73a877f3@45.76.85.77:30666",
+	"enode://cf9a2072a2b0a3bc6a629ef8372b2d5b70776a3869411c7e2e7adb15185a1065640c110ad33ff61b1e0386482011dce760a18c45c78125c0672cfbe13b7a0e90@45.76.85.77:30666",
 }
 
 // RinkebyBootnodes are the enode URLs of the P2P bootstrap nodes running on the
@@ -61,7 +61,5 @@ var DiscoveryV5Bootnodes = []string{
 }
 
 var XenioBootNodes = []string{
-	"enode://cf9a2072a2b0a3bc6a629ef8372b2d5b70776a3869411c7e2e7adb15185a1065640c110ad33ff61b1e0386482011dce760a18c45c78125c0672cfbe13b7a0e90@45.76.85.77:30666",
-
-
+	"enode://2a611428e9ad30d3bfb9626e9da40d4e249d27df626c93837e1e8ae31ff7290d16a8d4f1c3d8968715070cd6f0d9af1e5c852b85eb6fd4881dd8289f73a877f3@45.76.85.77:30666",
 }
