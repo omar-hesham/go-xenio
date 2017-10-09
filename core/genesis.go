@@ -310,7 +310,7 @@ func GenesisBlockForTesting(db ethdb.Database, addr common.Address, balance *big
 
 // DefaultGenesisBlock returns the Ethereum main net genesis block.
 func DefaultGenesisBlock() *Genesis {
-	log.Warn("Genesis: generating for default xenio network")
+	log.Warn("Genesis: generating for default XENIO network")
 	return &Genesis{
 		Config:     params.XenioChainConfig,
 		Nonce:      0x0,
@@ -324,7 +324,7 @@ func DefaultGenesisBlock() *Genesis {
 
 // DefaultTestnetGenesisBlock returns the Ropsten network genesis block.
 func DefaultTestnetGenesisBlock() *Genesis {
-	log.Warn("Genesis: generating for default TEST network")
+	log.Warn("Genesis: generating for default XENIO TEST network")
 	return &Genesis{
 		Config:     params.TestnetChainConfig,
 		Nonce:      0x0,
