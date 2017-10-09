@@ -333,17 +333,24 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 				log.Error(err.Error())
 			}else{
 				for key, node := range voteData{
-					var ismasternode bool
-					for _key, _ := range snap.MasterNodes{
-						if key == _key{
-							ismasternode = true
-						}
-					}
-					if(ismasternode){
+					//var ismasternode bool
+					//for _key, _ := range snap.MasterNodes{
+				//		if key == _key{
+				//			ismasternode = true
+				//		}
+				//	}
+				//	if(ismasternode){
 						snap.NewVotes[key] = node
-					}else{
-						log.Warn("vote originated from non masternode peer discarded")
-					}
+						if node.VoteType == GamesContract{
+							snap.GamesContractAddress = key
+						}else{
+							if node.VoteType == UsersContract{
+								snap.UsersContractAddress = key
+							}
+						}
+				//	}else{
+				//		log.Warn("vote originated from non masternode peer discarded")
+				//	}
 				}
 			}
 		}

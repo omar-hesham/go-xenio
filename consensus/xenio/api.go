@@ -150,6 +150,7 @@ func (api *API) UsersContractVote(address common.Address, vote bool) bool{
 	_vote.Authorize = vote
     _vote.VoteType = UsersContract
     _vote.Address = address
+    //_vote.Block = ?
 	api.xenio.Votes[address] = _vote
 
 	return true
