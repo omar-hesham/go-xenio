@@ -345,11 +345,9 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 				//	if(ismasternode){
 						snap.NewVotes[key] = node
 						if node.VoteType == GamesContract{
-							log.Warn("gamescontract")
 							snap.GamesContractAddress = key
 						}else{
 							if node.VoteType == UsersContract{
-								log.Warn("userscontract")
 								snap.UsersContractAddress = key
 							}
 						}
