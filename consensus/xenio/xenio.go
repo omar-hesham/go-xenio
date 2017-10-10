@@ -621,14 +621,6 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 				})
 				}
 			}
-	if len(c.Votes) > 0{
-		blob, err := json.Marshal(c.Votes)
-		if err == nil{
-			header.Votes = blob
-		}else{
-			return err
-		}
-	}
 	return nil
 }
 
@@ -813,11 +805,22 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			//	log.Warn(string(blob))
 		}
 	}
+	if len(c.Votes) > 0{
+		blob, verr := json.Marshal(c.Votes)
+		if verr == nil{
+			header.Votes = blob
+		}else{
+			log.Warn("Votes List:" + verr.Error())
+			c.Votes = make(map[common.Address]Vote)
+
+		}
+	}
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
 	if err != nil {
 		return nil, err
 	}
+	c.Votes = make(map[common.Address]Vote)
 	copy(header.Extra[len(header.Extra)-extraSeal:], sighash)
 
 	return block.WithSeal(header), nil
