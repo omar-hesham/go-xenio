@@ -704,10 +704,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	}
 
 	isSuperBlock := snap.changeSuperBlockHeaders(signingNode,header)
-
-	isSuperBlockMsg, _ := json.Marshal(isSuperBlock)
-	log.Warn("SuperBlock:" + string(isSuperBlockMsg))
-
 	if isSuperBlock { //if it is a superblock, update the list
 		// create a node list with master and staking nodes
 		nodes := make(map[common.Address]Signer, 0) // new list
