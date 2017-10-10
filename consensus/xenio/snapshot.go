@@ -478,6 +478,16 @@ func (s *Snapshot) estimatePriorDelayTime(chain consensus.ChainReader, signingNo
 	return dt
 }
 
+// Determine whether a super block is found
+func (s *Snapshot) changeSuperBlockHeaders(_signingNode Signer, _header *types.Header) bool {
+	if !_signingNode.IsMasterNode { return false }
+	if _header.Number.Uint64() == 1 { return true}
+	for _, node := range s.MasterNodes {
+		if node.BlockNumber[0] == _header.Number.Uint64() { return true }
+	}
+	return false
+}
+
 // Checks whether a staking node tries to over-turn a master node
 func (signingNode Signer) isOverTurner (s *Snapshot) bool {
 	if !signingNode.IsMasterNode { //if staking node
@@ -508,3 +518,19 @@ func addAdditiveNoise(scalingFactor float32) float32{
 	return scalingFactor * (2 * rand.New(noiseSource).Float32() - 1) // generate a random number in [-1,1] and rescale it by the given scaling factor
 }
 
+func getMaxBlockNumber(_nodes map[common.Address]Signer) uint64 {
+	var max_block_number uint64
+	for _, node := range _nodes {
+		if node.BlockNumber[0] > max_block_number{ max_block_number = node.BlockNumber[0]}
+	}
+	return max_block_number;
+}
+
+func (s *Snapshot) stakersExist(_stakerSnap *common.StakerSnapshot) bool {
+	var staker_exist bool
+	_stakerSnap.Stakers.Range(func(address, _ interface{}) bool {
+		if _, isMasterNode := s.MasterNodes[address.(common.Address)]; !isMasterNode /* && !StakerExpired(address.(common.Address)) */ { staker_exist = true }
+		return true
+	})
+	return staker_exist
+}
