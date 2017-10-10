@@ -351,7 +351,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 							if node.VoteType == UsersContract{
 								log.Warn("userscontract")
 								snap.UsersContractAddress = key
-							}xenio
+							}
 						}
 				//	}else{
 				//		log.Warn("vote originated from non masternode peer discarded")
