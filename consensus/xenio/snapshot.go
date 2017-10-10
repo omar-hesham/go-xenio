@@ -67,7 +67,7 @@ type Snapshot struct {
 	StakingNodes                                         map[common.Address]Signer   `json:"stakingnodes"`          // Set of normal signers
 	Recents                                              map[uint64]common.Address   `json:"recents"`               // Set of recent signers for spam protections
 	Votes                                                []*Vote                     `json:"votes"`                 // List of votes cast in chronological order
-	NewVotes                                                map[common.Address]Vote     `json:"newvotes"`                 // List of votes cast in chronological order
+	NewVotes                                             map[common.Address]Vote     `json:"newvotes"`                 // List of votes cast in chronological order
 	Tally                                                map[common.Address]Tally    `json:"tally"`                 // Current vote tally to avoid recalculating
 	GamesContractAddress                                 common.Address              `json:"gamescontractaddress"`  // Address of the games contract
 	UsersContractAddress                                 common.Address              `json:"usersscontractaddress"` // Address of the users contract
@@ -92,6 +92,7 @@ func newSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, number uint
 		StakingNodes: make(map[common.Address]Signer),
 		Recents:      make(map[uint64]common.Address),
 		Tally:        make(map[common.Address]Tally),
+		NewVotes:     make(map[common.Address]Vote),
 	}
 	var newSigner Signer
 	for i, signer := range signers {
