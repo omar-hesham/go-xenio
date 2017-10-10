@@ -23,6 +23,8 @@ import (
 	"github.com/xenioplatform/go-xenio/consensus"
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/rpc"
+	//"github.com/xenioplatform/go-xenio/log"
+	//"strconv"
 )
 
 // API is a user facing RPC API to allow controlling the signer and voting
@@ -123,6 +125,12 @@ func (api *API) Propose(address common.Address, auth bool) {
 	api.xenio.proposals[address] = auth
 }
 
+func (api *API) GetXNOGamesABI() string{
+	api.xenio.lock.Lock()
+	defer api.xenio.lock.Unlock()
+	return XNOGamesABI
+}
+
 // GamesContractPropose injects a new games contract authorization proposal that the signer will attempt to
 // push through.
 func (api *API) GamesContractVote(address common.Address, vote bool) bool{
@@ -134,9 +142,17 @@ func (api *API) GamesContractVote(address common.Address, vote bool) bool{
 	_vote.Authorize = vote
 	_vote.VoteType = GamesContract
 	_vote.Address = address
+	//_vote.Block = api.chain.CurrentHeader().Number.Uint64() + 1 // todo
+	//log.Warn("Vote in block: " + strconv.Itoa(int(_vote.Block)))
 	api.xenio.Votes[address] = _vote
 
 	return true
+}
+
+func (api *API) GetXNOUsersABI() string{
+	api.xenio.lock.Lock()
+	defer api.xenio.lock.Unlock()
+	return XNOUsersABI
 }
 
 // UsersContractPropose injects a new users contract authorization proposal that the signer will attempt to
@@ -150,7 +166,7 @@ func (api *API) UsersContractVote(address common.Address, vote bool) bool{
 	_vote.Authorize = vote
     _vote.VoteType = UsersContract
     _vote.Address = address
-    //_vote.Block = ?
+    //_vote.Block = ? // todo
 	api.xenio.Votes[address] = _vote
 
 	return true
