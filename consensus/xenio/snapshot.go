@@ -159,6 +159,8 @@ func (s *Snapshot) copy() *Snapshot {
 	for address, vote := range s.Votes {
 		cpy.Votes[address] = vote
 	}
+	cpy.GamesContractAddress = s.GamesContractAddress
+	cpy.UsersContractAddress = s.UsersContractAddress
 	copy(cpy.Votes, s.Votes)
 
 	return cpy
@@ -343,11 +345,13 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 				//	if(ismasternode){
 						snap.NewVotes[key] = node
 						if node.VoteType == GamesContract{
+							log.Warn("gamescontract")
 							snap.GamesContractAddress = key
 						}else{
 							if node.VoteType == UsersContract{
+								log.Warn("userscontract")
 								snap.UsersContractAddress = key
-							}
+							}xenio
 						}
 				//	}else{
 				//		log.Warn("vote originated from non masternode peer discarded")
