@@ -137,7 +137,7 @@ func (api *API) GetStakerSnapshot() *common.StakerSnapshot {
 	if common.StakerSnapShot == nil {
 		common.StakerSnapShot = NewStakerSnapshot()
 	}
-	//DeleteAllExpiredStakers()
+	DeleteAllExpiredStakers()
 	return common.StakerSnapShot
 }
 
