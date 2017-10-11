@@ -23,7 +23,6 @@ import (
 	"bytes"
 	"errors"
 	"math/big"
-	"math/rand"
 	"sync"
 	"time"
 
