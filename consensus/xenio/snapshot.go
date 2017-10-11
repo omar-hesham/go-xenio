@@ -480,9 +480,15 @@ func (s *Snapshot) estimatePriorDelayTime(chain consensus.ChainReader, signingNo
 
 // Determine whether a super block is found
 func (s *Snapshot) changeSuperBlockHeaders(_signingNode Signer, _header *types.Header) bool {
+
+	a, _ := json.Marshal(_header.Number.Uint64())
+	log.Warn("changeSuperBlockHeaders: " + string(a))
+
 	if !_signingNode.IsMasterNode { return false }
 	if _header.Number.Uint64() == 1 { return true}
 	for _, node := range s.MasterNodes {
+		b, _ := json.Marshal(node.BlockNumber[0])
+		log.Warn("changeSuperBlockHeaders - node number: " + string(b))
 		if node.BlockNumber[0] == _header.Number.Uint64() { return true }
 	}
 	return false
