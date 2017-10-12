@@ -101,13 +101,15 @@ func DeleteExpiredStaker(address common.Address) {
 }
 
 func DeleteAllExpiredStakers() {
-	common.StakerSnapShot.Stakers.Range(
-		func(address, staker interface{}) bool {
-			if StakerExpired(address.(common.Address)) == true {
-				common.StakerSnapShot.Stakers.Delete(address)
-			}
-			return true
-		})
+	if common.StakerSnapShot != nil {
+		common.StakerSnapShot.Stakers.Range(
+			func(address, staker interface{}) bool {
+				if StakerExpired(address.(common.Address)) == true {
+					common.StakerSnapShot.Stakers.Delete(address)
+				}
+				return true
+			})
+	}
 }
 
 func HasCoins(address common.Address, state *state.StateDB) bool {

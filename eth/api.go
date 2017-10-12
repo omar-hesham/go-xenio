@@ -263,6 +263,11 @@ func (api *PrivateStakerAPI) Stop() bool {
 	return true
 }
 
+// Staking returns an indication if this node is currently staking.
+func (api *PrivateStakerAPI) Staking() bool {
+	return api.e.IsStaking()
+}
+
 // SetExtra sets the extra data string that is included when this miner mines a block.
 func (api *PrivateMinerAPI) SetExtra(extra string) (bool, error) {
 	if err := api.e.Miner().SetExtra([]byte(extra)); err != nil {
