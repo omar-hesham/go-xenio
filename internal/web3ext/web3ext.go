@@ -595,6 +595,10 @@ web3._extend({
 			call: 'staker_setServerbase',
 			params: 1,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+			new web3._extend.Method({
+			name: 'isStaking',
+			call: 'staker_staking'
 		})
 	],
 	properties: []
