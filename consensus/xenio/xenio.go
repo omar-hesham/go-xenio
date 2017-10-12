@@ -23,7 +23,6 @@ import (
 	"bytes"
 	"errors"
 	"math/big"
-	"math/rand"
 	"sync"
 	"time"
 
@@ -558,7 +557,7 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 	if err != nil {
 		return err
 	}
-	if number%c.config.Epoch != 0 {
+	/*if number%c.config.Epoch != 0 {
 		c.lock.RLock()
 
 		// Gather all the proposals that make sense voting on
@@ -578,7 +577,7 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 			}
 		}
 		c.lock.RUnlock()
-	}
+	}*/
 	// Set the correct difficulty
 	header.Difficulty = diffNoTurn
 	if snap.inturn(header.Number.Uint64(), c.signer) {
@@ -706,8 +705,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	isSuperBlock := snap.changeSuperBlockHeaders(signingNode,header)
 	if isSuperBlock { //if it is a superblock, update the list
 
-		log.Warn("isSuperBlock")
-
 		// create a node list with master and staking nodes
 		nodes := make(map[common.Address]Signer, 0) // new list
 
@@ -778,9 +775,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			}
 		}
 		if (len(nodes)) > 0 {
-
-			log.Warn("We have nodes")
-
 			blob, _ := json.Marshal(nodes)
 			header.SuperBlock = blob
 			//	log.Warn(string(blob))
