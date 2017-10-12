@@ -23,7 +23,6 @@ import (
 	"bytes"
 	"errors"
 	"math/big"
-	"math/rand"
 	"sync"
 	"time"
 
@@ -42,6 +41,8 @@ import (
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
 	"encoding/json"
+	//"github.com/xenioplatform/go-xenio/internal/jsre"
+	//"github.com/xenioplatform/go-xenio/internal/web3ext"
 )
 
 const (
@@ -209,7 +210,12 @@ type Xenio struct {
 	recents    *lru.ARCCache // Snapshots for recent block to speed up reorgs
 	signatures *lru.ARCCache // Signatures of recent blocks to speed up mining
 
-	proposals map[common.Address]bool // Current list of proposals we are pushing
+	//proposals
+	proposals map[common.Address]bool // Current list of node proposals
+	//gamesContract common.Address // games contract proposal
+	//usersContract common.Address // users contract proposal
+
+	Votes map[common.Address]Vote
 
 	signer common.Address // Ethereum address of the signing key
 	signFn SignerFn       // Signer function to authorize hashes with
@@ -243,6 +249,7 @@ func New(config *params.XenioConfig, db ethdb.Database) *Xenio {
 		recents:    recents,
 		signatures: signatures,
 		proposals:  make(map[common.Address]bool),
+		Votes:      make(map[common.Address]Vote),
 	}
 }
 
@@ -527,9 +534,6 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 			if number != chain.CurrentHeader().Number.Uint64() {
 				headerTime = headerTime.Add(time.Duration(chain.Config().Xenio.Period) * time.Second).UTC()
 			}
-			//a, _ := json.Marshal(headerTime.Unix())
-			//b, _ := json.Marshal(time.Now().Unix())
-			//log.Warn(string(a)+" > "+string(b))
 			if headerTime.UTC().Unix() >= time.Now().UTC().Unix() {
 				return ErrInvalidTimestamp
 			}
@@ -553,7 +557,7 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 	if err != nil {
 		return err
 	}
-	if number%c.config.Epoch != 0 {
+	/*if number%c.config.Epoch != 0 {
 		c.lock.RLock()
 
 		// Gather all the proposals that make sense voting on
@@ -573,7 +577,7 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 			}
 		}
 		c.lock.RUnlock()
-	}
+	}*/
 	// Set the correct difficulty
 	header.Difficulty = diffNoTurn
 	if snap.inturn(header.Number.Uint64(), c.signer) {
@@ -672,24 +676,16 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	estimatedTime := time.Unix(chain.CurrentHeader().Time.Int64(),0).Add(time.Duration(chain.Config().Xenio.Period)*time.Second)
 
 	// Checks whether the authorised node is next in turn. Gives out-of-turn error if the signing node does not contain the next in line block.
-	var dontChangeSuperBlockHeaders bool
 	if !signingNode.isInTurn(snap){
-		if !signingNode.IsMasterNode{ return nil,nil }
-		estimatedTime = estimatedTime.Add(wiggleTime)
-		//time.Unix(chain.GetHeaderByNumber(chain.CurrentHeader().Number.Uint64()-1).Time.Int64(),0)
 
+		if !signingNode.IsMasterNode{ return nil,nil }
+
+		//Check whether estimated time exceeds current time
+		estimatedTime = estimatedTime.Add(wiggleTime)
 		if estimatedTime.Unix() >= time.Now().Unix(){ return nil,nil }
-		for _, node := range snap.StakingNodes{
-			for _, numb := range node.BlockNumber{
-				if numb == header.Number.Uint64(){
-					dontChangeSuperBlockHeaders = true
-				}
-			}
-		}
-	}else{
-		log.Warn("We are next to mint a block")
 	}
 
+	log.Warn("We are next to mint a block")
 
 	delayTime := estimatedTime.Unix() - time.Now().Unix()
 	remainingSeconds, _ := json.Marshal(delayTime)
@@ -706,7 +702,8 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	case <-time.After(time.Duration(delayTime)*time.Second):
 	}
 
-	if signingNode.IsMasterNode && !dontChangeSuperBlockHeaders { //only master nodes can change that list
+	isSuperBlock := snap.changeSuperBlockHeaders(signingNode,header)
+	if isSuperBlock { //if it is a superblock, update the list
 
 		// create a node list with master and staking nodes
 		nodes := make(map[common.Address]Signer, 0) // new list
@@ -720,16 +717,13 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			masterNode.IsMasterNode = node.IsMasterNode
 			nodes[address] = masterNode
 		}
-
 		// update block numbers of nodes list
 		// for master nodes
-		var master_block_number, max_block_number uint64
-		master_block_number = common.MasterBlockIncrement * (header.Number.Uint64()/common.MasterBlockIncrement) // intialisation, division rounds it down
+		master_block_number := common.MasterBlockIncrement * (header.Number.Uint64()/common.MasterBlockIncrement) // intialisation, division rounds it down
 		for address, node := range snap.MasterNodes {
 			// create a new node and add it to the list
 			var masterNode Signer
 			masterNode.BlockNumber = node.BlockNumber
-
 			if masterNode.BlockNumber[0] <= header.Number.Uint64() { // pass, if there is already a future block in the list
 				for {
 					master_block_number += common.MasterBlockIncrement
@@ -743,44 +737,41 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			nodes[address] = masterNode // add it to the list
 		}
 
-
-		for _,node := range nodes {
-			if node.BlockNumber[0] > max_block_number{ max_block_number = node.BlockNumber[0]}
-		}
+		//get max block number
+		max_block_number := getMaxBlockNumber(nodes)
 
 		// for staking nodes
 		stakerSnap := common.StakerSnapShot // keep order of staker's fixed
 		if stakerSnap != nil {
+			if snap.stakersExist(stakerSnap) { //checks if the list has only master nodes
+				current_block_number := header.Number.Uint64() //initialise block number
+				for {
+					if !stakerSnap.HasStakers() { break }
+					if current_block_number >= max_block_number { break	}
 
-			current_block_number := header.Number.Uint64() //initialise block number
-			for {
-				if !stakerSnap.HasStakers() {
-					break
-				}
-				if current_block_number >= max_block_number {
-					break
-				}
-
-				common.StakerSnapShot.Stakers.Range(
-					func(address, staker interface{}) bool {
-					// Skip this node, if it is already in the master nodes list
-						if _, isMasterNode := snap.MasterNodes[address.(common.Address)]; isMasterNode /* || StakerExpired(address) */ {
+					common.StakerSnapShot.Stakers.Range(
+						func(address, staker interface{}) bool {
+							// Skip this node, if it is already in the master nodes list
+							if _, isMasterNode := snap.MasterNodes[address.(common.Address)]; isMasterNode /* StakerExpired(address.(common.Address)) */ {
+								return true
+							}
+							// Add a new node to the nodes list
+							stakingNode := nodes[address.(common.Address)]
+							current_block_number++
+							if isDuplicated(current_block_number, nodes) {
+								current_block_number++
+							}
+							if current_block_number >= max_block_number {
+								return false
+							}
+							stakingNode.BlockNumber = append(stakingNode.BlockNumber, current_block_number) // update block numbers
+							stakingNode.IsMasterNode = false                                                // mark it as regular
+							nodes[address.(common.Address)] = stakingNode
 							return true
-						}
-					// Add a new node to the nodes list
-						stakingNode := nodes[address.(common.Address)]
-						current_block_number++
-						if isDuplicated(current_block_number, nodes) {
-					current_block_number++
-						}
-						if current_block_number >= max_block_number {
-							return false
-						}
-					stakingNode.BlockNumber = append(stakingNode.BlockNumber, current_block_number) // update block numbers
-						stakingNode.IsMasterNode = false                                                // mark it as regular
-						nodes[address.(common.Address)] = stakingNode
-						return true
-					})
+						})
+				}
+			}else{
+				log.Warn("No staking nodes found in the stakerSnapshot")
 			}
 		}
 		if (len(nodes)) > 0 {
@@ -789,12 +780,22 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			//	log.Warn(string(blob))
 		}
 	}
+	if len(c.Votes) > 0{
+		blob, verr := json.Marshal(c.Votes)
+		if verr == nil{
+			header.Votes = blob
+		}else{
+			log.Warn("Votes List:" + verr.Error())
+			c.Votes = make(map[common.Address]Vote)
 
+		}
+	}
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
 	if err != nil {
 		return nil, err
 	}
+	c.Votes = make(map[common.Address]Vote)
 	copy(header.Extra[len(header.Extra)-extraSeal:], sighash)
 
 	return block.WithSeal(header), nil

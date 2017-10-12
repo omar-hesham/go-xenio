@@ -23,6 +23,7 @@ import (
 )
 
 const (
+	XenioVersion = "0.1.0a"
 	VersionMajor = 1        // Major version component of the current release
 	VersionMinor = 7        // Minor version component of the current release
 	VersionPatch = 1        // Patch version component of the current release
@@ -31,7 +32,7 @@ const (
 
 // Version holds the textual version string.
 var Version = func() string {
-	v := fmt.Sprintf("%d.%d.%d", VersionMajor, VersionMinor, VersionPatch)
+	v := fmt.Sprintf("%s/Geth %d.%d.%d",XenioVersion, VersionMajor, VersionMinor, VersionPatch)
 	if VersionMeta != "" {
 		v += VersionMeta
 	}

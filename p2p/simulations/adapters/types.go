@@ -25,11 +25,11 @@ import (
 	"os"
 
 	"github.com/docker/docker/pkg/reexec"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/discover"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/xenioplatform/go-xenio/crypto"
+	"github.com/xenioplatform/go-xenio/node"
+	"github.com/xenioplatform/go-xenio/p2p"
+	"github.com/xenioplatform/go-xenio/p2p/discover"
+	"github.com/xenioplatform/go-xenio/rpc"
 )
 
 // Node represents a node in a simulation network which is created by a

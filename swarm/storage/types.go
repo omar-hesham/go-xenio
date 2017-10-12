@@ -26,8 +26,8 @@ import (
 	"io"
 	"sync"
 
+	"github.com/xenioplatform/go-xenio/bmt"
 	"github.com/xenioplatform/go-xenio/common"
-	"github.com/xenioplatform/go-xenio/crypto/sha3"
 	"github.com/xenioplatform/go-xenio/crypto/sha3"
 )
 

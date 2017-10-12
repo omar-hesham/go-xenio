@@ -25,7 +25,7 @@ import (
 )
 
 var (
-	MainnetGenesisHash = common.HexToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3") // Mainnet genesis hash to enforce below configs on
+	MainnetGenesisHash = common.HexToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fb2") // Mainnet genesis hash to enforce below configs on
 	TestnetGenesisHash = common.HexToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3") // Testnet genesis hash to enforce below configs on
 )
 
@@ -49,20 +49,20 @@ var (
 	// TestnetChainConfig contains the chain parameters to run a node on the Ropsten test network.
 	TestnetChainConfig = &ChainConfig{
 		ChainId:        big.NewInt(7497),
-		HomesteadBlock: big.NewInt(1), // never enable
-		DAOForkBlock:   nil,           // never enable
+		HomesteadBlock: big.NewInt(1),
+		DAOForkBlock:   nil,
 		DAOForkSupport: true,
-		EIP150Block:    big.NewInt(2), // never enable
+		EIP150Block:    big.NewInt(2),
 		EIP150Hash:     common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000"),
-		EIP155Block:    big.NewInt(3),             // never enable
-		EIP158Block:    big.NewInt(3),             // never enable
+		EIP155Block:    big.NewInt(3),
+		EIP158Block:    big.NewInt(3),
 		ByzantiumBlock: big.NewInt(math.MaxInt64), // never enable
 		XenioBlock:     big.NewInt(math.MaxInt64),
 
 		Xenio: &XenioConfig{
 			Epoch:  30000,
 			Period: 60,
-			//SuperPeriod:60*30,
+			SuperPeriod:60*20,
 		},
 	}
 
@@ -85,23 +85,23 @@ var (
 		},
 	}
 	XenioChainConfig = &ChainConfig{
-				ChainId:         big.NewInt(7497),
-				HomesteadBlock:  big.NewInt(1), // never enable
-				DAOForkBlock:    nil, // never enable
-				DAOForkSupport:  true,
-				EIP150Block:     big.NewInt(2), // never enable
-				EIP150Hash:      common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000"),
-				EIP155Block:     big.NewInt(3), // never enable
-				EIP158Block:     big.NewInt(3), // never enable
-				ByzantiumBlock: big.NewInt(math.MaxInt64), // never enable
-				XenioBlock:		 big.NewInt(math.MaxInt64),
+		ChainId:         big.NewInt(7498),
+		HomesteadBlock:  big.NewInt(1),
+		DAOForkBlock:    nil,
+		DAOForkSupport:  true,
+		EIP150Block:     big.NewInt(2),
+		EIP150Hash:      common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000"),
+		EIP155Block:     big.NewInt(3),
+		EIP158Block:     big.NewInt(3),
+		ByzantiumBlock:  big.NewInt(math.MaxInt64), // never enable
+		XenioBlock:		 big.NewInt(0),
 
-					Xenio: &XenioConfig{
-						Epoch:      30000,
-						Period: 	60,
-						SuperPeriod:60*20,
-						},
-			}
+		Xenio: &XenioConfig{
+			Epoch:      30000,
+			Period: 	60,
+			SuperPeriod:60*20,
+		},
+	}
 	// AllProtocolChanges contains every protocol change (EIPs)
 	// introduced and accepted by the Ethereum core developers.
 	//
@@ -183,7 +183,7 @@ func (c *ChainConfig) String() string {
 	default:
 		engine = "unknown"
 	}
-	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: Xenio: %v %v Engine: %v}",
+	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Xenio:  %v Engine: %v}",
 		c.ChainId,
 		c.HomesteadBlock,
 		c.DAOForkBlock,

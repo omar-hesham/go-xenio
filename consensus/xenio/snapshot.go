@@ -32,13 +32,20 @@ import (
 	"github.com/xenioplatform/go-xenio/log"
 	lru "github.com/hashicorp/golang-lru"
 )
+type VoteType int
 
+const (
+	GamesContract VoteType = 1 + iota
+	UsersContract
+	MasterNode
+)
 // Vote represents a single vote that an authorized signer made to modify the
 // list of authorizations.
 type Vote struct {
 	Signer    common.Address `json:"signer"`    // Authorized signer that cast this vote
 	Block     uint64         `json:"block"`     // Block number the vote was cast in (expire old votes)
 	Address   common.Address `json:"address"`   // Account being voted on to change its authorization
+	VoteType  VoteType       `json:"votetype"`  // what is in the vote
 	Authorize bool           `json:"authorize"` // Whether to authorize or deauthorize the voted account
 }
 
@@ -51,17 +58,19 @@ type Tally struct {
 
 // Snapshot is the state of the authorization voting at a given point in time.
 type Snapshot struct {
-	config         *params.XenioConfig // Consensus engine parameters to fine tune behavior
-	sigcache       *lru.ARCCache        // Cache of recent block signatures to speed up ecrecover
+	config                                              *params.XenioConfig // Consensus engine parameters to fine tune behavior
+	sigcache                                            *lru.ARCCache        // Cache of recent block signatures to speed up ecrecover
 
-	Number         uint64                      `json:"number"`      // Block number where the snapshot was created
-	Hash           common.Hash                 `json:"hash"`        // Block hash where the snapshot was created
-	MasterNodes    map[common.Address]Signer   `json:"masternodes"` // Set of authorized super signing nodes at this moment
-	StakingNodes   map[common.Address]Signer   `json:"stakingnodes"`// Set of normal signers
-	Recents        map[uint64]common.Address   `json:"recents"`     // Set of recent signers for spam protections
-	Votes          []*Vote                     `json:"votes"`       // List of votes cast in chronological order
-	Tally          map[common.Address]Tally    `json:"tally"`       // Current vote tally to avoid recalculating
-	//LastSuperBlock time.Time                 `json:"lastsuperblocktime"` // the time of the last known superblock
+	Number                                               uint64                      `json:"number"`                 // Block number where the snapshot was created
+	Hash                                                 common.Hash                 `json:"hash"`                  // Block hash where the snapshot was created
+	MasterNodes                                          map[common.Address]Signer   `json:"masternodes"`           // Set of authorized super signing nodes at this moment
+	StakingNodes                                         map[common.Address]Signer   `json:"stakingnodes"`          // Set of normal signers
+	Recents                                              map[uint64]common.Address   `json:"recents"`               // Set of recent signers for spam protections
+	Votes                                                []*Vote                     `json:"votes"`                 // List of votes cast in chronological order
+	NewVotes                                             map[common.Address]Vote     `json:"newvotes"`                 // List of votes cast in chronological order
+	Tally                                                map[common.Address]Tally    `json:"tally"`                 // Current vote tally to avoid recalculating
+	GamesContractAddress                                 common.Address              `json:"gamescontractaddress"`  // Address of the games contract
+	UsersContractAddress                                 common.Address              `json:"usersscontractaddress"` // Address of the users contract
 }
 
 type Signer struct {
@@ -83,6 +92,7 @@ func newSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, number uint
 		StakingNodes: make(map[common.Address]Signer),
 		Recents:      make(map[uint64]common.Address),
 		Tally:        make(map[common.Address]Tally),
+		NewVotes:     make(map[common.Address]Vote),
 	}
 	var newSigner Signer
 	for i, signer := range signers {
@@ -131,6 +141,7 @@ func (s *Snapshot) copy() *Snapshot {
 		StakingNodes: make(map[common.Address]Signer),
 		Recents:      make(map[uint64]common.Address),
 		Votes:        make([]*Vote, len(s.Votes)),
+		NewVotes:     make(map[common.Address]Vote),
 		Tally:        make(map[common.Address]Tally),
 	}
 	for address, signerData := range s.MasterNodes {
@@ -145,6 +156,11 @@ func (s *Snapshot) copy() *Snapshot {
 	for address, tally := range s.Tally {
 		cpy.Tally[address] = tally
 	}
+	for address, vote := range s.Votes {
+		cpy.Votes[address] = vote
+	}
+	cpy.GamesContractAddress = s.GamesContractAddress
+	cpy.UsersContractAddress = s.UsersContractAddress
 	copy(cpy.Votes, s.Votes)
 
 	return cpy
@@ -314,7 +330,33 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 				//snap.LastSuperBlock =time.Unix(header.Time.Int64(),0)
 			}
 		}
-
+		if len(header.Votes) > 0{
+			voteData := make(map[common.Address]Vote,0)
+			if err := json.Unmarshal(header.Votes,&voteData); err != nil {
+				log.Error(err.Error())
+			}else{
+				for key, node := range voteData{
+					//var ismasternode bool
+					//for _key, _ := range snap.MasterNodes{
+				//		if key == _key{
+				//			ismasternode = true
+				//		}
+				//	}
+				//	if(ismasternode){
+						snap.NewVotes[key] = node
+						if node.VoteType == GamesContract{
+							snap.GamesContractAddress = key
+						}else{
+							if node.VoteType == UsersContract{
+								snap.UsersContractAddress = key
+							}
+						}
+				//	}else{
+				//		log.Warn("vote originated from non masternode peer discarded")
+				//	}
+				}
+			}
+		}
 	}
 	snap.Number += uint64(len(headers))
 	snap.Hash = headers[len(headers)-1].Hash()
@@ -436,6 +478,17 @@ func (s *Snapshot) estimatePriorDelayTime(chain consensus.ChainReader, signingNo
 	return dt
 }
 
+// Determine whether a super block is found
+func (s *Snapshot) changeSuperBlockHeaders(_signingNode Signer, _header *types.Header) bool {
+
+	if !_signingNode.IsMasterNode { return false }
+	if _header.Number.Uint64() == 1 { return true}
+	for _, node := range s.MasterNodes {
+		if node.BlockNumber[0] == _header.Number.Uint64() { return true }
+	}
+	return false
+}
+
 // Checks whether a staking node tries to over-turn a master node
 func (signingNode Signer) isOverTurner (s *Snapshot) bool {
 	if !signingNode.IsMasterNode { //if staking node
@@ -466,3 +519,19 @@ func addAdditiveNoise(scalingFactor float32) float32{
 	return scalingFactor * (2 * rand.New(noiseSource).Float32() - 1) // generate a random number in [-1,1] and rescale it by the given scaling factor
 }
 
+func getMaxBlockNumber(_nodes map[common.Address]Signer) uint64 {
+	var max_block_number uint64
+	for _, node := range _nodes {
+		if node.BlockNumber[0] > max_block_number{ max_block_number = node.BlockNumber[0]}
+	}
+	return max_block_number;
+}
+
+func (s *Snapshot) stakersExist(_stakerSnap *common.StakerSnapshot) bool {
+	var staker_exist bool
+	_stakerSnap.Stakers.Range(func(address, _ interface{}) bool {
+		if _, isMasterNode := s.MasterNodes[address.(common.Address)]; !isMasterNode /* && !StakerExpired(address.(common.Address)) */ { staker_exist = true }
+		return true
+	})
+	return staker_exist
+}

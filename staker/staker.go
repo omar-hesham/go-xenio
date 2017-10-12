@@ -24,6 +24,7 @@ import (
 	"github.com/xenioplatform/go-xenio/accounts"
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/consensus"
+	"github.com/xenioplatform/go-xenio/consensus/xenio"
 	"github.com/xenioplatform/go-xenio/core"
 	"github.com/xenioplatform/go-xenio/core/state"
 	"github.com/xenioplatform/go-xenio/core/types"
@@ -147,6 +148,7 @@ func (self *Staker) Start(coinbase common.Address) {
 				break
 			}
 			//log.Info("awaking staker")
+			xenio.DeleteAllExpiredStakers()
 			self.watcher.start()
 			self.watcher.commitNewWork()
 		case <-stopChan:
