@@ -31,6 +31,7 @@ import (
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/consensus/xenio"
 	"github.com/xenioplatform/go-xenio/internal/jsre/deps"
+	"github.com/xenioplatform/go-xenio/log"
 	"github.com/robertkrimen/otto"
 )
 
@@ -81,10 +82,10 @@ func New(assetPath string, output io.Writer) *JSRE {
 	go re.runEventLoop()
 	re.Set("loadScript", re.loadScript)
 	re.Set("inspect", re.prettyPrintJS)
-	re.Set("XNOCreateUserContract", re.XNOCreateUserContract)
-	re.Set("XNOGetUserContract", re.XNOGetUserContract)
-	re.Set("XNOCreateGameContract", re.XNOCreateGameContract)
-	re.Set("XNOGetGameContract", re.XNOGetGameContract)
+	re.Set("XNOCreateUsersContract", re.XNOCreateUsersContract)
+	re.Set("XNOGetUsersContract", re.XNOGetUsersContract)
+	re.Set("XNOCreateGamesContract", re.XNOCreateGamesContract)
+	re.Set("XNOGetGamesContract", re.XNOGetGamesContract)
 	return re
 }
 
@@ -288,78 +289,99 @@ func (self *JSRE) Set(ns string, v interface{}) (err error) {
 	return err
 }
 
-func (self *JSRE) XNOCreateUserContract(call otto.FunctionCall) otto.Value {
-
-	contractRawABI := xenio.XNOUsersABI
+func (self *JSRE) XNOCreateUsersContract(call otto.FunctionCall) otto.Value {
+	contractRawABI := xenio.XNOUsersBin
 	goStringABI := "var userContract = eth.contract(" + contractRawABI + ")"
-	//fmt.Println("This is an ABI string: " + goStringABI)
-
 	_, err := compileAndRun(call.Otto, "", goStringABI)
 	if err != nil {
-		fmt.Println("error: " + err.Error())
-	}
-
-	contractRawBin := xenio.XNOUsersBin
-	goStringBin := "var user = userContract.new({from: eth.accounts[0],data:\"" + contractRawBin + "\",gas: 2200000})"
-	//fmt.Println("This is a BIN string: " + goStringBin)
-
-	_, err = compileAndRun(call.Otto, "", goStringBin)
-	if err != nil {
-		fmt.Println("error: " + err.Error())
-	}
-
-	return otto.TrueValue()
-}
-
-func (self *JSRE) XNOGetUserContract(call otto.FunctionCall) otto.Value {
-	//var greeter = eth.contract(ABI).at(Address);
-	address, err := call.Argument(0).ToString()
-	if err != nil {
+		log.Error(err.Error())
 		return otto.FalseValue()
 	}
-	contractRawABI := xenio.XNOGamesABI
-	contract := "var user = eth.contract(" + contractRawABI + ").at(" + address + ");"
-
-	_, err = compileAndRun(call.Otto, "", contract)
+	contractRawBin := xenio.XNOUsersBin
+	goStringBin := "var users = userContract.new({from: eth.accounts[0], data:\"" + contractRawBin + "\",gas: 2200000})"
+	_, err = compileAndRun(call.Otto, "", goStringBin)
 	if err != nil {
-		fmt.Println("error: " + err.Error())
+		log.Error(err.Error())
+		return otto.FalseValue()
 	}
 	return otto.TrueValue()
 }
 
-func (self *JSRE) XNOCreateGameContract(call otto.FunctionCall) otto.Value {
+func (self *JSRE) XNOGetUsersContract(call otto.FunctionCall) otto.Value {
+	address, err := compileAndRun(call.Otto, "", "xenio.getSnapshot().userscontractaddress")
+	if err != nil {
+		log.Error("error: " + err.Error())
+		return otto.FalseValue()
+	}
+	if address.String() == "undefined" || address.String() == "0x0000000000000000000000000000000000000000" {
+		log.Error("No Users Contract Address in Snapshot")
+		return otto.FalseValue()
+	}
+	code, err := compileAndRun(call.Otto, "", "eth.getCode("+ address.String() +")")
+	if err != nil {
+		log.Error(err.Error())
+		return otto.FalseValue()
+	}
+	if code.String() == "0x" {
+		log.Error("No Users Contract found with this address")
+		return otto.FalseValue()
+	}
+	contractRawABI := xenio.XNOUsersABI
+	contract := "var users = eth.contract(" + contractRawABI + ").at(" + address.String() + ");"
+	_, err = compileAndRun(call.Otto, "", contract)
+	if err != nil {
+		log.Error("error: " + err.Error())
+		return otto.FalseValue()
+	}
+	log.Info("Users Contract retrieved successfully")
+	return otto.TrueValue()
+}
+
+func (self *JSRE) XNOCreateGamesContract(call otto.FunctionCall) otto.Value {
 	contractRawABI := xenio.XNOGamesABI
 	goStringABI := "var gameContract = eth.contract(" + contractRawABI + ")"
-	//fmt.Println("This is an ABI string: " + goStringABI)
-
 	_, err := compileAndRun(call.Otto, "", goStringABI)
 	if err != nil {
-		fmt.Println("error: " + err.Error())
+		log.Error(err.Error())
+		return otto.FalseValue()
 	}
 	contractRawBin := xenio.XNOGamesBin
-	goStringBin := "var game = gameContract.new({from: eth.accounts[0],data:\"" + contractRawBin + "\",gas: 1200000})"
-	//fmt.Println("This is a BIN string: " + goStringBin)
-
+	goStringBin := "var games = gameContract.new({from: eth.accounts[0], data:\"" + contractRawBin + "\",gas: 2200000})"
 	_, err = compileAndRun(call.Otto, "", goStringBin)
 	if err != nil {
-		fmt.Println("error: " + err.Error())
+		log.Error(err.Error())
+		return otto.FalseValue()
 	}
 	return otto.TrueValue()
 }
 
-func (self *JSRE) XNOGetGameContract(call otto.FunctionCall) otto.Value {
-	//var greeter = eth.contract(ABI).at(Address);
-	address, err := call.Argument(0).ToString()
+func (self *JSRE) XNOGetGamesContract(call otto.FunctionCall) otto.Value {
+	address, err := compileAndRun(call.Otto, "", "xenio.getSnapshot().gamescontractaddress")
 	if err != nil {
+		log.Error(err.Error())
+		return otto.FalseValue()
+	}
+	if address.String() == "undefined" || address.String() == "0x0000000000000000000000000000000000000000" {
+		log.Error("No Games Contract Address in Snapshot")
+		return otto.FalseValue()
+	}
+	code, err := compileAndRun(call.Otto, "", "eth.getCode("+ address.String() +")")
+	if err != nil {
+		log.Error(err.Error())
+		return otto.FalseValue()
+	}
+	if code.String() == "0x" {
+		log.Error("No Games Contract found with this address")
 		return otto.FalseValue()
 	}
 	contractRawABI := xenio.XNOGamesABI
-	contract := "var game = eth.contract(" + contractRawABI + ").at(" + address + ");"
-
+	contract := "var games = eth.contract(" + contractRawABI + ").at(\"" + address.String() + "\");"
 	_, err = compileAndRun(call.Otto, "", contract)
 	if err != nil {
-		fmt.Println("error: " + err.Error())
+		log.Error(err.Error())
+		return otto.FalseValue()
 	}
+	log.Info("Games Contract retrieved successfully")
 	return otto.TrueValue()
 }
 
