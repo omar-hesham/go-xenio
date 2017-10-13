@@ -70,7 +70,7 @@ type Snapshot struct {
 	NewVotes                                             map[common.Address]Vote     `json:"newvotes"`                 // List of votes cast in chronological order
 	Tally                                                map[common.Address]Tally    `json:"tally"`                 // Current vote tally to avoid recalculating
 	GamesContractAddress                                 common.Address              `json:"gamescontractaddress"`  // Address of the games contract
-	UsersContractAddress                                 common.Address              `json:"usersscontractaddress"` // Address of the users contract
+	UsersContractAddress                                 common.Address              `json:"userscontractaddress"` // Address of the users contract
 }
 
 type Signer struct {
@@ -343,12 +343,14 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 				//		}
 				//	}
 				//	if(ismasternode){
+						//node.Block = header.Number.Uint64() // Block number that has the vote
 						snap.NewVotes[key] = node
 						if node.VoteType == GamesContract{
-							snap.GamesContractAddress = key
+							snap.GamesContractAddress = node.Address
+							//log.Warn("gamescontractaddress:" + node.Address.String())
 						}else{
 							if node.VoteType == UsersContract{
-								snap.UsersContractAddress = key
+								snap.UsersContractAddress = node.Address
 							}
 						}
 				//	}else{

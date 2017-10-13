@@ -30,6 +30,9 @@ import (
 
 // cast adds new stakers to the list.
 func StakerCast(stakers []common.StakerTransmit) {
+	if common.StakerSnapShot == nil {
+		common.StakerSnapShot = NewStakerSnapshot()
+	}
 	now := time.Now().UTC()
 	for _, value := range stakers {
 		var newStaker common.Staker
@@ -43,20 +46,20 @@ func StakerCast(stakers []common.StakerTransmit) {
 				newStaker.FirstSeen = time.Unix(firstSeen, 0).UTC()
 
 				// Handle case where clients haven't recorded firstSeen
-				if newStaker.FirstSeen.Unix() == -62135596800 { // default Unix Time
-					newStaker.FirstSeen = newStaker.LastSeen
+				if newStaker.FirstSeen.UTC().Unix() == -62135596800 { // default Unix Time
+					newStaker.FirstSeen = newStaker.LastSeen.UTC()
 				}
 
 				existingStaker, exists := common.StakerSnapShot.Stakers.Load(value.Address)
 
 				if exists {
 					// Keep existing firstSeen value if we've seen this staker before time in list, unless existing firstSeen is default Unix Time
-					if newStaker.FirstSeen.After(existingStaker.(common.Staker).FirstSeen) && existingStaker.(common.Staker).FirstSeen.Unix() != -62135596800 {
-						newStaker.FirstSeen = existingStaker.(common.Staker).FirstSeen
+					if newStaker.FirstSeen.UTC().After(existingStaker.(common.Staker).FirstSeen.UTC()) && existingStaker.(common.Staker).FirstSeen.UTC().Unix() != -62135596800 {
+						newStaker.FirstSeen = existingStaker.(common.Staker).FirstSeen.UTC()
 					}
 					// Keep existing lastSeen value if we've seen this staker after time in list
-					if newStaker.LastSeen.Before(existingStaker.(common.Staker).LastSeen) {
-						newStaker.LastSeen = existingStaker.(common.Staker).LastSeen
+					if newStaker.LastSeen.UTC().Before(existingStaker.(common.Staker).LastSeen.UTC()) {
+						newStaker.LastSeen = existingStaker.(common.Staker).LastSeen.UTC()
 					}
 				}
 				// Update staker list
@@ -74,29 +77,38 @@ func NewStakerSnapshot() *common.StakerSnapshot {
 }
 
 func StakerExists(address common.Address) bool {
-	_, exists := common.StakerSnapShot.Stakers.Load(address)
-	return exists
+	if common.StakerSnapShot != nil {
+		_, exists := common.StakerSnapShot.Stakers.Load(address)
+		return exists
+	}
+	return false
 }
 
 func StakerExpired(address common.Address) bool {
-	stakerData, exists := common.StakerSnapShot.Stakers.Load(address)
-	if exists == true {
-		delta := time.Now().Sub(stakerData.(common.Staker).LastSeen)
-		if delta.Seconds() >= common.StakerTTL {
-			return true
+	if common.StakerSnapShot != nil {
+		stakerData, exists := common.StakerSnapShot.Stakers.Load(address)
+		if exists == true {
+			delta := time.Now().UTC().Sub(stakerData.(common.Staker).LastSeen.UTC())
+			if delta.Seconds() >= common.StakerTTL {
+				return true
+			}
 		}
 	}
 	return false
 }
 
 func DeleteStaker(address common.Address) {
-	common.StakerSnapShot.Stakers.Delete(address)
+	if common.StakerSnapShot != nil {
+		common.StakerSnapShot.Stakers.Delete(address)
+	}
 }
 
 func DeleteExpiredStaker(address common.Address) {
-	expired := StakerExpired(address)
-	if expired {
-		common.StakerSnapShot.Stakers.Delete(address)
+	if common.StakerSnapShot != nil {
+		expired := StakerExpired(address)
+		if expired {
+			common.StakerSnapShot.Stakers.Delete(address)
+		}
 	}
 }
 
@@ -138,8 +150,9 @@ func (api *API) GetActiveStakerList() []common.Address {
 func (api *API) GetStakerSnapshot() *common.StakerSnapshot {
 	if common.StakerSnapShot == nil {
 		common.StakerSnapShot = NewStakerSnapshot()
+	} else {
+		DeleteAllExpiredStakers()
 	}
-	DeleteAllExpiredStakers()
 	return common.StakerSnapShot
 }
 
@@ -156,7 +169,7 @@ func (api *API) GetStakerSnapshotJS() interface{} {
 		})
 
 	return map[string]interface{}{
-		"created": common.StakerSnapShot.Created,
+		"created": common.StakerSnapShot.Created.UTC(),
 		"stakers": stakerList,
 	}
 }
@@ -171,13 +184,13 @@ func (api *API) AddStakerToSnapshot(address common.Address) {
 	existingStaker, exists := common.StakerSnapShot.Stakers.Load(address)
 
 	if exists {
-		staker.FirstSeen = existingStaker.(common.Staker).FirstSeen
+		staker.FirstSeen = existingStaker.(common.Staker).FirstSeen.UTC()
 	}
 
-	if !exists || existingStaker.(common.Staker).FirstSeen.Unix() == -62135596800 { // default Unix Time
-		staker.FirstSeen = staker.LastSeen
+	if !exists || existingStaker.(common.Staker).FirstSeen.UTC().Unix() == -62135596800 { // default Unix Time
+		staker.FirstSeen = staker.LastSeen.UTC()
 	} else {
-		staker.FirstSeen = existingStaker.(common.Staker).FirstSeen
+		staker.FirstSeen = existingStaker.(common.Staker).FirstSeen.UTC()
 	}
 	common.StakerSnapShot.Stakers.Store(address, staker)
 }

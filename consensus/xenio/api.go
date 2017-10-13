@@ -141,9 +141,7 @@ func (api *API) GamesContractVote(address common.Address, vote bool) bool{
 	//vote.Signer = ?
 	_vote.Authorize = vote
 	_vote.VoteType = GamesContract
-	_vote.Address = address
-	//_vote.Block = api.chain.CurrentHeader().Number.Uint64() + 1 // todo
-	//log.Warn("Vote in block: " + strconv.Itoa(int(_vote.Block)))
+	_vote.Address = address // contract address
 	api.xenio.Votes[address] = _vote
 
 	return true
@@ -165,8 +163,8 @@ func (api *API) UsersContractVote(address common.Address, vote bool) bool{
 	//vote.Signer = ?
 	_vote.Authorize = vote
     _vote.VoteType = UsersContract
-    _vote.Address = address
-    //_vote.Block = ? // todo
+    _vote.Address = address // contract address
+    //_vote.Block = ?
 	api.xenio.Votes[address] = _vote
 
 	return true
