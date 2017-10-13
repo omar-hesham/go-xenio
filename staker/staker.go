@@ -114,6 +114,7 @@ func (self *Staker) Start(coinbase common.Address) {
 	atomic.StoreInt32(&self.shouldStart, 1)
 	self.watcher.setEtherbase(coinbase)
 	self.coinbase = coinbase
+	var waitingForPeers bool = false
 
 	if atomic.LoadInt32(&self.canStart) == 0 {
 		log.Info("Network syncing, will start staker afterwards")
@@ -121,16 +122,16 @@ func (self *Staker) Start(coinbase common.Address) {
 	}
 
 	if self.eth.PeerCount() == 0 {
-		log.Info("No peers connected, will start staking when someone connects")
-		return
+		log.Info("No peers connected, will start staking shortly after a peer connects")
+		waitingForPeers = true
+	} else {
+
+		atomic.StoreInt32(&self.staking, 1)
+		log.Info("Starting staking operation")
+
+		self.watcher.start()
+		self.watcher.commitNewWork()
 	}
-
-	atomic.StoreInt32(&self.staking, 1)
-
-	log.Info("Starting staking operation")
-
-	self.watcher.start()
-	self.watcher.commitNewWork()
 
 	wakeChan := time.NewTicker(awakenTime).C
 	stopChan := make(chan struct{})
@@ -143,16 +144,22 @@ func (self *Staker) Start(coinbase common.Address) {
 		//		break
 		//	}
 		case <-wakeChan:
-			if self.staking == 0 {
+			if waitingForPeers && self.eth.PeerCount() > 0 {
+				log.Info("Connected to peers, starting staking operation")
+				atomic.StoreInt32(&self.staking, 1)
+				waitingForPeers = false
+			}
+			if self.staking == 0 && self.shouldStart == 0 {
 				close(stopChan)
 				break
 			}
-			//log.Info("awaking staker")
-			xenio.DeleteAllExpiredStakers()
-			self.watcher.start()
-			self.watcher.commitNewWork()
+			if !waitingForPeers {
+				xenio.DeleteAllExpiredStakers()
+				self.watcher.start()
+				self.watcher.commitNewWork()
+			}
 		case <-stopChan:
-			//log.Info("stoping staker")
+			// log.Info("Stopping staking operation")
 			return
 		}
 	}
@@ -161,6 +168,7 @@ func (self *Staker) Start(coinbase common.Address) {
 
 
 func (self *Staker) Stop() {
+	log.Info("Stopping staking operation")
 	self.watcher.stop()
 	atomic.StoreInt32(&self.staking, 0)
 	atomic.StoreInt32(&self.shouldStart, 0)
