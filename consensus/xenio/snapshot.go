@@ -38,6 +38,7 @@ const (
 	GamesContract VoteType = 1 + iota
 	UsersContract
 	MasterNode
+	BanPeer
 )
 // Vote represents a single vote that an authorized signer made to modify the
 // list of authorizations.

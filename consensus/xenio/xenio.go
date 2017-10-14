@@ -540,6 +540,13 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 		}
 
 	}
+	if len(header.Votes) > 0 {
+		if(signingNode.IsMasterNode){
+			log.Warn("block with votes,discarding votes because module is under development")
+		}else{
+			//hack attempt? maybe ban peer?
+		}
+	}
 	return nil
 }
 
