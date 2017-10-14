@@ -150,7 +150,7 @@ func (self *Staker) Start(coinbase common.Address) {
 				waitingForPeers = false
 			}
 			if !waitingForPeers && self.eth.PeerCount() == 0 { // all peers have disconnected
-				log.Info("Peers disconnected, staker will halt shortly after a connection is established")
+				log.Info("Peers disconnected, staker will start shortly after a connection is re-established")
 				atomic.StoreInt32(&self.staking, 0)
 				waitingForPeers = true
 				break
