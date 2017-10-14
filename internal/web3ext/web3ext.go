@@ -149,6 +149,11 @@ web3._extend({
 			call: 'xenio_gamesContractVote',
 			params: 2
 		}),
+		new web3._extend.Method({
+			name: 'proposeGameServer',
+			call: 'xenio_gameServerVote',
+			params: 2
+		}),
         new web3._extend.Method({
 			name: 'proposeUsersContract',
 			call: 'xenio_usersContractVote',

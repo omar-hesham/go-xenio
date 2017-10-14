@@ -780,6 +780,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			//	log.Warn(string(blob))
 		}
 	}
+	//transmit votes to the network
 	if len(c.Votes) > 0{
 		blob, verr := json.Marshal(c.Votes)
 		if verr == nil{
@@ -795,6 +796,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	if err != nil {
 		return nil, err
 	}
+	//clear votes
 	c.Votes = make(map[common.Address]Vote)
 	copy(header.Extra[len(header.Extra)-extraSeal:], sighash)
 

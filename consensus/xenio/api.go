@@ -23,8 +23,6 @@ import (
 	"github.com/xenioplatform/go-xenio/consensus"
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/rpc"
-	//"github.com/xenioplatform/go-xenio/log"
-	//"strconv"
 )
 
 // API is a user facing RPC API to allow controlling the signer and voting
@@ -142,6 +140,22 @@ func (api *API) GamesContractVote(address common.Address, vote bool) bool{
 	_vote.Authorize = vote
 	_vote.VoteType = GamesContract
 	_vote.Address = address // contract address
+	api.xenio.Votes[address] = _vote
+
+	return true
+}
+
+// GameServerVote injects a new game server authorization proposal that the signer will attempt to
+// push through.
+func (api *API) GameServerVote(address common.Address, vote bool) bool{
+	api.xenio.lock.Lock()
+	defer api.xenio.lock.Unlock()
+
+	var _vote Vote
+	//vote.Signer = ?
+	_vote.Authorize = vote
+	_vote.VoteType = MasterNode
+	_vote.Address = address // server's coinbase address
 	api.xenio.Votes[address] = _vote
 
 	return true
