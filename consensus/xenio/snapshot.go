@@ -331,51 +331,41 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 				//snap.LastSuperBlock =time.Unix(header.Time.Int64(),0)
 			}
 		}
-		if len(header.Votes) > 0{
-			voteData := make(map[string]Vote,0)
-			if err := json.Unmarshal(header.Votes,&voteData); err != nil {
+		if len(header.Votes) > 0 {
+			voteData := make(map[string]Vote, 0)
+			if err := json.Unmarshal(header.Votes, &voteData); err != nil {
 				log.Error(err.Error())
-			}else{
-				for key, node := range voteData{
-					//var ismasternode bool
-					//for _key, _ := range snap.MasterNodes{
-				//		if key == _key{
-				//			ismasternode = true
-				//		}
-				//	}
-				//	if(ismasternode){
-						//node.Block = header.Number.Uint64() // Block number that has the vote
-						snap.NewVotes[key] = node
-						if node.VoteType == GamesContract{
-							snap.GamesContractAddress = node.Address
-							//log.Warn("gamescontractaddress:" + node.Address.String())
-						}else{
-							if node.VoteType == UsersContract{
-								snap.UsersContractAddress = node.Address
+			} else {
+				for _, node := range voteData {
+					switch node.VoteType {
+					case GamesContract:
+						//snap.NewVotes[key] = node
+						snap.GamesContractAddress = node.Address
+					case UsersContract:
+						snap.UsersContractAddress = node.Address
+					case MasterNode:
+						//if(node.IsMasterNode){
+							var votes map[string]Vote
+							if err := json.Unmarshal(header.Votes, &votes); err != nil {
+								log.Error("invalid vote json received")
+							}else {
+								for _, newvote := range votes {
+									h := common.GetMD5Hash(newvote.Address.String() + newvote.Signer.String())
+									snap.NewVotes[h] = newvote
+								}
 							}
-						}
-				//	}else{
-				//		log.Warn("vote originated from non masternode peer discarded")
-				//	}
+					//	}else{
+							//hack attempt? maybe ban peer?
+					//	}
+					}
 				}
 			}
 		}
 	}
+
 	snap.Number += uint64(len(headers))
 	snap.Hash = headers[len(headers)-1].Hash()
 
-	//genesis := chain.GetHeaderByNumber(0)
-	//if err := c.VerifyHeader(chain, genesis, false); err != nil {
-	//	return nil, err
-	//}
-	//signers := make([]common.Address, (len(genesis.Extra)-extraVanity-extraSeal)/common.AddressLength)
-	//for i := 0; i < len(signers); i++ {
-	//	copy(signers[i][:], genesis.Extra[extraVanity+i*common.AddressLength:])
-	//}
-	//snap = updateSigners(snap, nil, snap.Number, nil, snap.MasterNodes)
-
-	//blob,_ := json.Marshal(snap)
-	//log.Warn(string(blob))
 	return snap, nil
 }
 
