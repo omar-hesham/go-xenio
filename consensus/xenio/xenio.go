@@ -215,7 +215,7 @@ type Xenio struct {
 	//gamesContract common.Address // games contract proposal
 	//usersContract common.Address // users contract proposal
 
-	Votes map[common.Address]Vote
+	Votes map[string]Vote
 
 	signer common.Address // Ethereum address of the signing key
 	signFn SignerFn       // Signer function to authorize hashes with
@@ -249,7 +249,7 @@ func New(config *params.XenioConfig, db ethdb.Database) *Xenio {
 		recents:    recents,
 		signatures: signatures,
 		proposals:  make(map[common.Address]bool),
-		Votes:      make(map[common.Address]Vote),
+		Votes:      make(map[string]Vote),
 	}
 }
 
@@ -545,11 +545,11 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 			var votes []Vote
 			if err := json.Unmarshal(header.Votes, &votes); err != nil {
 				log.Error("invalid vote json received")
-
 			}else {
-				//for _, vote := range votes {
-					log.Warn("discarding votes because module is under development")
-				//}
+				for _, newvote := range votes {
+					h := common.GetMD5Hash(newvote.Address.String() + newvote.Signer.String())
+					snap.NewVotes[h] = newvote
+				}
 			}
 		}else{
 			//hack attempt? maybe ban peer?
@@ -801,8 +801,8 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		if verr == nil{
 			header.Votes = blob
 		}else{
-			log.Warn("Votes List:" + verr.Error())
-			c.Votes = make(map[common.Address]Vote)
+			log.Warn("Votes List: " + verr.Error())
+			c.Votes = make(map[string]Vote)
 
 		}
 	}
@@ -812,7 +812,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		return nil, err
 	}
 	//clear votes
-	c.Votes = make(map[common.Address]Vote)
+	c.Votes = make(map[string]Vote)
 	copy(header.Extra[len(header.Extra)-extraSeal:], sighash)
 
 	return block.WithSeal(header), nil

@@ -29,6 +29,7 @@ import (
 
 	"github.com/xenioplatform/go-xenio/common/hexutil"
 	"github.com/xenioplatform/go-xenio/crypto/sha3"
+	"crypto/md5"
 )
 
 const (
@@ -104,7 +105,11 @@ func (h *Hash) SetBytes(b []byte) {
 
 	copy(h[HashLength-len(b):], b)
 }
-
+func GetMD5Hash(text string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(text))
+	return hex.EncodeToString(hasher.Sum(nil))
+}
 // Set string `s` to h. If s is larger than len(h) s will be cropped (from left) to fit.
 func (h *Hash) SetString(s string) { h.SetBytes([]byte(s)) }
 

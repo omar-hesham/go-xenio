@@ -103,13 +103,13 @@ func (api *API) Proposals() map[common.Address]bool {
 }
 
 // Proposals returns the current proposals the node tries to uphold and vote on.
-func (api *API) Votes() map[common.Address]Vote {
+func (api *API) Votes() map[string]Vote {
 	api.xenio.lock.RLock()
 	defer api.xenio.lock.RUnlock()
 
-	votes := make(map[common.Address]Vote)
-	for address, vt := range api.xenio.Votes {
-		votes[address] = vt
+	votes := make(map[string]Vote)
+	for str, vt := range api.xenio.Votes {
+		votes[str] = vt
 	}
 	return votes
 }
@@ -140,7 +140,7 @@ func (api *API) GamesContractVote(address common.Address, vote bool) bool{
 	_vote.Authorize = vote
 	_vote.VoteType = GamesContract
 	_vote.Address = address // contract address
-	api.xenio.Votes[address] = _vote
+	api.xenio.Votes[address.String()] = _vote
 
 	return true
 }
@@ -150,13 +150,13 @@ func (api *API) GamesContractVote(address common.Address, vote bool) bool{
 func (api *API) GameServerVote(address common.Address, vote bool) bool{
 	api.xenio.lock.Lock()
 	defer api.xenio.lock.Unlock()
-
 	var _vote Vote
-	//vote.Signer = ?
+	_vote.Signer = api.xenio.signer
 	_vote.Authorize = vote
 	_vote.VoteType = MasterNode
 	_vote.Address = address // server's coinbase address
-	api.xenio.Votes[address] = _vote
+	vhash := common.GetMD5Hash(_vote.Address.String() + _vote.Signer.String())
+	api.xenio.Votes[vhash] = _vote
 
 	return true
 }
@@ -179,7 +179,7 @@ func (api *API) UsersContractVote(address common.Address, vote bool) bool{
     _vote.VoteType = UsersContract
     _vote.Address = address // contract address
     //_vote.Block = ?
-	api.xenio.Votes[address] = _vote
+	api.xenio.Votes[address.String()] = _vote
 
 	return true
 }

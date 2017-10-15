@@ -68,7 +68,7 @@ type Snapshot struct {
 	StakingNodes                                         map[common.Address]Signer   `json:"stakingnodes"`          // Set of normal signers
 	Recents                                              map[uint64]common.Address   `json:"recents"`               // Set of recent signers for spam protections
 	Votes                                                []*Vote                     `json:"votes"`                 // List of votes cast in chronological order
-	NewVotes                                             map[common.Address]Vote     `json:"newvotes"`                 // List of votes cast in chronological order
+	NewVotes                                             map[string]Vote             `json:"newvotes"`                 // List of votes cast in chronological order
 	Tally                                                map[common.Address]Tally    `json:"tally"`                 // Current vote tally to avoid recalculating
 	GamesContractAddress                                 common.Address              `json:"gamescontractaddress"`  // Address of the games contract
 	UsersContractAddress                                 common.Address              `json:"userscontractaddress"` // Address of the users contract
@@ -93,7 +93,7 @@ func newSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, number uint
 		StakingNodes: make(map[common.Address]Signer),
 		Recents:      make(map[uint64]common.Address),
 		Tally:        make(map[common.Address]Tally),
-		NewVotes:     make(map[common.Address]Vote),
+		NewVotes:     make(map[string]Vote),
 	}
 	var newSigner Signer
 	for i, signer := range signers {
@@ -142,7 +142,7 @@ func (s *Snapshot) copy() *Snapshot {
 		StakingNodes: make(map[common.Address]Signer),
 		Recents:      make(map[uint64]common.Address),
 		Votes:        make([]*Vote, len(s.Votes)),
-		NewVotes:     make(map[common.Address]Vote),
+		NewVotes:     make(map[string]Vote),
 		Tally:        make(map[common.Address]Tally),
 	}
 	for address, signerData := range s.MasterNodes {
@@ -332,7 +332,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 			}
 		}
 		if len(header.Votes) > 0{
-			voteData := make(map[common.Address]Vote,0)
+			voteData := make(map[string]Vote,0)
 			if err := json.Unmarshal(header.Votes,&voteData); err != nil {
 				log.Error(err.Error())
 			}else{
