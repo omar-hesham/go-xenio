@@ -23,6 +23,7 @@ import (
 	"github.com/xenioplatform/go-xenio/consensus"
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/rpc"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 // API is a user facing RPC API to allow controlling the signer and voting
@@ -148,6 +149,11 @@ func (api *API) GamesContractVote(address common.Address, vote bool) bool{
 // GameServerVote injects a new game server authorization proposal that the signer will attempt to
 // push through.
 func (api *API) GameServerVote(address common.Address, vote bool) bool{
+	var ca common.Address
+	if api.xenio.signer == ca{
+		log.Error("coinbase not parsed, check if staker is active")
+		return false
+	}
 	api.xenio.lock.Lock()
 	defer api.xenio.lock.Unlock()
 	var _vote Vote
