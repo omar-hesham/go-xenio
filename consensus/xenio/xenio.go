@@ -543,23 +543,17 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 	if len(header.Votes) > 0 {
 		if(signingNode.IsMasterNode){
 			var votes map[string]Vote
-			log.Warn("1")
 			if err := json.Unmarshal(header.Votes, &votes); err != nil {
 				log.Error("invalid vote json received")
 			}else {
-				log.Warn("2")
 				for _, newvote := range votes {
-					log.Warn("2a")
 					h := common.GetMD5Hash(newvote.Address.String() + newvote.Signer.String())
 					snap.NewVotes[h] = newvote
 				}
 			}
 		}else{
-			log.Warn("3")
 			//hack attempt? maybe ban peer?
 		}
-	}else{
-		log.Warn("no vote")
 	}
 	return nil
 }
