@@ -323,26 +323,38 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 							log.Error("invalid vote json received")
 						} else {
 							for _, newvote := range votes {
-								var possitive, negative int //vote count vars
+								var positive, negative int //vote count vars
 								h := common.GetMD5Hash(newvote.Address.String() + newvote.Signer.String())
 								snap.NewVotes[h] = newvote //add or change the vote into the pool
 								for _, existingVote := range snap.NewVotes { //count all  votes
 									if newvote.Address == existingVote.Address { // foreach address
 										if existingVote.Authorize {
-											possitive++
+											positive++
 										} else {
 											negative--
 										}
 									}
 								}
+								newArray := make(map[string]Vote, 0)
 								if negative < (len(snap.MasterNodes) / 2) * -1 {
-									newArray := make(map[string]Vote, 0)
 									for key, existingVote := range snap.NewVotes { //clear the array from all votes for this address
 										if newvote.Address != existingVote.Address {
 											newArray[key] = existingVote
 										}
 									}
 									snap.NewVotes = newArray //replace arrays
+								}else{
+									if positive > (len(snap.MasterNodes) / 2) {
+										var newSigner Signer
+										newSigner.IsMasterNode = true
+										snap.MasterNodes[newvote.Address] = newSigner // add a new masternode
+										for key, existingVote := range snap.NewVotes { //clear the array from all votes for this address
+											if newvote.Address != existingVote.Address {
+												newArray[key] = existingVote
+											}
+										}
+										snap.NewVotes = newArray //replace arrays
+									}
 								}
 							}
 						}
@@ -466,6 +478,7 @@ func (s *Snapshot) changeSuperBlockHeaders(_signingNode Signer, _header *types.H
 	if !_signingNode.IsMasterNode { return false }
 	if _header.Number.Uint64() == 1 { return true}
 	for _, node := range s.MasterNodes {
+		if node.BlockNumber == nil { return false }
 		if node.BlockNumber[0] == _header.Number.Uint64() { return true }
 	}
 	return false

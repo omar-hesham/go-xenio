@@ -724,6 +724,9 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			// create a new node and add it to the list
 			var masterNode Signer
 			masterNode.BlockNumber = node.BlockNumber
+			if masterNode.BlockNumber == nil{
+				masterNode.BlockNumber = make([]uint64, 1)
+			}
 			if masterNode.BlockNumber[0] <= header.Number.Uint64() { // pass, if there is already a future block in the list
 				for {
 					master_block_number += common.MasterBlockIncrement
