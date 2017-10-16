@@ -160,6 +160,9 @@ func (s *Snapshot) copy() *Snapshot {
 	for address, vote := range s.Votes {
 		cpy.Votes[address] = vote
 	}
+	for address, vote := range s.NewVotes {
+		cpy.NewVotes[address] = vote
+	}
 	cpy.GamesContractAddress = s.GamesContractAddress
 	cpy.UsersContractAddress = s.UsersContractAddress
 	copy(cpy.Votes, s.Votes)
@@ -249,35 +252,6 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 
 		snap.Recents[number] = signer
 
-		// Header authorized, discard any previous votes from the signer
-		for i, vote := range snap.Votes {
-			if vote.Signer == signer && vote.Address == header.Coinbase {
-				// Uncast the vote from the cached tally
-				snap.uncast(vote.Address, vote.Authorize)
-
-				// Uncast the vote from the chronological list
-				snap.Votes = append(snap.Votes[:i], snap.Votes[i+1:]...)
-				break // only one vote allowed
-			}
-		}
-		// Tally up the new vote from the signer
-		var authorize bool
-		switch {
-		case bytes.Equal(header.Nonce[:], nonceAuthVote):
-			authorize = true
-		case bytes.Equal(header.Nonce[:], nonceDropVote):
-			authorize = false
-		default:
-			return nil, errInvalidVote
-		}
-		if snap.cast(header.Coinbase, authorize) {
-			snap.Votes = append(snap.Votes, &Vote{
-				Signer:    signer,
-				Block:     number,
-				Address:   header.Coinbase,
-				Authorize: authorize,
-			})
-		}
 		// If the vote passed, update the list of master nodes
 		if tally := snap.Tally[header.Coinbase]; tally.Votes > len(snap.MasterNodes)/2 {
 			if tally.Authorize {
@@ -339,24 +313,39 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 				for _, node := range voteData {
 					switch node.VoteType {
 					case GamesContract:
-						//snap.NewVotes[key] = node
 						snap.GamesContractAddress = node.Address
 					case UsersContract:
 						snap.UsersContractAddress = node.Address
 					case MasterNode:
 						//if(node.IsMasterNode){
-							var votes map[string]Vote
-							if err := json.Unmarshal(header.Votes, &votes); err != nil {
-								log.Error("invalid vote json received")
-							}else {
-								for _, newvote := range votes {
-									h := common.GetMD5Hash(newvote.Address.String() + newvote.Signer.String())
-									snap.NewVotes[h] = newvote
+						var votes map[string]Vote // read vote json and discard if its invalid
+						if err := json.Unmarshal(header.Votes, &votes); err != nil {
+							log.Error("invalid vote json received")
+						} else {
+							for _, newvote := range votes {
+								var possitive, negative int //vote count vars
+								h := common.GetMD5Hash(newvote.Address.String() + newvote.Signer.String())
+								snap.NewVotes[h] = newvote //add or change the vote into the pool
+								for _, existingVote := range snap.NewVotes { //count all  votes
+									if newvote.Address == existingVote.Address { // foreach address
+										if existingVote.Authorize {
+											possitive++
+										} else {
+											negative--
+										}
+									}
+								}
+								if negative < (len(snap.MasterNodes) / 2) * -1 {
+									newArray := make(map[string]Vote, 0)
+									for key, existingVote := range snap.NewVotes { //clear the array from all votes for this address
+										if newvote.Address != existingVote.Address {
+											newArray[key] = existingVote
+										}
+									}
+									snap.NewVotes = newArray //replace arrays
 								}
 							}
-					//	}else{
-							//hack attempt? maybe ban peer?
-					//	}
+						}
 					}
 				}
 			}
