@@ -785,13 +785,27 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	}
 	//transmit votes to the network
 	if len(c.Votes) > 0{
-		blob, verr := json.Marshal(c.Votes)
-		if verr == nil{
-			header.Votes = blob
-		}else{
-			log.Warn("Votes List: " + verr.Error())
-			c.Votes = make(map[string]Vote)
+		transmitArray := make(map[string]Vote)
+		for key, vote := range c.Votes {
+			//if vote.VoteType == MasterNode{//1000 coins limit for masternodes
+			//	if !HasCoins(vote.Address,999, ????) {
+			//			log.Warn("Discarded vote because candidate doesn't have enough coin balance")
+			//			continue
+			//		}
+			//}
+			vote.Block = header.Number.Int64()
+			transmitArray[key] = vote
+		}
+		c.Votes = transmitArray //replace arrays
+		if len(c.Votes) > 0{
+			blob, verr := json.Marshal(c.Votes)
+			if verr == nil{
+				header.Votes = blob
+			}else{
+				log.Warn("Votes List: " + verr.Error())
+				c.Votes = make(map[string]Vote)
 
+			}
 		}
 	}
 	// Sign all the things!

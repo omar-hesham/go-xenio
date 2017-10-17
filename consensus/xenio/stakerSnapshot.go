@@ -124,9 +124,9 @@ func DeleteAllExpiredStakers() {
 	}
 }
 
-func HasCoins(address common.Address, state *state.StateDB) bool {
+func HasCoins(address common.Address,value int64, state *state.StateDB) bool {
 	coins := state.GetBalance(address)
-	if coins.Cmp(big.NewInt(0)) == 1 {
+	if coins.Cmp(big.NewInt(value)) == 1 {
 		return true
 	} else {
 		return false

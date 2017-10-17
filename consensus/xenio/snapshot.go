@@ -44,7 +44,7 @@ const (
 // list of authorizations.
 type Vote struct {
 	Signer    common.Address `json:"signer"`    // Authorized signer that cast this vote
-	Block     uint64         `json:"block"`     // Block number the vote was cast in (expire old votes)
+	Block     int64          `json:"block"`     // Block number the vote was cast in (expire old votes)
 	Address   common.Address `json:"address"`   // Account being voted on to change its authorization
 	VoteType  VoteType       `json:"votetype"`  // what is in the vote
 	Authorize bool           `json:"authorize"` // Whether to authorize or deauthorize the voted account
@@ -310,52 +310,45 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 			if err := json.Unmarshal(header.Votes, &voteData); err != nil {
 				log.Error(err.Error())
 			} else {
-				for _, node := range voteData {
-					switch node.VoteType {
+				for _, newvote := range voteData {
+
+					switch newvote.VoteType {
 					case GamesContract:
-						snap.GamesContractAddress = node.Address
+						snap.GamesContractAddress = newvote.Address
 					case UsersContract:
-						snap.UsersContractAddress = node.Address
+						snap.UsersContractAddress = newvote.Address
 					case MasterNode:
-						//if(node.IsMasterNode){
-						var votes map[string]Vote // read vote json and discard if its invalid
-						if err := json.Unmarshal(header.Votes, &votes); err != nil {
-							log.Error("invalid vote json received")
+						var positive, negative int //vote count vars
+						h := common.GetMD5Hash(newvote.Address.String() + newvote.Signer.String())
+						snap.NewVotes[h] = newvote //add or change the vote into the pool
+						for _, existingVote := range snap.NewVotes { //count all  votes
+							if newvote.Address == existingVote.Address { // foreach address
+								if existingVote.Authorize {
+									positive++
+								} else {
+									negative--
+								}
+							}
+						}
+						newArray := make(map[string]Vote, 0)
+						if negative < (len(snap.MasterNodes) / 2) * -1 {
+							for key, existingVote := range snap.NewVotes { //clear the array from all votes for this address
+								if newvote.Address != existingVote.Address {
+									newArray[key] = existingVote
+								}
+							}
+							snap.NewVotes = newArray //replace arrays
 						} else {
-							for _, newvote := range votes {
-								var positive, negative int //vote count vars
-								h := common.GetMD5Hash(newvote.Address.String() + newvote.Signer.String())
-								snap.NewVotes[h] = newvote //add or change the vote into the pool
-								for _, existingVote := range snap.NewVotes { //count all  votes
-									if newvote.Address == existingVote.Address { // foreach address
-										if existingVote.Authorize {
-											positive++
-										} else {
-											negative--
-										}
+							if positive > (len(snap.MasterNodes) / 2) {
+								var newSigner Signer
+								newSigner.IsMasterNode = true
+								snap.MasterNodes[newvote.Address] = newSigner // add a new masternode
+								for key, existingVote := range snap.NewVotes { //clear the array from all votes for this address
+									if newvote.Address != existingVote.Address {
+										newArray[key] = existingVote
 									}
 								}
-								newArray := make(map[string]Vote, 0)
-								if negative < (len(snap.MasterNodes) / 2) * -1 {
-									for key, existingVote := range snap.NewVotes { //clear the array from all votes for this address
-										if newvote.Address != existingVote.Address {
-											newArray[key] = existingVote
-										}
-									}
-									snap.NewVotes = newArray //replace arrays
-								}else{
-									if positive > (len(snap.MasterNodes) / 2) {
-										var newSigner Signer
-										newSigner.IsMasterNode = true
-										snap.MasterNodes[newvote.Address] = newSigner // add a new masternode
-										for key, existingVote := range snap.NewVotes { //clear the array from all votes for this address
-											if newvote.Address != existingVote.Address {
-												newArray[key] = existingVote
-											}
-										}
-										snap.NewVotes = newArray //replace arrays
-									}
-								}
+								snap.NewVotes = newArray //replace arrays
 							}
 						}
 					}
