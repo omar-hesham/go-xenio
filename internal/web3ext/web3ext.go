@@ -200,6 +200,11 @@ web3._extend({
 			call: 'xenio_getXNOUsersABI',
 			params: 0
 		}),
+			new web3._extend.Method({
+			name: 'getCompletedTransactions',
+			call: 'xenio_getCompletedTransactions',
+			params: 1
+	}),
   ],
 	properties:
 	[

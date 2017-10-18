@@ -215,3 +215,24 @@ func (api *API) GetRewardsList(number *rpc.BlockNumber) ([]common.Address, error
 
 	return header.RewardList, nil
 }
+
+func (api *API) GetCompletedTransactions(address common.Address) interface{} {
+	header := api.chain.CurrentHeader()
+
+	completedTxs := make([]*types.Transaction, 0)
+
+	for n := uint64(1); n <= header.Number.Uint64(); n++ {
+		h := api.chain.GetHeaderByNumber(n)
+		b := api.chain.GetBlock(h.Hash(), n)
+
+		txs := b.Transactions()
+		for t := range txs {
+			to := txs[t].To()
+			if to != nil && *to == address {
+				completedTxs = append(completedTxs, txs[t])
+			}
+		}
+	}
+
+	return completedTxs
+}
