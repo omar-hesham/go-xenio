@@ -798,6 +798,32 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			//	log.Warn(string(blob))
 		}
 	}
+	//see whats for voting and autocast our vote
+	if len(snap.NewVotes) > 0{
+		for hash, vote := range snap.NewVotes {
+			if vote.VoteType == MasterNode{
+				if !signingNode.IsMasterNode { continue }
+				ourhash := common.GetMD5Hash(vote.Address.String() + signer.String())// to see if the vote is ours
+				if ourhash == hash {
+					log.Warn("already voted") //TODO: remove that message
+					continue
+				}
+				var newVote Vote
+				newVote.VoteType = MasterNode
+				if HasCoins(vote.Address, requiredCoins, currentState) {
+					log.Warn("automated upvote for a gameserver")
+					newVote.Authorize = true
+
+				}else{
+					log.Warn("automated downvote for a gameserver")
+					newVote.Authorize = false
+				}
+				c.Votes[ourhash] = newVote
+			}
+		}
+	}
+
+
 	//transmit votes to the network
 	if len(c.Votes) > 0 && currentState != nil {
 		transmitArray := make(map[string]Vote)
@@ -828,6 +854,8 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			}
 		}
 	}
+
+
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
 	if err != nil {
