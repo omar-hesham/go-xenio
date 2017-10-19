@@ -806,7 +806,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 					continue
 				}
 				//1000 coins limit for masternodes
-				if !HasCoins(vote.Address,999, currentState) {
+				if !HasCoins(vote.Address,1000000000000000000000, currentState) { //value is wei
 						log.Warn("Discarded vote because candidate doesn't have enough coin balance")
 						continue
 					}
