@@ -817,6 +817,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 					log.Warn("automated downvote for a gameserver")
 					newVote.Authorize = false
 				}
+				newVote.Address = vote.Address
 				c.Votes[ourhash] = newVote
 			}
 		}
