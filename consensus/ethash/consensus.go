@@ -41,6 +41,7 @@ var (
 	frontierBlockReward  *big.Int = big.NewInt(5e+18) // Block reward in wei for successfully mining a block
 	byzantiumBlockReward *big.Int = big.NewInt(3e+18) // Block reward in wei for successfully mining a block upward from Byzantium
 	maxUncles                     = 2                 // Maximum number of uncles allowed in a single block
+	currentState *state.StateDB
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -549,4 +550,8 @@ func AccumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 		reward.Add(reward, r)
 	}
 	state.AddBalance(header.Coinbase, reward)
+}
+
+func (ethash *Ethash) State(state *state.StateDB) {
+	currentState = state
 }

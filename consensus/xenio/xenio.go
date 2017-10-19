@@ -74,6 +74,8 @@ var (
 	blockReward *big.Int = big.NewInt(0) // big.NewInt(5e+18)
 	big8  = big.NewInt(8)
 	big32 = big.NewInt(32)
+
+	currentState *state.StateDB
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -795,7 +797,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		}
 	}
 	//transmit votes to the network
-	if len(c.Votes) > 0{
+	if len(c.Votes) > 0 && currentState != nil {
 		transmitArray := make(map[string]Vote)
 		for key, vote := range c.Votes {
 			if vote.VoteType == MasterNode{
@@ -803,11 +805,11 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 					log.Warn("Discarded vote because normal peers are not allowed to vote for game servers")
 					continue
 				}
-			//1000 coins limit for masternodes
-			//	if !HasCoins(vote.Address,999, ????) {
-			//			log.Warn("Discarded vote because candidate doesn't have enough coin balance")
-			//			continue
-			//		}
+				//1000 coins limit for masternodes
+				if !HasCoins(vote.Address,999, currentState) {
+						log.Warn("Discarded vote because candidate doesn't have enough coin balance")
+						continue
+					}
 			}
 			vote.Block = header.Number.Int64()
 			transmitArray[key] = vote
@@ -845,6 +847,10 @@ func (c *Xenio) APIs(chain consensus.ChainReader) []rpc.API {
 		Service:   &API{chain: chain, xenio: c},
 		Public:    false,
 	}}
+}
+
+func (c *Xenio) State(state *state.StateDB) {
+	currentState = state
 }
 
 func AccumulateRewards(state *state.StateDB, header *types.Header, txs []*types.Transaction, uncles []*types.Header) {
