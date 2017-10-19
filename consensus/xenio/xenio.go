@@ -805,7 +805,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 				if !signingNode.IsMasterNode { continue }
 				ourhash := common.GetMD5Hash(vote.Address.String() + signer.String())// to see if the vote is ours
 				if ourhash == hash {
-					log.Warn("already voted") //TODO: remove that message
 					continue
 				}
 				var newVote Vote
