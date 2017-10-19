@@ -52,6 +52,8 @@ const (
 
 	wiggleTime = time.Minute // delay
 	noiseScalingFactor = 0.1 // scale of noise
+
+	requiredCoins = 1000 // Voter must hold at least this amount of coins in order to be eligible to vote
 )
 
 // Clique proof-of-authority protocol constants.
@@ -800,26 +802,26 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	if len(c.Votes) > 0 && currentState != nil {
 		transmitArray := make(map[string]Vote)
 		for key, vote := range c.Votes {
-			if vote.VoteType == MasterNode{
-				if !signingNode.IsMasterNode{
+			if vote.VoteType == MasterNode {
+				if !signingNode.IsMasterNode {
 					log.Warn("Discarded vote because normal peers are not allowed to vote for game servers")
 					continue
 				}
 				//1000 coins limit for masternodes
-				if !HasCoins(vote.Address,1000000000000000000000, currentState) { //value is wei
-						log.Warn("Discarded vote because candidate doesn't have enough coin balance")
-						continue
-					}
+				if !HasCoins(vote.Address, requiredCoins, currentState) {
+					log.Warn("Discarded vote because candidate doesn't have enough coin balance")
+					continue
+				}
 			}
 			vote.Block = header.Number.Int64()
 			transmitArray[key] = vote
 		}
 		c.Votes = transmitArray //replace arrays
-		if len(c.Votes) > 0{
+		if len(c.Votes) > 0 {
 			blob, verr := json.Marshal(c.Votes)
-			if verr == nil{
+			if verr == nil {
 				header.Votes = blob
-			}else{
+			} else {
 				log.Warn("Votes List: " + verr.Error())
 				c.Votes = make(map[string]Vote)
 

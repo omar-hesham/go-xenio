@@ -124,9 +124,15 @@ func DeleteAllExpiredStakers() {
 	}
 }
 
-func HasCoins(address common.Address,value int64, state *state.StateDB) bool {
+func HasCoins(address common.Address, value int64, state *state.StateDB) bool {
 	coins := state.GetBalance(address)
-	if coins.Cmp(big.NewInt(value)) == 1 {
+
+	//convert value (XNO) to wei
+	bigValue := big.NewInt(value-1)
+	bigWeis := big.NewInt(0).SetUint64(1000000000000000000)
+	bigValue.Mul(bigValue, bigWeis)
+
+	if coins.Cmp(bigValue) == 1 {
 		return true
 	} else {
 		return false
