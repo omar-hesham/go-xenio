@@ -23,8 +23,7 @@ import (
 	"github.com/xenioplatform/go-xenio/consensus"
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/rpc"
-	//"github.com/xenioplatform/go-xenio/log"
-	//"strconv"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 // API is a user facing RPC API to allow controlling the signer and voting
@@ -105,13 +104,13 @@ func (api *API) Proposals() map[common.Address]bool {
 }
 
 // Proposals returns the current proposals the node tries to uphold and vote on.
-func (api *API) Votes() map[common.Address]Vote {
+func (api *API) Votes() map[string]Vote {
 	api.xenio.lock.RLock()
 	defer api.xenio.lock.RUnlock()
 
-	votes := make(map[common.Address]Vote)
-	for address, vt := range api.xenio.Votes {
-		votes[address] = vt
+	votes := make(map[string]Vote)
+	for str, vt := range api.xenio.Votes {
+		votes[str] = vt
 	}
 	return votes
 }
@@ -142,7 +141,28 @@ func (api *API) GamesContractVote(address common.Address, vote bool) bool{
 	_vote.Authorize = vote
 	_vote.VoteType = GamesContract
 	_vote.Address = address // contract address
-	api.xenio.Votes[address] = _vote
+	api.xenio.Votes[address.String()] = _vote
+
+	return true
+}
+
+// GameServerVote injects a new game server authorization proposal that the signer will attempt to
+// push through.
+func (api *API) GameServerVote(address common.Address, vote bool) bool{
+	var ca common.Address
+	if api.xenio.signer == ca{
+		log.Error("coinbase not parsed, check if staker is active")
+		return false
+	}
+	api.xenio.lock.Lock()
+	defer api.xenio.lock.Unlock()
+	var _vote Vote
+	_vote.Signer = api.xenio.signer
+	_vote.Authorize = vote
+	_vote.VoteType = MasterNode
+	_vote.Address = address // server's coinbase address
+	vhash := common.GetMD5Hash(_vote.Address.String() + _vote.Signer.String())
+	api.xenio.Votes[vhash] = _vote
 
 	return true
 }
@@ -165,7 +185,7 @@ func (api *API) UsersContractVote(address common.Address, vote bool) bool{
     _vote.VoteType = UsersContract
     _vote.Address = address // contract address
     //_vote.Block = ?
-	api.xenio.Votes[address] = _vote
+	api.xenio.Votes[address.String()] = _vote
 
 	return true
 }
@@ -194,4 +214,25 @@ func (api *API) GetRewardsList(number *rpc.BlockNumber) ([]common.Address, error
 	}
 
 	return header.RewardList, nil
+}
+
+func (api *API) GetCompletedTransactions(address common.Address) interface{} {
+	header := api.chain.CurrentHeader()
+
+	completedTxs := make([]*types.Transaction, 0)
+
+	for n := uint64(1); n <= header.Number.Uint64(); n++ {
+		h := api.chain.GetHeaderByNumber(n)
+		b := api.chain.GetBlock(h.Hash(), n)
+
+		txs := b.Transactions()
+		for t := range txs {
+			to := txs[t].To()
+			if to != nil && *to == address {
+				completedTxs = append(completedTxs, txs[t])
+			}
+		}
+	}
+
+	return completedTxs
 }

@@ -149,11 +149,17 @@ func (self *Staker) Start(coinbase common.Address) {
 				atomic.StoreInt32(&self.staking, 1)
 				waitingForPeers = false
 			}
-			if self.staking == 0 && self.shouldStart == 0 {
+			if !waitingForPeers && self.eth.PeerCount() == 0 { // all peers have disconnected
+				log.Info("Peers disconnected, staker will start shortly after a connection is re-established")
+				atomic.StoreInt32(&self.staking, 0)
+				waitingForPeers = true
+				break
+			}
+			if self.staking == 0 && self.shouldStart == 0 { // user stopped the staker
 				close(stopChan)
 				break
 			}
-			if !waitingForPeers {
+			if !waitingForPeers && self.eth.PeerCount() > 0 {
 				xenio.DeleteAllExpiredStakers()
 				self.watcher.start()
 				self.watcher.commitNewWork()

@@ -52,6 +52,8 @@ const (
 
 	wiggleTime = time.Minute // delay
 	noiseScalingFactor = 0.1 // scale of noise
+
+	requiredCoins = 1000 // Voter must hold at least this amount of coins in order to be eligible to vote
 )
 
 // Clique proof-of-authority protocol constants.
@@ -74,6 +76,8 @@ var (
 	blockReward *big.Int = big.NewInt(0) // big.NewInt(5e+18)
 	big8  = big.NewInt(8)
 	big32 = big.NewInt(32)
+
+	currentState *state.StateDB
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -138,6 +142,10 @@ var (
 	errOutOfTurn = errors.New("invalid turn")
 
 	errMasterNodesTurn = errors.New("normal peer cannot mint in master-nodes block number")
+
+	errInvalidVoteJSON = errors.New("cannot read vote stream")
+
+
 )
 
 // SignerFn is a signer callback function to request a hash to be signed by a
@@ -215,7 +223,7 @@ type Xenio struct {
 	//gamesContract common.Address // games contract proposal
 	//usersContract common.Address // users contract proposal
 
-	Votes map[common.Address]Vote
+	Votes map[string]Vote
 
 	signer common.Address // Ethereum address of the signing key
 	signFn SignerFn       // Signer function to authorize hashes with
@@ -249,7 +257,7 @@ func New(config *params.XenioConfig, db ethdb.Database) *Xenio {
 		recents:    recents,
 		signatures: signatures,
 		proposals:  make(map[common.Address]bool),
-		Votes:      make(map[common.Address]Vote),
+		Votes:      make(map[string]Vote),
 	}
 }
 
@@ -540,6 +548,13 @@ func (c *Xenio) verifySeal(chain consensus.ChainReader, header *types.Header, pa
 		}
 
 	}
+	//verify vote stream
+	if len(header.Votes) > 0{
+		voteData := make(map[string]Vote, 0)
+		if err := json.Unmarshal(header.Votes, &voteData); err != nil {
+			return errInvalidVoteJSON
+		}
+	}
 	return nil
 }
 
@@ -724,6 +739,9 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			// create a new node and add it to the list
 			var masterNode Signer
 			masterNode.BlockNumber = node.BlockNumber
+			if masterNode.BlockNumber == nil{
+				masterNode.BlockNumber = make([]uint64, 1)
+			}
 			if masterNode.BlockNumber[0] <= header.Number.Uint64() { // pass, if there is already a future block in the list
 				for {
 					master_block_number += common.MasterBlockIncrement
@@ -780,14 +798,34 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			//	log.Warn(string(blob))
 		}
 	}
-	if len(c.Votes) > 0{
-		blob, verr := json.Marshal(c.Votes)
-		if verr == nil{
-			header.Votes = blob
-		}else{
-			log.Warn("Votes List:" + verr.Error())
-			c.Votes = make(map[common.Address]Vote)
+	//transmit votes to the network
+	if len(c.Votes) > 0 && currentState != nil {
+		transmitArray := make(map[string]Vote)
+		for key, vote := range c.Votes {
+			if vote.VoteType == MasterNode {
+				if !signingNode.IsMasterNode {
+					log.Warn("Discarded vote because normal peers are not allowed to vote for game servers")
+					continue
+				}
+				//1000 coins limit for masternodes
+				if !HasCoins(vote.Address, requiredCoins, currentState) {
+					log.Warn("Discarded vote because candidate doesn't have enough coin balance")
+					continue
+				}
+			}
+			vote.Block = header.Number.Int64()
+			transmitArray[key] = vote
+		}
+		c.Votes = transmitArray //replace arrays
+		if len(c.Votes) > 0 {
+			blob, verr := json.Marshal(c.Votes)
+			if verr == nil {
+				header.Votes = blob
+			} else {
+				log.Warn("Votes List: " + verr.Error())
+				c.Votes = make(map[string]Vote)
 
+			}
 		}
 	}
 	// Sign all the things!
@@ -795,7 +833,8 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	if err != nil {
 		return nil, err
 	}
-	c.Votes = make(map[common.Address]Vote)
+	//clear votes
+	c.Votes = make(map[string]Vote)
 	copy(header.Extra[len(header.Extra)-extraSeal:], sighash)
 
 	return block.WithSeal(header), nil
@@ -810,6 +849,10 @@ func (c *Xenio) APIs(chain consensus.ChainReader) []rpc.API {
 		Service:   &API{chain: chain, xenio: c},
 		Public:    false,
 	}}
+}
+
+func (c *Xenio) State(state *state.StateDB) {
+	currentState = state
 }
 
 func AccumulateRewards(state *state.StateDB, header *types.Header, txs []*types.Transaction, uncles []*types.Header) {

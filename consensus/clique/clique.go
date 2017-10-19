@@ -66,6 +66,8 @@ var (
 
 	diffInTurn = big.NewInt(2) // Block difficulty for in-turn signatures
 	diffNoTurn = big.NewInt(1) // Block difficulty for out-of-turn signatures
+
+	currentState *state.StateDB
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -655,4 +657,8 @@ func (c *Clique) APIs(chain consensus.ChainReader) []rpc.API {
 		Service:   &API{chain: chain, clique: c},
 		Public:    false,
 	}}
+}
+
+func (c *Clique) State(state *state.StateDB) {
+	currentState = state
 }

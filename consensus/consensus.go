@@ -91,6 +91,9 @@ type Engine interface {
 	// seal place on top.
 	Seal(chain ChainReader, block *types.Block, stop <-chan struct{}) (*types.Block, error)
 
+	// State is used to give the current state to the package
+	State(state *state.StateDB)
+
 	// APIs returns the RPC APIs this consensus engine provides.
 	APIs(chain ChainReader) []rpc.API
 }

@@ -38,12 +38,13 @@ const (
 	GamesContract VoteType = 1 + iota
 	UsersContract
 	MasterNode
+	BanPeer
 )
 // Vote represents a single vote that an authorized signer made to modify the
 // list of authorizations.
 type Vote struct {
 	Signer    common.Address `json:"signer"`    // Authorized signer that cast this vote
-	Block     uint64         `json:"block"`     // Block number the vote was cast in (expire old votes)
+	Block     int64          `json:"block"`     // Block number the vote was cast in (expire old votes)
 	Address   common.Address `json:"address"`   // Account being voted on to change its authorization
 	VoteType  VoteType       `json:"votetype"`  // what is in the vote
 	Authorize bool           `json:"authorize"` // Whether to authorize or deauthorize the voted account
@@ -67,7 +68,7 @@ type Snapshot struct {
 	StakingNodes                                         map[common.Address]Signer   `json:"stakingnodes"`          // Set of normal signers
 	Recents                                              map[uint64]common.Address   `json:"recents"`               // Set of recent signers for spam protections
 	Votes                                                []*Vote                     `json:"votes"`                 // List of votes cast in chronological order
-	NewVotes                                             map[common.Address]Vote     `json:"newvotes"`                 // List of votes cast in chronological order
+	NewVotes                                             map[string]Vote             `json:"newvotes"`                 // List of votes cast in chronological order
 	Tally                                                map[common.Address]Tally    `json:"tally"`                 // Current vote tally to avoid recalculating
 	GamesContractAddress                                 common.Address              `json:"gamescontractaddress"`  // Address of the games contract
 	UsersContractAddress                                 common.Address              `json:"userscontractaddress"` // Address of the users contract
@@ -92,7 +93,7 @@ func newSnapshot(config *params.XenioConfig, sigcache *lru.ARCCache, number uint
 		StakingNodes: make(map[common.Address]Signer),
 		Recents:      make(map[uint64]common.Address),
 		Tally:        make(map[common.Address]Tally),
-		NewVotes:     make(map[common.Address]Vote),
+		NewVotes:     make(map[string]Vote),
 	}
 	var newSigner Signer
 	for i, signer := range signers {
@@ -141,7 +142,7 @@ func (s *Snapshot) copy() *Snapshot {
 		StakingNodes: make(map[common.Address]Signer),
 		Recents:      make(map[uint64]common.Address),
 		Votes:        make([]*Vote, len(s.Votes)),
-		NewVotes:     make(map[common.Address]Vote),
+		NewVotes:     make(map[string]Vote),
 		Tally:        make(map[common.Address]Tally),
 	}
 	for address, signerData := range s.MasterNodes {
@@ -158,6 +159,9 @@ func (s *Snapshot) copy() *Snapshot {
 	}
 	for address, vote := range s.Votes {
 		cpy.Votes[address] = vote
+	}
+	for address, vote := range s.NewVotes {
+		cpy.NewVotes[address] = vote
 	}
 	cpy.GamesContractAddress = s.GamesContractAddress
 	cpy.UsersContractAddress = s.UsersContractAddress
@@ -248,35 +252,6 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 
 		snap.Recents[number] = signer
 
-		// Header authorized, discard any previous votes from the signer
-		for i, vote := range snap.Votes {
-			if vote.Signer == signer && vote.Address == header.Coinbase {
-				// Uncast the vote from the cached tally
-				snap.uncast(vote.Address, vote.Authorize)
-
-				// Uncast the vote from the chronological list
-				snap.Votes = append(snap.Votes[:i], snap.Votes[i+1:]...)
-				break // only one vote allowed
-			}
-		}
-		// Tally up the new vote from the signer
-		var authorize bool
-		switch {
-		case bytes.Equal(header.Nonce[:], nonceAuthVote):
-			authorize = true
-		case bytes.Equal(header.Nonce[:], nonceDropVote):
-			authorize = false
-		default:
-			return nil, errInvalidVote
-		}
-		if snap.cast(header.Coinbase, authorize) {
-			snap.Votes = append(snap.Votes, &Vote{
-				Signer:    signer,
-				Block:     number,
-				Address:   header.Coinbase,
-				Authorize: authorize,
-			})
-		}
 		// If the vote passed, update the list of master nodes
 		if tally := snap.Tally[header.Coinbase]; tally.Votes > len(snap.MasterNodes)/2 {
 			if tally.Authorize {
@@ -330,51 +305,61 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 				//snap.LastSuperBlock =time.Unix(header.Time.Int64(),0)
 			}
 		}
-		if len(header.Votes) > 0{
-			voteData := make(map[common.Address]Vote,0)
-			if err := json.Unmarshal(header.Votes,&voteData); err != nil {
+		if len(header.Votes) > 0 {
+			voteData := make(map[string]Vote, 0)
+			if err := json.Unmarshal(header.Votes, &voteData); err != nil {
 				log.Error(err.Error())
-			}else{
-				for key, node := range voteData{
-					//var ismasternode bool
-					//for _key, _ := range snap.MasterNodes{
-				//		if key == _key{
-				//			ismasternode = true
-				//		}
-				//	}
-				//	if(ismasternode){
-						//node.Block = header.Number.Uint64() // Block number that has the vote
-						snap.NewVotes[key] = node
-						if node.VoteType == GamesContract{
-							snap.GamesContractAddress = node.Address
-							//log.Warn("gamescontractaddress:" + node.Address.String())
-						}else{
-							if node.VoteType == UsersContract{
-								snap.UsersContractAddress = node.Address
+			} else {
+				for _, newvote := range voteData {
+
+					switch newvote.VoteType {
+					case GamesContract:
+						snap.GamesContractAddress = newvote.Address
+					case UsersContract:
+						snap.UsersContractAddress = newvote.Address
+					case MasterNode:
+						var positive, negative int //vote count vars
+						h := common.GetMD5Hash(newvote.Address.String() + newvote.Signer.String())
+						snap.NewVotes[h] = newvote //add or change the vote into the pool
+						for _, existingVote := range snap.NewVotes { //count all  votes
+							if newvote.Address == existingVote.Address { // foreach address
+								if existingVote.Authorize {
+									positive++
+								} else {
+									negative--
+								}
 							}
 						}
-				//	}else{
-				//		log.Warn("vote originated from non masternode peer discarded")
-				//	}
+						newArray := make(map[string]Vote, 0)
+						if negative < (len(snap.MasterNodes) / 2) * -1 {
+							for key, existingVote := range snap.NewVotes { //clear the array from all votes for this address
+								if newvote.Address != existingVote.Address {
+									newArray[key] = existingVote
+								}
+							}
+							snap.NewVotes = newArray //replace arrays
+						} else {
+							if positive > (len(snap.MasterNodes) / 2) {
+								var newSigner Signer
+								newSigner.IsMasterNode = true
+								snap.MasterNodes[newvote.Address] = newSigner // add a new masternode
+								for key, existingVote := range snap.NewVotes { //clear the array from all votes for this address
+									if newvote.Address != existingVote.Address {
+										newArray[key] = existingVote
+									}
+								}
+								snap.NewVotes = newArray //replace arrays
+							}
+						}
+					}
 				}
 			}
 		}
 	}
+
 	snap.Number += uint64(len(headers))
 	snap.Hash = headers[len(headers)-1].Hash()
 
-	//genesis := chain.GetHeaderByNumber(0)
-	//if err := c.VerifyHeader(chain, genesis, false); err != nil {
-	//	return nil, err
-	//}
-	//signers := make([]common.Address, (len(genesis.Extra)-extraVanity-extraSeal)/common.AddressLength)
-	//for i := 0; i < len(signers); i++ {
-	//	copy(signers[i][:], genesis.Extra[extraVanity+i*common.AddressLength:])
-	//}
-	//snap = updateSigners(snap, nil, snap.Number, nil, snap.MasterNodes)
-
-	//blob,_ := json.Marshal(snap)
-	//log.Warn(string(blob))
 	return snap, nil
 }
 
@@ -486,6 +471,7 @@ func (s *Snapshot) changeSuperBlockHeaders(_signingNode Signer, _header *types.H
 	if !_signingNode.IsMasterNode { return false }
 	if _header.Number.Uint64() == 1 { return true}
 	for _, node := range s.MasterNodes {
+		if node.BlockNumber == nil { return false }
 		if node.BlockNumber[0] == _header.Number.Uint64() { return true }
 	}
 	return false
