@@ -56,7 +56,7 @@ const (
 	requiredCoins = 1000 // Voter must hold at least this amount of coins in order to be eligible to vote
 )
 
-// Clique proof-of-authority protocol constants.
+// xenio proof-of-network protocol constants.
 var (
 	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
 	blockPeriod = uint64(15)    // Default minimum difference between two consecutive block's timestamps
