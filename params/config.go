@@ -61,7 +61,7 @@ var (
 
 		Xenio: &XenioConfig{
 			Epoch:  30000,
-			Period: 60,
+			Period: 15,
 			SuperPeriod:60*20,
 		},
 	}
@@ -98,7 +98,7 @@ var (
 
 		Xenio: &XenioConfig{
 			Epoch:      30000,
-			Period: 	60,
+			Period: 	15,
 			SuperPeriod:60*20,
 		},
 	}

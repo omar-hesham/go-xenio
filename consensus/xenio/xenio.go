@@ -50,7 +50,7 @@ const (
 	inmemorySnapshots  = 128  // Number of recent vote snapshots to keep in memory
 	inmemorySignatures = 4096 // Number of recent block signatures to keep in memory
 
-	wiggleTime = time.Minute // delay
+	wiggleTime = time.Second * 15 // delay
 	noiseScalingFactor = 0.1 // scale of noise
 
 	requiredCoins = 1000 // Voter must hold at least this amount of coins in order to be eligible to vote
@@ -689,7 +689,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 
 	// Estimate delay time by adding a small amount of noise
 	estimatedTime := time.Unix(chain.CurrentHeader().Time.Int64(),0).Add(time.Duration(chain.Config().Xenio.Period)*time.Second)
-
 	// Checks whether the authorised node is next in turn. Gives out-of-turn error if the signing node does not contain the next in line block.
 	if !signingNode.isInTurn(snap){
 
