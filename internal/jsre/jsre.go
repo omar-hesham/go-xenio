@@ -290,7 +290,7 @@ func (self *JSRE) Set(ns string, v interface{}) (err error) {
 }
 
 func (self *JSRE) XNOCreateUsersContract(call otto.FunctionCall) otto.Value {
-	contractRawABI := xenio.XNOUsersBin
+	contractRawABI := xenio.XNOUsersABI
 	goStringABI := "var userContract = eth.contract(" + contractRawABI + ")"
 	_, err := compileAndRun(call.Otto, "", goStringABI)
 	if err != nil {
