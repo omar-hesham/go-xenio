@@ -165,3 +165,7 @@ func (bn *BlockNumber) UnmarshalJSON(data []byte) error {
 func (bn BlockNumber) Int64() int64 {
 	return (int64)(bn)
 }
+
+func (bn BlockNumber) UInt64() uint64 {
+	return (uint64)(bn)
+}
