@@ -216,12 +216,13 @@ func (api *API) GetRewardsList(number *rpc.BlockNumber) ([]common.Address, error
 	return header.RewardList, nil
 }
 
-func (api *API) GetCompletedTransactions(address common.Address) interface{} {
+// GetCompletedTransactions returns list of transactions for given address
+// starting from specified block number till current
+func (api *API) GetCompletedTransactions(address common.Address, number *rpc.BlockNumber) interface{} {
 	header := api.chain.CurrentHeader()
-
 	completedTxs := make([]*types.Transaction, 0)
 
-	for n := uint64(1); n <= header.Number.Uint64(); n++ {
+	for n := number.UInt64(); n <= header.Number.Uint64(); n++ {
 		h := api.chain.GetHeaderByNumber(n)
 		b := api.chain.GetBlock(h.Hash(), n)
 
