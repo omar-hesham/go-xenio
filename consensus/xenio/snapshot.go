@@ -512,7 +512,7 @@ func getMaxBlockNumber(_nodes map[common.Address]Signer) uint64 {
 	for _, node := range _nodes {
 		if node.BlockNumber[0] > max_block_number{ max_block_number = node.BlockNumber[0]}
 	}
-	return max_block_number;
+	return max_block_number
 }
 
 func (s *Snapshot) stakersExist(_stakerSnap *common.StakerSnapshot) bool {
