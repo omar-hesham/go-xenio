@@ -219,21 +219,34 @@ func (api *API) GetRewardsList(number *rpc.BlockNumber) ([]common.Address, error
 // GetCompletedTransactions returns list of transactions for given address
 // starting from specified block number till current
 func (api *API) GetCompletedTransactions(address common.Address, number *rpc.BlockNumber) interface{} {
-	header := api.chain.CurrentHeader()
-	completedTxs := make([]*types.Transaction, 0)
+	outgoingTxs := make([]*types.Transaction, 0)
+	incomingTxs := make([]*types.Transaction, 0)
 
-	for n := number.UInt64(); n <= header.Number.Uint64(); n++ {
+	currentHeaderNumber := api.chain.CurrentHeader().Number.Uint64()
+
+	for n := number.UInt64(); n <= currentHeaderNumber; n++ {
 		h := api.chain.GetHeaderByNumber(n)
 		b := api.chain.GetBlock(h.Hash(), n)
+		s := types.MakeSigner(api.chain.Config(), b.Number())
 
 		txs := b.Transactions()
 		for t := range txs {
-			to := txs[t].To()
-			if to != nil && *to == address {
-				completedTxs = append(completedTxs, txs[t])
+			txM, err := txs[t].AsMessage(s)
+			if err != nil {
+				continue
+			}
+			from := txM.From()
+			to := txM.To()
+			if from == address {
+				outgoingTxs = append(outgoingTxs, txs[t])
+			} else if to != nil && *to == address {
+				incomingTxs = append(incomingTxs, txs[t])
 			}
 		}
 	}
 
-	return completedTxs
+	return map[string]interface{}{
+		"incoming": incomingTxs,
+		"outgoing": outgoingTxs,
+	}
 }
