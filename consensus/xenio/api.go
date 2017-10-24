@@ -230,17 +230,17 @@ func (api *API) GetCompletedTransactions(address common.Address, number *rpc.Blo
 		s := types.MakeSigner(api.chain.Config(), b.Number())
 
 		txs := b.Transactions()
-		for t := range txs {
-			txM, err := txs[t].AsMessage(s)
+		for _, tx := range txs {
+			txM, err := tx.AsMessage(s)
 			if err != nil {
 				continue
 			}
 			from := txM.From()
 			to := txM.To()
 			if from == address {
-				outgoingTxs = append(outgoingTxs, txs[t])
+				outgoingTxs = append(outgoingTxs, tx)
 			} else if to != nil && *to == address {
-				incomingTxs = append(incomingTxs, txs[t])
+				incomingTxs = append(incomingTxs, tx)
 			}
 		}
 	}
