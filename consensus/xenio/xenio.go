@@ -54,6 +54,10 @@ const (
 	noiseScalingFactor = 0.1 // scale of noise
 
 	requiredCoins = 1000 // Voter must hold at least this amount of coins in order to be eligible to vote
+	// ReceiptStatusFailed is the status code of a transaction if execution failed.
+	ReceiptStatusFailed = uint(0) // should have the same value with receipt.go
+	// ReceiptStatusSuccessful is the status code of a transaction if execution succeeded.
+	ReceiptStatusSuccessful = uint(1)// should have the same value with receipt.go
 )
 
 // xenio proof-of-network protocol constants.
@@ -641,7 +645,7 @@ func (c *Xenio) Prepare(chain consensus.ChainReader, header *types.Header) error
 // Finalize implements consensus.Engine, ensuring no uncles are set, nor block
 // rewards given, and returns the final block.
 func (c *Xenio) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
-	AccumulateRewards(state, header, txs, uncles)
+	AccumulateRewards(state, header, txs, uncles, receipts)
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 
@@ -882,8 +886,8 @@ func (c *Xenio) State(state *state.StateDB) {
 	currentState = state
 }
 
-func AccumulateRewards(state *state.StateDB, header *types.Header, txs []*types.Transaction, uncles []*types.Header) {
-	reward := calculateReward(txs)
+func AccumulateRewards(state *state.StateDB, header *types.Header, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) {
+	reward := calculateReward(txs, receipts)
 
 	//r := new(big.Int)
 	/*for _, uncle := range uncles {
@@ -912,11 +916,13 @@ func AccumulateRewards(state *state.StateDB, header *types.Header, txs []*types.
 	}
 }
 
-func calculateReward(txs []*types.Transaction) *big.Int {
+func calculateReward(txs []*types.Transaction, receipts []*types.Receipt) *big.Int {
 	reward := new(big.Int)
-	if len(txs) > 0 {
-		for i := range txs {
-			reward.Add(reward, txs[i].Fee())
+	if receipts != nil && len(receipts) > 0 {
+		for i := range receipts {
+			if receipts[i].Status == ReceiptStatusSuccessful {
+				reward.Add(reward, receipts[i].GasUsed)
+			}
 		}
 	}
 	return reward
