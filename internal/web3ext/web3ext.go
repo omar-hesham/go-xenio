@@ -218,7 +218,8 @@ web3._extend({
 			new web3._extend.Method({
 			name: 'getCompletedTransactions',
 			call: 'xenio_getCompletedTransactions',
-			params: 1
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputBlockNumberFormatter]
 	}),
   ],
 	properties:
