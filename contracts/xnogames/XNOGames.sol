@@ -19,15 +19,16 @@ contract XNOGames {
         string publisher;
         string developer;
         bytes32 country;
-        bytes32 state;    
+        bytes32 state;
         bytes32 logoImg;
+        bool isRegistered;
     }
 
     modifier onlyAdmin() {
         if (msg.sender != GamesAdmin)
             revert(); //throw
         _; // Do not forget the "_;"! It will be replaced by the actual function body when the modifier is used.
-    }    
+    }
 
     // Constructor
     function XNOGames() public payable {
@@ -39,16 +40,21 @@ contract XNOGames {
     function () {} // add payable if there is an associated cost with the game entries
 
     // Methods
-    function registerNewGame(string name, string publisher, string developer, bytes32 country, bytes32 state) public returns (bool success) {
+    function registerNewGame(string _name, string _publisher, string _developer, bytes32 _country, bytes32 _state) public returns (bool success) {
         address thisAddress = msg.sender;
-        // don't overwrite existing game entries, and make sure that game name (handle) isn't null
-        // if (name.length == 0) {return false;} // TODO: check if name exist 
 
-        Games[thisAddress].name = name;
-        Games[thisAddress].publisher = publisher;
-        Games[thisAddress].developer = developer;
-        Games[thisAddress].state = state;
-        Games[thisAddress].country = country;
+
+        if (Games[thisAddress].isRegistered == true) {return false;} // check if address exist
+        if (bytes(_name).length == 0) {return false;} // check if name is empty
+
+        Game memory game; //initialise in memory - it does not consume gas
+        game.name = _name;
+        game.publisher = _publisher;
+        game.developer = _developer;
+        game.country = _country;
+        game.state = _state;
+        game.isRegistered = true;
+        Games[thisAddress] = game;
 
         gamesByAddress.push(thisAddress);  // adds an entry for this user to the user 'whitepages'
         return true;
@@ -77,11 +83,39 @@ contract XNOGames {
         return true;
     }
 
-    // Getters
-    function getAllGames() public constant returns (address[]) { return gamesByAddress; }
+    function stringToBytes32(string memory source) returns (bytes32 result) {
+    assembly {
+            result := mload(add(source, 32))
+        }
+    }
 
+    // Getters
+    //return the addresses of all registered games
+    function getGamesAddresses() public constant returns (address[]) { return gamesByAddress; }
+
+    //return the game details of a given address
     function getGame(address gameAddress) public constant returns (string,string,string,bytes32,bytes32,bytes32) {
         return (Games[gameAddress].name, Games[gameAddress].publisher, Games[gameAddress].developer, Games[gameAddress].country, Games[gameAddress].state, Games[gameAddress].logoImg);
+    }
+
+    //return a list of all games
+    function getGames() public constant returns (bytes32[],bytes32[], bytes32[],bytes32[],bytes32[]) {
+        uint nGames = gamesByAddress.length;
+        address gameAddress;
+        bytes32[] memory names = new bytes32[](nGames);
+        bytes32[] memory publishers = new bytes32[](nGames);
+        bytes32[] memory developers = new bytes32[](nGames);
+        bytes32[] memory countries = new bytes32[](nGames);
+        bytes32[] memory states = new bytes32[](nGames);
+        for (uint8 i = 0; i < nGames; i++) {
+            gameAddress = gamesByAddress[i];
+            names[i] = stringToBytes32(Games[gameAddress].name);
+            publishers[i] = stringToBytes32(Games[gameAddress].publisher);
+            developers[i] = stringToBytes32(Games[gameAddress].developer);
+            countries[i] = Games[gameAddress].country;
+            states[i] = Games[gameAddress].state;
+        }
+        return(names, publishers, developers, countries, states);
     }
 
     function getAllImages() public constant returns (bytes32[]) { return imagesByNotaryHash; }
@@ -92,5 +126,5 @@ contract XNOGames {
         return (notarizedImages[SHA256notaryHash].imageURL,notarizedImages[SHA256notaryHash].timeStamp);
     }
 
-  
+
 }

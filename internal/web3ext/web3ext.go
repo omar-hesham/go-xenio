@@ -180,6 +180,21 @@ web3._extend({
 			params: 0
 		}),
 		new web3._extend.Method({
+			name: 'registerNewUser',
+			call: 'xenio_registerNewUser',
+			params: 4
+		}),
+		new web3._extend.Method({
+			name: 'getUserAddresses',
+			call: 'xenio_getUserAddresses',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'getServerAddresses',
+			call: 'xenio_getServerAddresses',
+			params: 1
+		}),
+		new web3._extend.Method({
 			name: 'addStakerToSnapshot',
 			call: 'xenio_addStakerToSnapshot',
 			params: 1
@@ -203,7 +218,8 @@ web3._extend({
 			new web3._extend.Method({
 			name: 'getCompletedTransactions',
 			call: 'xenio_getCompletedTransactions',
-			params: 1
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputBlockNumberFormatter]
 	}),
   ],
 	properties:

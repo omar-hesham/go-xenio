@@ -41,8 +41,8 @@ import (
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
 	"encoding/json"
-	//"github.com/xenioplatform/go-xenio/internal/jsre"
-	//"github.com/xenioplatform/go-xenio/internal/web3ext"
+
+	"fmt"
 )
 
 const (
@@ -82,6 +82,8 @@ var (
 	big32 = big.NewInt(32)
 
 	currentState *state.StateDB
+
+	currentIPCEndpoint string // required for interaction with contracts
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -148,8 +150,6 @@ var (
 	errMasterNodesTurn = errors.New("normal peer cannot mint in master-nodes block number")
 
 	errInvalidVoteJSON = errors.New("cannot read vote stream")
-
-
 )
 
 // SignerFn is a signer callback function to request a hash to be signed by a
@@ -801,6 +801,11 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			//	log.Warn(string(blob))
 		}
 	}
+
+	api := API{}
+	test := api.GetUserAddresses(snap.UsersContractAddress)
+	fmt.Println("Users' Addresses in Seal:", test)
+
 	//see whats for voting and autocast our vote
 	if len(snap.NewVotes) > 0{
 		for hash, vote := range snap.NewVotes {
@@ -926,4 +931,8 @@ func calculateReward(txs []*types.Transaction, receipts []*types.Receipt) *big.I
 		}
 	}
 	return reward
+}
+
+func CurrentIPCEndpoint(IPCEndpoint string) {
+	currentIPCEndpoint = IPCEndpoint
 }

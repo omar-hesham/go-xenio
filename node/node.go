@@ -29,6 +29,7 @@ import (
 	"sync"
 
 	"github.com/xenioplatform/go-xenio/accounts"
+	"github.com/xenioplatform/go-xenio/consensus/xenio"
 	"github.com/xenioplatform/go-xenio/ethdb"
 	"github.com/xenioplatform/go-xenio/event"
 	"github.com/xenioplatform/go-xenio/internal/debug"
@@ -103,6 +104,10 @@ func New(conf *Config) (*Node, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Pass the IPC file path to Xenio consensus for contract interactions
+	xenio.CurrentIPCEndpoint(conf.IPCEndpoint())
+
 	// Note: any interaction with Config that would create/touch files
 	// in the data directory or instance directory is delayed until Start.
 	return &Node{

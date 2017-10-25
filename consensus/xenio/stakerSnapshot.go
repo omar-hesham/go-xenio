@@ -128,7 +128,7 @@ func HasCoins(address common.Address, value int64, state *state.StateDB) bool {
 	coins := state.GetBalance(address)
 
 	//convert value (XNO) to wei
-	bigValue := big.NewInt(value-1)
+	bigValue := big.NewInt(value - 1)
 	bigWeis := big.NewInt(0).SetUint64(1000000000000000000)
 	bigValue.Mul(bigValue, bigWeis)
 
