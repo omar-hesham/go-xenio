@@ -21,6 +21,8 @@ package xenio
 import (
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/consensus"
+	"github.com/xenioplatform/go-xenio/contracts/xnogames"
+	"github.com/xenioplatform/go-xenio/contracts/xnousers"
 	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/rpc"
 	"github.com/xenioplatform/go-xenio/log"
@@ -127,7 +129,7 @@ func (api *API) Propose(address common.Address, auth bool) {
 func (api *API) GetXNOGamesABI() string{
 	api.xenio.lock.Lock()
 	defer api.xenio.lock.Unlock()
-	return XNOGamesABI
+	return xnogames.XNOGamesABI
 }
 
 // GamesContractPropose injects a new games contract authorization proposal that the signer will attempt to
@@ -170,7 +172,7 @@ func (api *API) GameServerVote(address common.Address, vote bool) bool{
 func (api *API) GetXNOUsersABI() string{
 	api.xenio.lock.Lock()
 	defer api.xenio.lock.Unlock()
-	return XNOUsersABI
+	return xnousers.XNOUsersABI
 }
 
 // UsersContractPropose injects a new users contract authorization proposal that the signer will attempt to
