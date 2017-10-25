@@ -310,7 +310,6 @@ func (self *JSRE) XNOCreateUsersContract(call otto.FunctionCall) otto.Value {
 
 func (self *JSRE) XNOGetUsersContract(call otto.FunctionCall) otto.Value {
 	address, _ := compileAndRun(call.Otto, "", "xenio.getSnapshot().userscontractaddress")
-	log.Warn("address " + address.String())
 	if address.String() == "undefined" || address.String() == "0x0000000000000000000000000000000000000000" {
 		log.Error("No Users Contract Address in Snapshot")
 		return otto.FalseValue()

@@ -42,7 +42,7 @@ import (
 	lru "github.com/hashicorp/golang-lru"
 	"encoding/json"
 
-	"fmt"
+	//"fmt"
 )
 
 const (
@@ -802,9 +802,9 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		}
 	}
 
-	api := API{}
-	test := api.GetUserAddresses(snap.UsersContractAddress)
-	fmt.Println("Users' Addresses in Seal:", test)
+	//api := API{}
+	//test := api.GetUserAddresses(snap.UsersContractAddress)
+	//fmt.Println("Users' Addresses in Seal:", test)
 
 	//see whats for voting and autocast our vote
 	if len(snap.NewVotes) > 0{
