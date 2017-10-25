@@ -923,11 +923,9 @@ func AccumulateRewards(state *state.StateDB, header *types.Header, txs []*types.
 
 func calculateReward(txs []*types.Transaction, receipts []*types.Receipt) *big.Int {
 	reward := new(big.Int)
-	if receipts != nil && len(receipts) > 0 {
-		for i := range receipts {
-			if receipts[i].Status == ReceiptStatusSuccessful {
-				reward.Add(reward, receipts[i].GasUsed)
-			}
+	if txs != nil && len(txs) > 0 {
+		for i := range txs {
+				reward.Add(reward, txs[i].Fee())
 		}
 	}
 	return reward
