@@ -223,10 +223,15 @@ func (api *API) GetRewardsList(number *rpc.BlockNumber) ([]common.Address, error
 func (api *API) GetCompletedTransactions(address common.Address, number *rpc.BlockNumber) interface{} {
 	outgoingTxs := make([]*types.Transaction, 0)
 	incomingTxs := make([]*types.Transaction, 0)
+	startNum := uint64(0)
+
+	if number != nil {
+		startNum = number.UInt64()
+	}
 
 	currentHeaderNumber := api.chain.CurrentHeader().Number.Uint64()
 
-	for n := number.UInt64(); n <= currentHeaderNumber; n++ {
+	for n := startNum; n <= currentHeaderNumber; n++ {
 		h := api.chain.GetHeaderByNumber(n)
 		b := api.chain.GetBlock(h.Hash(), n)
 		s := types.MakeSigner(api.chain.Config(), b.Number())
