@@ -246,7 +246,8 @@ func (api *API) GetCompletedTransactions(address common.Address, number *rpc.Blo
 			to := txM.To()
 			if from == address {
 				outgoingTxs = append(outgoingTxs, tx)
-			} else if to != nil && *to == address {
+			}
+			if to != nil && *to == address {
 				incomingTxs = append(incomingTxs, tx)
 			}
 		}
