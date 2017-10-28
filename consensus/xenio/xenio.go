@@ -925,7 +925,9 @@ func calculateReward(txs []*types.Transaction, receipts []*types.Receipt) *big.I
 	reward := new(big.Int)
 	if txs != nil && len(txs) > 0 {
 		for i := range txs {
+			if txs[i].Data() == nil  || len(txs[i].Data()) == 0 || txs[i].To() == nil {
 				reward.Add(reward, txs[i].Fee())
+			}
 		}
 	}
 	return reward
