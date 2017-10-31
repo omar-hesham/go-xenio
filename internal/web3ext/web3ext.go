@@ -226,6 +226,7 @@ web3._extend({
 			call: 'xenio_isServer',
 			params: 1
 		})
+  ],
 	properties:
 	[
 		new web3._extend.Property({
