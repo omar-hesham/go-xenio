@@ -82,8 +82,13 @@ var (
 	big32 = big.NewInt(32)
 
 	currentState *state.StateDB
+)
 
+// xenio contracts constants (users and games).
+var (
 	currentIPCEndpoint string // required for interaction with contracts
+	deployedGamesContract common.Address
+	deployedUsersContract common.Address
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -802,9 +807,13 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		}
 	}
 
+	//// Set current active contract addresses --- now set in cpy snapshot
+	//deployedGamesContract = snap.GamesContractAddress
+	//deployedUsersContract = snap.UsersContractAddress
+
 	//api := API{}
-	//test := api.GetUserAddresses(snap.UsersContractAddress)
-	//fmt.Println("Users' Addresses in Seal:", test)
+	//test, _ := api.GetServersAddresses()
+	//fmt.Println("Servers' Addresses in Seal:", test)
 
 	//see whats for voting and autocast our vote
 	if len(snap.NewVotes) > 0{

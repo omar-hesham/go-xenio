@@ -165,6 +165,11 @@ func (s *Snapshot) copy() *Snapshot {
 	}
 	cpy.GamesContractAddress = s.GamesContractAddress
 	cpy.UsersContractAddress = s.UsersContractAddress
+
+	// Set current active contract addresses for contract functions
+	deployedGamesContract = s.GamesContractAddress
+	deployedUsersContract = s.UsersContractAddress
+
 	copy(cpy.Votes, s.Votes)
 
 	return cpy

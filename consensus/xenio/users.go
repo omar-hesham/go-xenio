@@ -14,68 +14,126 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-xenio library. If not, see <http://www.gnu.org/licenses/>.
+//
+// This file provides functions to interact with the XNOUsers contract
 
 package xenio
 
 import (
 	"github.com/xenioplatform/go-xenio/accounts/abi/bind"
 	"github.com/xenioplatform/go-xenio/common"
-	//"github.com/xenioplatform/go-xenio/contracts/xnogames"
 	"github.com/xenioplatform/go-xenio/contracts/xnousers"
 	"github.com/xenioplatform/go-xenio/ethclient"
 	"github.com/xenioplatform/go-xenio/log"
-	"github.com/xenioplatform/go-xenio/core/types"
-	"math/big"
+	//"github.com/xenioplatform/go-xenio/core/types"
 )
 
-func (api *API) GetUserAddresses(contractAddress common.Address) []common.Address {
 
-	h := bind.CallOpts{}
-	// Create an IPC based RPC connection to a remote node
-	conn, err := ethclient.Dial(currentIPCEndpoint)
-	if err != nil {
-		log.Error("Failed to connect to the Ethereum client: " + err.Error())
-	}
-	// Instantiate the contract and display its name
-	token, err := xnousers.NewXNOUsers(contractAddress, conn)
-	if err != nil {
-		log.Error("Failed to instantiate a Token contract: " + err.Error())
-	}
-	f1, _ := token.GetGamersAddresses(&h)
-	return f1
+/* Free data retrieval calls */
+
+func (api *API) GetAllUsersAddresses() ([]common.Address, error) {
+	contract, err := getUsersContract()
+	callOpts := bind.CallOpts{}
+	result, err := contract.GetAllUsersAddresses(&callOpts)
+	return result, err
 }
 
-func (api *API) GetServerAddresses(contractAddress common.Address) []common.Address {
+//func (api *API) GetGamers() ([][32]byte, [][32]byte, error) {
+//	contract, err := getUsersContract()
+//	callOpts := bind.CallOpts{}
+//	names, games, err := contract.GetGamers(&callOpts)
+//	return names, games, err
+//}
 
-	h := bind.CallOpts{}
-	// Create an IPC based RPC connection to a remote node
-	conn, err := ethclient.Dial(currentIPCEndpoint)
-	if err != nil {
-		log.Error("Failed to connect to the Ethereum client: " + err.Error())
-	}
-	// Instantiate the contract and display its name
-	token, err := xnousers.NewXNOUsers(contractAddress, conn)
-	if err != nil {
-		log.Error("Failed to instantiate a Token contract: " + err.Error())
-	}
-	f2, _ := token.GetServersAddresses(&h)
-	return f2
+func (api *API) GetGamersAddresses() ([]common.Address, error) {
+	contract, err := getUsersContract()
+	callOpts := bind.CallOpts{}
+	result, err := contract.GetGamersAddresses(&callOpts)
+	return result, err
 }
 
-// not working
-func (api *API) RegisterNewUser(contractAddress common.Address, name string, isServer bool, game string) *types.Transaction {
+func (api *API) GetGamersNumber() (uint64, error) {
+	contract, err := getUsersContract()
+	callOpts := bind.CallOpts{}
+	result, err := contract.GetGamersNumber(&callOpts)
+	return result.Uint64(), err
+}
 
-	h := bind.TransactOpts{From: common.HexToAddress("0xd956e4b845b574c3519509b1c2cd3090b7eb97d4"), GasLimit: big.NewInt(300000)}
+//func (api *API) GetServers() ([][32]byte, [][32]byte, error) {
+//	contract, err := getUsersContract()
+//	callOpts := bind.CallOpts{}
+//	names, games, err := contract.GetServers(&callOpts)
+//	return names, games, err
+//}
+
+func (api *API) GetServersAddresses() ([]common.Address, error) {
+	contract, err := getUsersContract()
+	callOpts := bind.CallOpts{}
+	result, err := contract.GetServersAddresses(&callOpts)
+	return result, err
+}
+
+//func (api *API) GetUsers() ([][32]byte, [][32]byte, error) {
+//	contract, err := getUsersContract()
+//	callOpts := bind.CallOpts{}
+//	names, games, err := contract.GetUsers(&callOpts)
+//	return names, games, err
+//}
+
+func (api *API) IsServer(userAddress common.Address) (bool, error) {
+	contract, err := getUsersContract()
+	callOpts := bind.CallOpts{}
+	result, err := contract.IsServer(&callOpts, userAddress)
+	return result, err
+}
+
+/* Paid mutator transaction calls */
+
+//// not working - under construction
+//func (api *API) RegisterNewUser(name string, isServer bool, game string) (*types.Transaction, error) {
+//	contract, err := getUsersContract()
+//	transactOps := bind.TransactOpts{From: common.HexToAddress("0xd956e4b845b574c3519509b1c2cd3090b7eb97d4"), GasLimit: big.NewInt(300000)}
+//	result, _ := contract.RegisterNewUser(&transactOps, name, isServer, game)
+//	return result, err
+//}
+
+
+/* Contract helper functions */
+
+//// not working - under construction
+//// Deploy and propose new users contract
+//func (api *API) DeployNewUsersContract() {
+//	// Create an IPC based RPC connection to a remote node
+//	conn, err := ethclient.Dial(currentIPCEndpoint)
+//	if err != nil {
+//		log.Error("Failed to connect to the Xenio client: " + err.Error())
+//	}
+//
+//bind.NewKeyedTransactor()
+//bind.NewTransactor()
+//
+//	transactOps := bind.TransactOpts{From: common.HexToAddress("0xd956e4b845b574c3519509b1c2cd3090b7eb97d4"), GasLimit: big.NewInt(300000)}
+//	//address, transaction, contractObject, err := xnousers.DeployXNOUsers(&transactOps, conn)
+//	_, _, _, _ = xnousers.DeployXNOUsers(&transactOps, conn)
+//}
+
+// Get deployed contract object
+func getUsersContract() (*xnousers.XNOUsers, error) {
 	// Create an IPC based RPC connection to a remote node
 	conn, err := ethclient.Dial(currentIPCEndpoint)
 	if err != nil {
-		log.Error("Failed to connect to the Ethereum client: " + err.Error())
+		log.Error("Failed to connect to the Xenio client: " + err.Error())
 	}
 	// Instantiate the contract and display its name
-	token, err := xnousers.NewXNOUsers(contractAddress, conn)
+	contract, err := xnousers.NewXNOUsers(deployedUsersContract, conn)
 	if err != nil {
-		log.Error("Failed to instantiate a Token contract: " + err.Error())
+		log.Error("Failed to instantiate a Users contract: " + err.Error())
 	}
-	result, _ := token.RegisterNewUser(&h, name, isServer, game)
-	return result
+	return contract, err
+}
+
+func (api *API) GetXNOUsersABI() string{
+	api.xenio.lock.Lock()
+	defer api.xenio.lock.Unlock()
+	return xnousers.XNOUsersABI
 }

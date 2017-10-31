@@ -175,26 +175,6 @@ web3._extend({
 			params: 0
 		}),
 		new web3._extend.Method({
-			name: 'getGamesList',
-			call: 'xenio_getGamesList',
-			params: 0
-		}),
-		new web3._extend.Method({
-			name: 'registerNewUser',
-			call: 'xenio_registerNewUser',
-			params: 4
-		}),
-		new web3._extend.Method({
-			name: 'getUserAddresses',
-			call: 'xenio_getUserAddresses',
-			params: 1
-		}),
-		new web3._extend.Method({
-			name: 'getServerAddresses',
-			call: 'xenio_getServerAddresses',
-			params: 1
-		}),
-		new web3._extend.Method({
 			name: 'addStakerToSnapshot',
 			call: 'xenio_addStakerToSnapshot',
 			params: 1
@@ -220,8 +200,32 @@ web3._extend({
 			call: 'xenio_getCompletedTransactions',
 			params: 2,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputBlockNumberFormatter]
-	}),
-  ],
+		}),
+		new web3._extend.Method({
+			name: 'getAllUsersAddresses',
+			call: 'xenio_getAllUsersAddresses',
+			params: 0
+		}),
+		new web3._extend.Method({
+			name: 'getGamersAddresses',
+			call: 'xenio_getGamersAddresses',
+			params: 0
+		}),
+		new web3._extend.Method({
+			name: 'getGamersNumber',
+			call: 'xenio_getGamersNumber',
+			params: 0
+		}),
+		new web3._extend.Method({
+			name: 'getServersAddresses',
+			call: 'xenio_getServersAddresses',
+			params: 0
+		}),
+		new web3._extend.Method({
+			name: 'isServer',
+			call: 'xenio_isServer',
+			params: 1
+		})
 	properties:
 	[
 		new web3._extend.Property({
