@@ -202,8 +202,18 @@ web3._extend({
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputBlockNumberFormatter]
 		}),
 		new web3._extend.Method({
+			name: 'getAllUsers',
+			call: 'xenio_getAllUsers',
+			params: 0
+		}),
+		new web3._extend.Method({
 			name: 'getAllUsersAddresses',
 			call: 'xenio_getAllUsersAddresses',
+			params: 0
+		}),
+		new web3._extend.Method({
+			name: 'getGamers',
+			call: 'xenio_getGamers',
 			params: 0
 		}),
 		new web3._extend.Method({
@@ -214,6 +224,11 @@ web3._extend({
 		new web3._extend.Method({
 			name: 'getGamersNumber',
 			call: 'xenio_getGamersNumber',
+			params: 0
+		}),
+		new web3._extend.Method({
+			name: 'getServers',
+			call: 'xenio_getServers',
 			params: 0
 		}),
 		new web3._extend.Method({
