@@ -28,6 +28,11 @@ import (
 	//"github.com/xenioplatform/go-xenio/core/types"
 )
 
+type User struct {
+	Name 		string  	`json:"username"`
+	IsServer 	bool 		`json:"isserver"`
+	Game 		string  	`json:"gamename"`
+}
 
 /* Free data retrieval calls */
 
@@ -71,6 +76,21 @@ func (api *API) GetServersAddresses() ([]common.Address, error) {
 	callOpts := bind.CallOpts{}
 	result, err := contract.GetServersAddresses(&callOpts)
 	return result, err
+}
+
+func (api *API) GetServersNumber() (uint64, error) {
+	contract, err := getUsersContract()
+	callOpts := bind.CallOpts{}
+	result, err := contract.GetServersNumber(&callOpts)
+	return result.Uint64(), err
+}
+
+func (api *API) GetUser(userAddress common.Address) (User, error) {
+	contract, err := getUsersContract()
+	callOpts := bind.CallOpts{}
+	userName, isServer, gameName, err := contract.GetUser(&callOpts, userAddress)
+	user := User{userName, isServer, gameName}
+	return user, err
 }
 
 //func (api *API) GetUsers() ([][32]byte, [][32]byte, error) {

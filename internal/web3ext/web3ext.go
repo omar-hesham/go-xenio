@@ -222,8 +222,18 @@ web3._extend({
 			params: 0
 		}),
 		new web3._extend.Method({
+			name: 'getServersNumber',
+			call: 'xenio_getServersNumber',
+			params: 0
+		}),
+		new web3._extend.Method({
 			name: 'isServer',
 			call: 'xenio_isServer',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'getUser',
+			call: 'xenio_getUser',
 			params: 1
 		})
   ],
