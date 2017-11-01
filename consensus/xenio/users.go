@@ -29,27 +29,28 @@ import (
 )
 
 type User struct {
-	Name     string `json:"username"`
-	IsServer bool   `json:"isserver"`
-	Game     string `json:"gamename"`
+	Address  common.Address `json:"address"`
+	Name     string         `json:"username"`
+	IsServer bool           `json:"isserver"`
+	Game     string         `json:"gamename"`
 }
 
 /* Free data retrieval calls */
 
-func (api *API) GetAllUsers() (map[common.Address]User, error) {
+func (api *API) GetAllUsers() ([]User, error) {
 	contract, err := getUsersContract()
 	callOpts := bind.CallOpts{}
-	users := make(map[common.Address]User)
 	userAddresses, err := contract.GetAllUsersAddresses(&callOpts)
+	var usersList []User
 	for i := 0; i < len(userAddresses); i++ {
 		userName, isServer, gameName, err := contract.GetUser(&callOpts, userAddresses[i])
 		if err != nil {
 			return nil, err
 		}
-		user := User{userName, isServer, gameName}
-		users[userAddresses[i]] = user
+		user := User{userAddresses[i], userName, isServer, gameName}
+		usersList = append(usersList, user)
 	}
-	return users, err
+	return usersList, err
 }
 
 func (api *API) GetAllUsersAddresses() ([]common.Address, error) {
@@ -59,20 +60,20 @@ func (api *API) GetAllUsersAddresses() ([]common.Address, error) {
 	return result, err
 }
 
-func (api *API) GetGamers() (map[common.Address]User, error) {
+func (api *API) GetGamers() ([]User, error) {
 	contract, err := getUsersContract()
 	callOpts := bind.CallOpts{}
-	gamers := make(map[common.Address]User)
 	gamerAddresses, err := contract.GetGamersAddresses(&callOpts)
+	var gamersList []User
 	for i := 0; i < len(gamerAddresses); i++ {
 		userName, isServer, gameName, err := contract.GetUser(&callOpts, gamerAddresses[i])
 		if err != nil {
 			return nil, err
 		}
-		user := User{userName, isServer, gameName}
-		gamers[gamerAddresses[i]] = user
+		gamer := User{gamerAddresses[i], userName, isServer, gameName}
+		gamersList = append(gamersList, gamer)
 	}
-	return gamers, err
+	return gamersList, err
 }
 
 func (api *API) GetGamersAddresses() ([]common.Address, error) {
@@ -89,20 +90,20 @@ func (api *API) GetGamersNumber() (uint64, error) {
 	return result.Uint64(), err
 }
 
-func (api *API) GetServers() (map[common.Address]User, error) {
+func (api *API) GetServers() ([]User, error) {
 	contract, err := getUsersContract()
 	callOpts := bind.CallOpts{}
-	servers := make(map[common.Address]User)
 	serverAddresses, err := contract.GetServersAddresses(&callOpts)
+	var serversList []User
 	for i := 0; i < len(serverAddresses); i++ {
 		userName, isServer, gameName, err := contract.GetUser(&callOpts, serverAddresses[i])
 		if err != nil {
 			return nil, err
 		}
-		user := User{userName, isServer, gameName}
-		servers[serverAddresses[i]] = user
+		server := User{serverAddresses[i], userName, isServer, gameName}
+		serversList = append(serversList, server)
 	}
-	return servers, err
+	return serversList, err
 }
 
 func (api *API) GetServersAddresses() ([]common.Address, error) {
@@ -123,7 +124,7 @@ func (api *API) GetUser(userAddress common.Address) (User, error) {
 	contract, err := getUsersContract()
 	callOpts := bind.CallOpts{}
 	userName, isServer, gameName, err := contract.GetUser(&callOpts, userAddress)
-	user := User{userName, isServer, gameName}
+	user := User{userAddress, userName, isServer, gameName}
 	return user, err
 }
 
