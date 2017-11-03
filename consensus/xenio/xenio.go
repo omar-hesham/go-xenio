@@ -43,6 +43,7 @@ import (
 	"encoding/json"
 
 	//"fmt"
+	"fmt"
 )
 
 const (
@@ -812,8 +813,15 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	//deployedUsersContract = snap.UsersContractAddress
 
 	//api := API{}
-	//test, _ := api.GetServersAddresses()
-	//fmt.Println("Servers' Addresses in Seal:", test)
+	//candidates, _ := api.GetServersAddresses()
+	//fmt.Println("Servers' Addresses in Seal:", candidates)
+	//for _, add := range candidates{
+	//	for mnode, _ := range snap.MasterNodes{
+	//		if mnode == add{
+	//			log.Warn("candidate already in masternodes")
+	//		}
+	//	}
+	//}
 
 	//see whats for voting and autocast our vote
 	if len(snap.NewVotes) > 0{
