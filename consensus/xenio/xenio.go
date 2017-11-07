@@ -842,7 +842,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			if vote.VoteType == MasterNode{
 				if !signingNode.IsMasterNode { continue }
 				ourhash := common.GetMD5Hash(vote.Address.String() + signer.String())// to see if the vote is ours
-				if ourhash == hash {
+				if ourhash == hash || vote.Signer == ca{
 					continue
 				}
 				var newVote Vote
