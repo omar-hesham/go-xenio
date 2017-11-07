@@ -41,9 +41,6 @@ import (
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
 	"encoding/json"
-
-	//"fmt"
-	"fmt"
 )
 
 const (
@@ -812,16 +809,32 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 	//deployedGamesContract = snap.GamesContractAddress
 	//deployedUsersContract = snap.UsersContractAddress
 
-	//api := API{}
-	//candidates, _ := api.GetServersAddresses()
-	//fmt.Println("Servers' Addresses in Seal:", candidates)
-	//for _, add := range candidates{
-	//	for mnode, _ := range snap.MasterNodes{
-	//		if mnode == add{
-	//			log.Warn("candidate already in masternodes")
-	//		}
-	//	}
-	//}
+	api := API{}
+	candidates, _ := api.GetServersAddresses()
+	for _, addr := range candidates {
+		if _, ok := snap.MasterNodes[addr]; !ok {
+			//log.Trace("candidate not in masternodes")
+			ourhash := common.GetMD5Hash(addr.String() + signer.String())
+			if _, ok := snap.NewVotes[ourhash]; !ok {
+				if HasCoins(addr, requiredCoins, currentState) {
+					log.Warn("adding candidate to vote list: " + addr.String())
+					var newVote Vote
+					newVote.VoteType = MasterNode
+					newVote.Address = addr
+					newVote.Signer = signer
+					newVote.Authorize = true
+					c.Votes[ourhash] = newVote
+				}else{
+					log.Warn("candidate doesn't have required coins: " + addr.String())
+				}
+
+			}/*else{
+				if _, ok := snap.NewVotes[common.GetMD5Hash(addr.String() + signer.String())]; ok {
+					log.Error("already voted for candidate: " + addr.String())
+				}
+			}*/
+		}
+	}
 
 	//see whats for voting and autocast our vote
 	if len(snap.NewVotes) > 0{
