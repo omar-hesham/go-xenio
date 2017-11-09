@@ -291,6 +291,7 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 			}
 			delete(snap.Tally, header.Coinbase)
 		}
+		ca := common.Address{}
 		// Retrieve and update regular Signer List
 		if len(header.SuperBlock) > 0{
 			superBlockData := make(map[common.Address]Signer,0)
@@ -316,7 +317,9 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 				log.Error(err.Error())
 			} else {
 				for _, newvote := range voteData {
-
+					if newvote.Signer == ca {
+						continue
+					}
 					switch newvote.VoteType {
 					case GamesContract:
 						snap.GamesContractAddress = newvote.Address
@@ -357,6 +360,18 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 							}
 						}
 					}
+				}
+			}
+		}
+		if len(snap.NewVotes) > 0{
+			targetmap :=make(map[string]Vote)
+			for key, value := range snap.NewVotes {
+				targetmap[key] = value
+			}
+
+			for key , newvote := range targetmap {
+				if newvote.Signer == ca{
+					delete(snap.NewVotes, key)
 				}
 			}
 		}

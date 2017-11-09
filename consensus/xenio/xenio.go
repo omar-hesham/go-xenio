@@ -798,16 +798,32 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		}
 	}
 
-	//api := API{}
-	//candidates, _ := api.GetServersAddresses()
-	//fmt.Println("Servers' Addresses in Seal:", candidates)
-	//for _, add := range candidates{
-	//	for mnode, _ := range snap.MasterNodes{
-	//		if mnode == add{
-	//			log.Warn("candidate already in masternodes")
-	//		}
-	//	}
-	//}
+	api := API{}
+	candidates, _ := api.GetServersAddresses()
+	for _, addr := range candidates {
+		if _, ok := snap.MasterNodes[addr]; !ok {
+			//log.Trace("candidate not in masternodes")
+			ourhash := common.GetMD5Hash(addr.String() + signer.String())
+			if _, ok := snap.NewVotes[ourhash]; !ok {
+				if HasCoins(addr, requiredCoins, currentState) {
+					log.Warn("adding candidate to vote list: " + addr.String())
+					var newVote Vote
+					newVote.VoteType = MasterNode
+					newVote.Address = addr
+					newVote.Signer = signer
+					newVote.Authorize = true
+					c.Votes[ourhash] = newVote
+				}else{
+					log.Warn("candidate doesn't have required coins: " + addr.String())
+				}
+
+			}/*else{
+				if _, ok := snap.NewVotes[common.GetMD5Hash(addr.String() + signer.String())]; ok {
+					log.Error("already voted for candidate: " + addr.String())
+				}
+			}*/
+		}
+	}
 
 	//see whats for voting and autocast our vote
 	if len(snap.NewVotes) > 0{
@@ -815,7 +831,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 			if vote.VoteType == MasterNode{
 				if !signingNode.IsMasterNode { continue }
 				ourhash := common.GetMD5Hash(vote.Address.String() + signer.String())// to see if the vote is ours
-				if ourhash == hash {
+				if ourhash == hash || vote.Signer == ca{
 					continue
 				}
 				var newVote Vote
