@@ -798,6 +798,10 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		}
 	}
 
+	//// Set current active contract addresses --- now set in cpy snapshot
+	//deployedGamesContract = snap.GamesContractAddress
+	//deployedUsersContract = snap.UsersContractAddress
+
 	api := API{}
 	candidates, _ := api.GetServersAddresses()
 	for _, addr := range candidates {

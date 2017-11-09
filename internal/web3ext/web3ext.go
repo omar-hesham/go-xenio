@@ -262,6 +262,11 @@ web3._extend({
 			params: 4
 		}),
 		new web3._extend.Method({
+			name: 'deployNewUsersContract',
+			call: 'xenio_deployNewUsersContract',
+			params: 1
+		}),
+		new web3._extend.Method({
 			name: 'getAllGames',
 			call: 'xenio_getAllGames',
 			params: 0

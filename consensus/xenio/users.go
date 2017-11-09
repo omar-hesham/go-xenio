@@ -153,22 +153,25 @@ func (api *API) RegisterNewUser(name string, isServer bool, game string, gas *bi
 	return result, err
 }
 
-//// Deploy and propose new users contract
-//func (api *API) DeployNewUsersContract(gas *big.Int) error {
-//	if currentTransactor.contractAuth == nil || currentTransactor.authorizedTransactions == 0 {
-//		return errTransactorNotSet
-//	}
-//	// Set Gas for paid transaction -- use default gas if not provided
-//	currentTransactor.contractAuth.GasPrice = gas
-//
-//	conn, err := getContractBackend()
-//	_, _, _, _ = xnousers.DeployXNOUsers(currentTransactor.contractAuth, conn)
-//	if err == nil {
-//		// transaction was successful, deduct from authorized transactions
-//		resetContractTransactor()
-//	}
-//	return err
-//}
+// Deploy and propose new users contract - under construction
+func (api *API) DeployNewUsersContract(gas *big.Int) (common.Address, error) {
+	if currentTransactor.contractAuth == nil || currentTransactor.authorizedTransactions == 0 {
+		return *new(common.Address), errTransactorNotSet
+	}
+	// Set Gas for paid transaction -- use default gas if not provided
+	currentTransactor.contractAuth.GasPrice = gas
+
+	conn, err := getContractBackend()
+	address, _, _, err := xnousers.DeployXNOUsers(currentTransactor.contractAuth, conn)
+	if err == nil {
+		// propose newly created contract
+		api.UsersContractVote(address, true)
+
+		// transaction was successful, deduct from authorized transactions
+		resetContractTransactor()
+	}
+	return address, err
+}
 
 /* XNOUsers helper functions */
 
