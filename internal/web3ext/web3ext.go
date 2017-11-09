@@ -202,6 +202,11 @@ web3._extend({
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputBlockNumberFormatter]
 		}),
 		new web3._extend.Method({
+			name: 'setContractTransactor',
+			call: 'xenio_setContractTransactor',
+			params: 3
+		}),
+		new web3._extend.Method({
 			name: 'getAllUsers',
 			call: 'xenio_getAllUsers',
 			params: 0
@@ -250,7 +255,27 @@ web3._extend({
 			name: 'getUser',
 			call: 'xenio_getUser',
 			params: 1
-		})
+		}),
+		new web3._extend.Method({
+			name: 'registerNewUser',
+			call: 'xenio_registerNewUser',
+			params: 4
+		}),
+		new web3._extend.Method({
+			name: 'getAllGames',
+			call: 'xenio_getAllGames',
+			params: 0
+		}),
+		new web3._extend.Method({
+			name: 'getGame',
+			call: 'xenio_getGame',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'getGamesAddresses',
+			call: 'xenio_getGamesAddresses',
+			params: 0
+		}),
   ],
 	properties:
 	[

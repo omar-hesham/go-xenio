@@ -362,7 +362,7 @@ func (c *Config) parsePersistentNodes(path string) []*discover.Node {
 	return nodes
 }
 
-func makeAccountManager(conf *Config) (*accounts.Manager, string, error) {
+func makeAccountManager(conf *Config) (*accounts.Manager, string, string, error) {
 	scryptN := keystore.StandardScryptN
 	scryptP := keystore.StandardScryptP
 	if conf.UseLightweightKDF {
@@ -392,10 +392,10 @@ func makeAccountManager(conf *Config) (*accounts.Manager, string, error) {
 		ephemeral = keydir
 	}
 	if err != nil {
-		return nil, "", err
+		return nil, "", "", err
 	}
 	if err := os.MkdirAll(keydir, 0700); err != nil {
-		return nil, "", err
+		return nil, "", "", err
 	}
 	// Assemble the account manager and supported backends
 	backends := []accounts.Backend{
@@ -415,5 +415,5 @@ func makeAccountManager(conf *Config) (*accounts.Manager, string, error) {
 			backends = append(backends, trezorhub)
 		}
 	}
-	return accounts.NewManager(backends...), ephemeral, nil
+	return accounts.NewManager(backends...), ephemeral, keydir, err
 }

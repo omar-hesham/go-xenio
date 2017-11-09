@@ -23,9 +23,9 @@ import (
 	"github.com/xenioplatform/go-xenio/accounts/abi/bind"
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/contracts/xnousers"
-	"github.com/xenioplatform/go-xenio/ethclient"
 	"github.com/xenioplatform/go-xenio/log"
-	//"github.com/xenioplatform/go-xenio/core/types"
+	"github.com/xenioplatform/go-xenio/core/types"
+	"math/big"
 )
 
 type User struct {
@@ -137,41 +137,44 @@ func (api *API) IsServer(userAddress common.Address) (bool, error) {
 
 /* Paid mutator transaction calls */
 
-//// not working - under construction
-//func (api *API) RegisterNewUser(name string, isServer bool, game string) (*types.Transaction, error) {
-//	contract, err := getUsersContract()
-//	transactOps := bind.TransactOpts{From: common.HexToAddress("0xd956e4b845b574c3519509b1c2cd3090b7eb97d4"), GasLimit: big.NewInt(300000)}
-//	result, _ := contract.RegisterNewUser(&transactOps, name, isServer, game)
-//	return result, err
-//}
+func (api *API) RegisterNewUser(name string, isServer bool, game string, gas *big.Int) (*types.Transaction, error) {
+	if currentTransactor.contractAuth == nil || currentTransactor.authorizedTransactions == 0 {
+		return nil, errTransactorNotSet
+	}
+	// Set Gas for paid transaction -- use default gas if not provided
+	currentTransactor.contractAuth.GasPrice = gas
 
-/* Contract helper functions */
+	contract, err := getUsersContract()
+	result, err := contract.RegisterNewUser(currentTransactor.contractAuth, name, isServer, game)
+	if err == nil {
+		// transaction was successful, deduct from authorized transactions
+		resetContractTransactor()
+	}
+	return result, err
+}
 
-//// not working - under construction
 //// Deploy and propose new users contract
-//func (api *API) DeployNewUsersContract() {
-//	// Create an IPC based RPC connection to a remote node
-//	conn, err := ethclient.Dial(currentIPCEndpoint)
-//	if err != nil {
-//		log.Error("Failed to connect to the Xenio client: " + err.Error())
+//func (api *API) DeployNewUsersContract(gas *big.Int) error {
+//	if currentTransactor.contractAuth == nil || currentTransactor.authorizedTransactions == 0 {
+//		return errTransactorNotSet
 //	}
+//	// Set Gas for paid transaction -- use default gas if not provided
+//	currentTransactor.contractAuth.GasPrice = gas
 //
-//bind.NewKeyedTransactor()
-//bind.NewTransactor()
-//
-//	transactOps := bind.TransactOpts{From: common.HexToAddress("0xd956e4b845b574c3519509b1c2cd3090b7eb97d4"), GasLimit: big.NewInt(300000)}
-//	//address, transaction, contractObject, err := xnousers.DeployXNOUsers(&transactOps, conn)
-//	_, _, _, _ = xnousers.DeployXNOUsers(&transactOps, conn)
+//	conn, err := getContractBackend()
+//	_, _, _, _ = xnousers.DeployXNOUsers(currentTransactor.contractAuth, conn)
+//	if err == nil {
+//		// transaction was successful, deduct from authorized transactions
+//		resetContractTransactor()
+//	}
+//	return err
 //}
+
+/* XNOUsers helper functions */
 
 // Get deployed contract object
 func getUsersContract() (*xnousers.XNOUsers, error) {
-	// Create an IPC based RPC connection to a remote node
-	conn, err := ethclient.Dial(currentIPCEndpoint)
-	if err != nil {
-		log.Error("Failed to connect to the Xenio client: " + err.Error())
-	}
-	// Instantiate the contract and display its name
+	conn, err := getContractBackend()
 	contract, err := xnousers.NewXNOUsers(deployedUsersContract, conn)
 	if err != nil {
 		log.Error("Failed to instantiate a Users contract: " + err.Error())

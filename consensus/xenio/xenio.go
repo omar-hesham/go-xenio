@@ -41,9 +41,6 @@ import (
 	"github.com/xenioplatform/go-xenio/rpc"
 	lru "github.com/hashicorp/golang-lru"
 	"encoding/json"
-
-	//"fmt"
-	"fmt"
 )
 
 const (
@@ -83,13 +80,6 @@ var (
 	big32 = big.NewInt(32)
 
 	currentState *state.StateDB
-)
-
-// xenio contracts constants (users and games).
-var (
-	currentIPCEndpoint string // required for interaction with contracts
-	deployedGamesContract common.Address
-	deployedUsersContract common.Address
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -808,10 +798,6 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		}
 	}
 
-	//// Set current active contract addresses --- now set in cpy snapshot
-	//deployedGamesContract = snap.GamesContractAddress
-	//deployedUsersContract = snap.UsersContractAddress
-
 	//api := API{}
 	//candidates, _ := api.GetServersAddresses()
 	//fmt.Println("Servers' Addresses in Seal:", candidates)
@@ -952,4 +938,8 @@ func calculateReward(txs []*types.Transaction, receipts []*types.Receipt) *big.I
 
 func CurrentIPCEndpoint(IPCEndpoint string) {
 	currentIPCEndpoint = IPCEndpoint
+}
+
+func CurrentKeyStoreDir(keyDir string) {
+	currentKeyStoreDir = keyDir
 }

@@ -100,13 +100,14 @@ func New(conf *Config) (*Node, error) {
 	}
 	// Ensure that the AccountManager method works before the node has started.
 	// We rely on this in cmd/geth.
-	am, ephemeralKeystore, err := makeAccountManager(conf)
+	am, ephemeralKeystore, keyStoreDir, err := makeAccountManager(conf)
 	if err != nil {
 		return nil, err
 	}
 
-	// Pass the IPC file path to Xenio consensus for contract interactions
+	// Pass the IPC file paths and NodeKey to Xenio consensus for contract interactions
 	xenio.CurrentIPCEndpoint(conf.IPCEndpoint())
+	xenio.CurrentKeyStoreDir(keyStoreDir)
 
 	// Note: any interaction with Config that would create/touch files
 	// in the data directory or instance directory is delayed until Start.

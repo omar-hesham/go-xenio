@@ -20,13 +20,24 @@
 package xenio
 
 import (
-	//"github.com/xenioplatform/go-xenio/accounts/abi/bind"
-	//"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/accounts/abi/bind"
+	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/contracts/xnogames"
 	"github.com/xenioplatform/go-xenio/ethclient"
 	"github.com/xenioplatform/go-xenio/log"
+	//"math/big"
+	"strings"
 )
 
+type Game struct {
+	Address   string `json:"address"`
+	Name      string `json:"title"`
+	Publisher string `json:"publisher"`
+	Developer string `json:"developer"`
+	Country   string `json:"country"`
+	State     string `json:"state"`
+	LogoImg   string `json:"logoimg"`
+}
 
 /* Free data retrieval calls */
 
@@ -36,42 +47,57 @@ import (
 //	result, err := contract.GetAllImages(&callOpts)
 //	return result, err
 //}
-//
-//func (api *API) GetGame(gameAddress common.Address) (string, string, string, [32]byte, [32]byte, [32]byte, error) {
-//	contract, err := getGamesContract()
-//	callOpts := bind.CallOpts{}
-//	name, publisher, developer, country, state, logoImg, err := contract.GetGame(&callOpts, gameAddress)
-//	return name, publisher, developer, country, state, logoImg, err
-//}
-//
+
+func (api *API) GetAllGames() ([]Game, error) {
+	contract, err := getGamesContract()
+	callOpts := bind.CallOpts{}
+	gamesAddresses, err := contract.GetGamesAddresses(&callOpts)
+	var games []Game
+	if err.Error() == "abi: unmarshalling empty output" {
+		return nil, nil
+	}
+	for i := 0; i < len(gamesAddresses); i++ {
+		name, publisher, developer, country, state, logoImg, err := contract.GetGame(&callOpts, gamesAddresses[i])
+		if err != nil {
+			return nil, err
+		}
+		game := Game{gamesAddresses[i].String(),name, publisher, developer, strings.Replace(string(country[:]), "\x00", "", -1), strings.Replace(string(state[:]), "\x00", "", -1), strings.Replace(string(logoImg[:]), "\x00", "", -1)}
+		games= append(games, game)
+	}
+	return games, err
+}
+
+func (api *API) GetGame(gameAddress common.Address) (Game, error) {
+	contract, err := getGamesContract()
+	callOpts := bind.CallOpts{}
+	name, publisher, developer, country, state, logoImg, err := contract.GetGame(&callOpts, gameAddress)
+	game := Game{gameAddress.String(),name, publisher, developer, strings.Replace(string(country[:]), "\x00", "", -1), strings.Replace(string(state[:]), "\x00", "", -1), strings.Replace(string(logoImg[:]), "\x00", "", -1)}
+	return game, err
+}
+
 //func (api *API) GetGameImages(userAddress common.Address) ([32]byte, error) {
 //	contract, err := getGamesContract()
 //	callOpts := bind.CallOpts{}
 //	result, err := contract.GetGameImages(&callOpts, userAddress)
 //	return result, err
 //}
-//
-//func (api *API) GetGames() ([][32]byte, [][32]byte, [][32]byte, [][32]byte, [][32]byte, error) {
-//	contract, err := getGamesContract()
-//	callOpts := bind.CallOpts{}
-//	names, publishers, developers, countries, states, err := contract.GetGames(&callOpts)
-//	return names, publishers, developers, countries, states, err
-//}
-//
-//func (api *API) GetGamesAddresses() ([]common.Address, error) {
-//	contract, err := getGamesContract()
-//	callOpts := bind.CallOpts{}
-//	result, err := contract.GetGamesAddresses(&callOpts)
-//	return result, err
-//}
-//
+
+func (api *API) GetGamesAddresses() ([]common.Address, error) {
+	contract, err := getGamesContract()
+	callOpts := bind.CallOpts{}
+	result, err := contract.GetGamesAddresses(&callOpts)
+	if err.Error() == "abi: unmarshalling empty output" {
+		return nil, nil
+	}
+	return result, err
+}
+
 //func (api *API) GetImage(SHA256notaryHash [32]byte) (string, *big.Int, error) {
 //	contract, err := getGamesContract()
 //	callOpts := bind.CallOpts{}
 //	imageURL, timestamp, err := contract.GetImage(&callOpts, SHA256notaryHash)
 //	return imageURL, timestamp, err
 //}
-
 
 ///* Contract helper functions */
 
@@ -90,19 +116,8 @@ func getGamesContract() (*xnogames.XNOGames, error) {
 	return contract, err
 }
 
-func (api *API) GetXNOGamesABI() string{
+func (api *API) GetXNOGamesABI() string {
 	api.xenio.lock.Lock()
 	defer api.xenio.lock.Unlock()
 	return xnogames.XNOGamesABI
 }
-
-//// Instantiate the contract and display its name
-//token2, err := xnogames.NewXNOGames(snap.GamesContractAddress, conn)
-//if err != nil {
-//	log.Error("Failed to instantiate a Token contract: " + err.Error())
-//}
-//g1, g2, g3, g4, g5, _ := token2.GetGames(&h)
-////if err != nil {
-////	log.Error("Failed to retrieve token name: " + err.Error())
-////}
-//fmt.Println("All Games:", g1, g2, g3, g4, g5)
