@@ -45,9 +45,7 @@ var (
 var (
 	// Contract Specific Errors
 	errTransactorNotSet = errors.New("transactor not set")
-	//errTransactorExpired = errors.New("transactor expired")
 	errAccountNotFound = errors.New("invalid address")
-	//errAccountFileNotFound = errors.New("account file missing")
 )
 
 type transactor struct {
@@ -83,9 +81,7 @@ func (api *API) SetContractTransactor(fromAddress common.Address, pwd string, tr
 	currentTransactor.contractAuth, err = bind.NewTransactor(strings.NewReader(string(keyJSON)), pwd)
 	if err != nil {
 		resetContractTransactor()
-	} //else {
-		//log.Info("Set auth for " + strconv.Itoa(transactionsTL) + " transactions")
-	//}
+	}
 	return err
 }
 
