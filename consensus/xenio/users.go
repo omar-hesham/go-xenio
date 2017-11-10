@@ -148,7 +148,7 @@ func (api *API) RegisterNewUser(name string, isServer bool, game string, gas *bi
 	result, err := contract.RegisterNewUser(currentTransactor.contractAuth, name, isServer, game)
 	if err == nil {
 		// transaction was successful, deduct from authorized transactions
-		resetContractTransactor()
+		evaluateContractTransactorAuth()
 	}
 	return result, err
 }
@@ -168,7 +168,7 @@ func (api *API) DeployNewUsersContract(gas *big.Int) (common.Address, error) {
 		api.UsersContractVote(address, true)
 
 		// transaction was successful, deduct from authorized transactions
-		resetContractTransactor()
+		evaluateContractTransactorAuth()
 	}
 	return address, err
 }

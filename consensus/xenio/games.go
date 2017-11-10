@@ -112,7 +112,7 @@ func (api *API) RegisterNewGame(name string, publisher string, developer string,
 	result, err := contract.RegisterNewGame(currentTransactor.contractAuth, name, publisher, developer, country, state)
 	if err == nil {
 		// transaction was successful, deduct from authorized transactions
-		resetContractTransactor()
+		evaluateContractTransactorAuth()
 	}
 	return result, err
 }
@@ -132,7 +132,7 @@ func (api *API) DeployNewGamesContract(gas *big.Int) (common.Address, error) {
 		api.GamesContractVote(address, true)
 
 		// transaction was successful, deduct from authorized transactions
-		resetContractTransactor()
+		evaluateContractTransactorAuth()
 	}
 	return address, err
 }

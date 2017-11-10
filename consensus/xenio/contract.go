@@ -24,7 +24,6 @@ import (
 	"strings"
 	"strconv"
 	"errors"
-	"sync"
 
 	"github.com/xenioplatform/go-xenio/accounts/abi/bind"
 	"github.com/xenioplatform/go-xenio/accounts/keystore"
@@ -45,39 +44,63 @@ var (
 
 var (
 	// Contract Specific Errors
-	errTransactorNotSet  = errors.New("transactor not set")
+	errTransactorNotSet = errors.New("transactor not set")
 	//errTransactorExpired = errors.New("transactor expired")
+	errAccountNotFound = errors.New("invalid address")
+	//errAccountFileNotFound = errors.New("account file missing")
 )
 
 type transactor struct {
 	contractAuth           *bind.TransactOpts
 	authorizedTransactions int
-
-	lock   sync.RWMutex   // Protects the transactor fields
 }
 
 func (api *API) SetContractTransactor(fromAddress common.Address, pwd string, transactionsTL int) error {
+	var accountIndex int
+	var found bool
+
 	ks := keystore.NewKeyStore(currentKeyStoreDir, keystore.LightScryptN, keystore.LightScryptP)
 	localAccounts := ks.Accounts()
-	keyjson, err := ioutil.ReadFile(localAccounts[0].URL.Path)
+	for accountIndex = 0; accountIndex < len(localAccounts); accountIndex++ {
+		if localAccounts[accountIndex].Address == fromAddress {
+			found = true
+			break
+		}
+	}
+	if !found {
+		resetContractTransactor()
+		return errAccountNotFound
+	}
+	keyJSON, err := ioutil.ReadFile(localAccounts[accountIndex].URL.Path)
 	if &transactionsTL == nil || transactionsTL == 0 {
 		transactionsTL = 1
 	}
+	if err != nil {
+		resetContractTransactor()
+		return err
+	}
 	currentTransactor.authorizedTransactions = transactionsTL
-	currentTransactor.contractAuth, err = bind.NewTransactor(strings.NewReader(string(keyjson)), pwd)
-
-	log.Info("Set auth for " + strconv.Itoa(transactionsTL) + " transactions")
+	currentTransactor.contractAuth, err = bind.NewTransactor(strings.NewReader(string(keyJSON)), pwd)
+	if err != nil {
+		resetContractTransactor()
+	} //else {
+		//log.Info("Set auth for " + strconv.Itoa(transactionsTL) + " transactions")
+	//}
 	return err
 }
 
-func resetContractTransactor() {
+func evaluateContractTransactorAuth() {
 	if currentTransactor.authorizedTransactions > 0 {
 		currentTransactor.authorizedTransactions = currentTransactor.authorizedTransactions - 1
 	}
 	// transactor expired
 	if currentTransactor.authorizedTransactions == 0 {
-	currentTransactor = transactor{}
+		resetContractTransactor()
 	}
+}
+
+func resetContractTransactor() {
+	currentTransactor = transactor{}
 }
 
 func getContractBackend() (*ethclient.Client, error) {
@@ -89,7 +112,7 @@ func getContractBackend() (*ethclient.Client, error) {
 	return conn, err
 }
 
-func getFreeTxTransactor() *bind.CallOpts{
+func getFreeTxTransactor() *bind.CallOpts {
 	var freeTxTransactor *bind.CallOpts
 	return freeTxTransactor
 }
