@@ -20,13 +20,13 @@
 package xenio
 
 import (
-	"github.com/xenioplatform/go-xenio/accounts/abi/bind"
+	"math/big"
+	"strings"
+
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/contracts/xnogames"
-	"github.com/xenioplatform/go-xenio/ethclient"
+	"github.com/xenioplatform/go-xenio/core/types"
 	"github.com/xenioplatform/go-xenio/log"
-	//"math/big"
-	"strings"
 )
 
 type Game struct {
@@ -41,51 +41,51 @@ type Game struct {
 
 /* Free data retrieval calls */
 
-//func (api *API) GetAllImages() ([][32]byte, error) {
-//	contract, err := getGamesContract()
-//	callOpts := bind.CallOpts{}
-//	result, err := contract.GetAllImages(&callOpts)
-//	return result, err
-//}
+func (api *API) GetAllImages() ([][]byte, error) {
+	contract, err := getGamesContract()
+	callOpts := getFreeTxTransactor()
+	result, err := contract.GetAllImages(callOpts)
+	return result, err
+}
 
 func (api *API) GetAllGames() ([]Game, error) {
 	contract, err := getGamesContract()
-	callOpts := bind.CallOpts{}
-	gamesAddresses, err := contract.GetGamesAddresses(&callOpts)
+	callOpts := getFreeTxTransactor()
+	gamesAddresses, err := contract.GetGamesAddresses(callOpts)
 	var games []Game
 	if err.Error() == "abi: unmarshalling empty output" {
 		return nil, nil
 	}
 	for i := 0; i < len(gamesAddresses); i++ {
-		name, publisher, developer, country, state, logoImg, err := contract.GetGame(&callOpts, gamesAddresses[i])
+		name, publisher, developer, country, state, logoImg, err := contract.GetGame(callOpts, gamesAddresses[i])
 		if err != nil {
 			return nil, err
 		}
-		game := Game{gamesAddresses[i].String(),name, publisher, developer, strings.Replace(string(country[:]), "\x00", "", -1), strings.Replace(string(state[:]), "\x00", "", -1), strings.Replace(string(logoImg[:]), "\x00", "", -1)}
-		games= append(games, game)
+		game := Game{gamesAddresses[i].String(), name, publisher, developer, strings.Replace(string(country[:]), "\x00", "", -1), strings.Replace(string(state[:]), "\x00", "", -1), strings.Replace(string(logoImg[:]), "\x00", "", -1)}
+		games = append(games, game)
 	}
 	return games, err
 }
 
 func (api *API) GetGame(gameAddress common.Address) (Game, error) {
 	contract, err := getGamesContract()
-	callOpts := bind.CallOpts{}
-	name, publisher, developer, country, state, logoImg, err := contract.GetGame(&callOpts, gameAddress)
-	game := Game{gameAddress.String(),name, publisher, developer, strings.Replace(string(country[:]), "\x00", "", -1), strings.Replace(string(state[:]), "\x00", "", -1), strings.Replace(string(logoImg[:]), "\x00", "", -1)}
+	callOpts := getFreeTxTransactor()
+	name, publisher, developer, country, state, logoImg, err := contract.GetGame(callOpts, gameAddress)
+	game := Game{gameAddress.String(), name, publisher, developer, strings.Replace(string(country[:]), "\x00", "", -1), strings.Replace(string(state[:]), "\x00", "", -1), strings.Replace(string(logoImg[:]), "\x00", "", -1)}
 	return game, err
 }
 
-//func (api *API) GetGameImages(userAddress common.Address) ([32]byte, error) {
-//	contract, err := getGamesContract()
-//	callOpts := bind.CallOpts{}
-//	result, err := contract.GetGameImages(&callOpts, userAddress)
-//	return result, err
-//}
+func (api *API) GetGameImages(userAddress common.Address) ([32]byte, error) {
+	contract, err := getGamesContract()
+	callOpts := getFreeTxTransactor()
+	result, err := contract.GetGameImages(callOpts, userAddress)
+	return result, err
+}
 
 func (api *API) GetGamesAddresses() ([]common.Address, error) {
 	contract, err := getGamesContract()
-	callOpts := bind.CallOpts{}
-	result, err := contract.GetGamesAddresses(&callOpts)
+	callOpts := getFreeTxTransactor()
+	result, err := contract.GetGamesAddresses(callOpts)
 	if err.Error() == "abi: unmarshalling empty output" {
 		return nil, nil
 	}
@@ -99,19 +99,52 @@ func (api *API) GetGamesAddresses() ([]common.Address, error) {
 //	return imageURL, timestamp, err
 //}
 
-///* Contract helper functions */
+/* Paid mutator transaction calls */
+
+func (api *API) RegisterNewGame(name string, publisher string, developer string, country [32]byte, state [32]byte, gas *big.Int) (*types.Transaction, error) {
+	if currentTransactor.contractAuth == nil || currentTransactor.authorizedTransactions == 0 {
+		return nil, errTransactorNotSet
+	}
+	// Set Gas for paid transaction -- use default gas if not provided
+	currentTransactor.contractAuth.GasPrice = gas
+
+	contract, err := getGamesContract()
+	result, err := contract.RegisterNewGame(currentTransactor.contractAuth, name, publisher, developer, country, state)
+	if err == nil {
+		// transaction was successful, deduct from authorized transactions
+		resetContractTransactor()
+	}
+	return result, err
+}
+
+// Deploy and propose new users contract - under construction
+func (api *API) DeployNewGamesContract(gas *big.Int) (common.Address, error) {
+	if currentTransactor.contractAuth == nil || currentTransactor.authorizedTransactions == 0 {
+		return *new(common.Address), errTransactorNotSet
+	}
+	// Set Gas for paid transaction -- use default gas if not provided
+	currentTransactor.contractAuth.GasPrice = gas
+
+	conn, err := getContractBackend()
+	address, _, _, err := xnogames.DeployXNOGames(currentTransactor.contractAuth, conn)
+	if err == nil {
+		// propose newly created contract
+		api.GamesContractVote(address, true)
+
+		// transaction was successful, deduct from authorized transactions
+		resetContractTransactor()
+	}
+	return address, err
+}
+
+///* XNOGames contract helper functions */
 
 // Get deployed contract object
 func getGamesContract() (*xnogames.XNOGames, error) {
-	// Create an IPC based RPC connection to a remote node
-	conn, err := ethclient.Dial(currentIPCEndpoint)
-	if err != nil {
-		log.Error("Failed to connect to the Xenio client: " + err.Error())
-	}
-	// Instantiate the contract and display its name
+	conn, err := getContractBackend()
 	contract, err := xnogames.NewXNOGames(deployedGamesContract, conn)
 	if err != nil {
-		log.Error("Failed to instantiate a Users contract: " + err.Error())
+		log.Error("Failed to instantiate a Games contract: " + err.Error())
 	}
 	return contract, err
 }

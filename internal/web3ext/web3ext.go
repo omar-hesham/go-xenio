@@ -257,18 +257,23 @@ web3._extend({
 			params: 1
 		}),
 		new web3._extend.Method({
-			name: 'registerNewUser',
-			call: 'xenio_registerNewUser',
-			params: 4
-		}),
-		new web3._extend.Method({
 			name: 'deployNewUsersContract',
 			call: 'xenio_deployNewUsersContract',
 			params: 1
 		}),
 		new web3._extend.Method({
+			name: 'registerNewUser',
+			call: 'xenio_registerNewUser',
+			params: 4
+		}),
+		new web3._extend.Method({
 			name: 'getAllGames',
 			call: 'xenio_getAllGames',
+			params: 0
+		}),
+		new web3._extend.Method({
+			name: 'getAllImages',
+			call: 'xenio_getAllImages',
 			params: 0
 		}),
 		new web3._extend.Method({
@@ -277,10 +282,25 @@ web3._extend({
 			params: 1
 		}),
 		new web3._extend.Method({
+			name: 'getGameImages',
+			call: 'xenio_getGameImages',
+			params: 1
+		}),
+		new web3._extend.Method({
 			name: 'getGamesAddresses',
 			call: 'xenio_getGamesAddresses',
 			params: 0
 		}),
+		new web3._extend.Method({
+			name: 'deployNewGamesContract',
+			call: 'xenio_deployNewGamesContract',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'registerNewGame',
+			call: 'xenio_registerNewGame',
+			params: 6
+		})
   ],
 	properties:
 	[

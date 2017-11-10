@@ -88,3 +88,8 @@ func getContractBackend() (*ethclient.Client, error) {
 	}
 	return conn, err
 }
+
+func getFreeTxTransactor() *bind.CallOpts{
+	var freeTxTransactor *bind.CallOpts
+	return freeTxTransactor
+}

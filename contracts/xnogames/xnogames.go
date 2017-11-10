@@ -162,9 +162,9 @@ func (_XNOGames *XNOGamesTransactorRaw) Transact(opts *bind.TransactOpts, method
 // GetAllImages is a free data retrieval call binding the contract method 0x7b7284fc.
 //
 // Solidity: function getAllImages() constant returns(bytes32[])
-func (_XNOGames *XNOGamesCaller) GetAllImages(opts *bind.CallOpts) ([][32]byte, error) {
+func (_XNOGames *XNOGamesCaller) GetAllImages(opts *bind.CallOpts) ([][]byte, error) {
 	var (
-		ret0 = new([][32]byte)
+		ret0 = new([][]byte)
 	)
 	out := ret0
 	err := _XNOGames.contract.Call(opts, out, "getAllImages")
@@ -174,14 +174,14 @@ func (_XNOGames *XNOGamesCaller) GetAllImages(opts *bind.CallOpts) ([][32]byte, 
 // GetAllImages is a free data retrieval call binding the contract method 0x7b7284fc.
 //
 // Solidity: function getAllImages() constant returns(bytes32[])
-func (_XNOGames *XNOGamesSession) GetAllImages() ([][32]byte, error) {
+func (_XNOGames *XNOGamesSession) GetAllImages() ([][]byte, error) {
 	return _XNOGames.Contract.GetAllImages(&_XNOGames.CallOpts)
 }
 
 // GetAllImages is a free data retrieval call binding the contract method 0x7b7284fc.
 //
 // Solidity: function getAllImages() constant returns(bytes32[])
-func (_XNOGames *XNOGamesCallerSession) GetAllImages() ([][32]byte, error) {
+func (_XNOGames *XNOGamesCallerSession) GetAllImages() ([][]byte, error) {
 	return _XNOGames.Contract.GetAllImages(&_XNOGames.CallOpts)
 }
 

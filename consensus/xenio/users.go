@@ -20,12 +20,12 @@
 package xenio
 
 import (
-	"github.com/xenioplatform/go-xenio/accounts/abi/bind"
+	"math/big"
+
 	"github.com/xenioplatform/go-xenio/common"
 	"github.com/xenioplatform/go-xenio/contracts/xnousers"
-	"github.com/xenioplatform/go-xenio/log"
 	"github.com/xenioplatform/go-xenio/core/types"
-	"math/big"
+	"github.com/xenioplatform/go-xenio/log"
 )
 
 type User struct {
@@ -39,11 +39,11 @@ type User struct {
 
 func (api *API) GetAllUsers() ([]User, error) {
 	contract, err := getUsersContract()
-	callOpts := bind.CallOpts{}
-	userAddresses, err := contract.GetAllUsersAddresses(&callOpts)
+	callOpts := getFreeTxTransactor()
+	userAddresses, err := contract.GetAllUsersAddresses(callOpts)
 	var usersList []User
 	for i := 0; i < len(userAddresses); i++ {
-		userName, isServer, gameName, err := contract.GetUser(&callOpts, userAddresses[i])
+		userName, isServer, gameName, err := contract.GetUser(callOpts, userAddresses[i])
 		if err != nil {
 			return nil, err
 		}
@@ -55,18 +55,18 @@ func (api *API) GetAllUsers() ([]User, error) {
 
 func (api *API) GetAllUsersAddresses() ([]common.Address, error) {
 	contract, err := getUsersContract()
-	callOpts := bind.CallOpts{}
-	result, err := contract.GetAllUsersAddresses(&callOpts)
+	callOpts := getFreeTxTransactor()
+	result, err := contract.GetAllUsersAddresses(callOpts)
 	return result, err
 }
 
 func (api *API) GetGamers() ([]User, error) {
 	contract, err := getUsersContract()
-	callOpts := bind.CallOpts{}
-	gamerAddresses, err := contract.GetGamersAddresses(&callOpts)
+	callOpts := getFreeTxTransactor()
+	gamerAddresses, err := contract.GetGamersAddresses(callOpts)
 	var gamersList []User
 	for i := 0; i < len(gamerAddresses); i++ {
-		userName, isServer, gameName, err := contract.GetUser(&callOpts, gamerAddresses[i])
+		userName, isServer, gameName, err := contract.GetUser(callOpts, gamerAddresses[i])
 		if err != nil {
 			return nil, err
 		}
@@ -78,25 +78,25 @@ func (api *API) GetGamers() ([]User, error) {
 
 func (api *API) GetGamersAddresses() ([]common.Address, error) {
 	contract, err := getUsersContract()
-	callOpts := bind.CallOpts{}
-	result, err := contract.GetGamersAddresses(&callOpts)
+	callOpts := getFreeTxTransactor()
+	result, err := contract.GetGamersAddresses(callOpts)
 	return result, err
 }
 
 func (api *API) GetGamersNumber() (uint64, error) {
 	contract, err := getUsersContract()
-	callOpts := bind.CallOpts{}
-	result, err := contract.GetGamersNumber(&callOpts)
+	callOpts := getFreeTxTransactor()
+	result, err := contract.GetGamersNumber(callOpts)
 	return result.Uint64(), err
 }
 
 func (api *API) GetServers() ([]User, error) {
 	contract, err := getUsersContract()
-	callOpts := bind.CallOpts{}
-	serverAddresses, err := contract.GetServersAddresses(&callOpts)
+	callOpts := getFreeTxTransactor()
+	serverAddresses, err := contract.GetServersAddresses(callOpts)
 	var serversList []User
 	for i := 0; i < len(serverAddresses); i++ {
-		userName, isServer, gameName, err := contract.GetUser(&callOpts, serverAddresses[i])
+		userName, isServer, gameName, err := contract.GetUser(callOpts, serverAddresses[i])
 		if err != nil {
 			return nil, err
 		}
@@ -108,30 +108,30 @@ func (api *API) GetServers() ([]User, error) {
 
 func (api *API) GetServersAddresses() ([]common.Address, error) {
 	contract, err := getUsersContract()
-	callOpts := bind.CallOpts{}
-	result, err := contract.GetServersAddresses(&callOpts)
+	callOpts := getFreeTxTransactor()
+	result, err := contract.GetServersAddresses(callOpts)
 	return result, err
 }
 
 func (api *API) GetServersNumber() (uint64, error) {
 	contract, err := getUsersContract()
-	callOpts := bind.CallOpts{}
-	result, err := contract.GetServersNumber(&callOpts)
+	callOpts := getFreeTxTransactor()
+	result, err := contract.GetServersNumber(callOpts)
 	return result.Uint64(), err
 }
 
 func (api *API) GetUser(userAddress common.Address) (User, error) {
 	contract, err := getUsersContract()
-	callOpts := bind.CallOpts{}
-	userName, isServer, gameName, err := contract.GetUser(&callOpts, userAddress)
+	callOpts := getFreeTxTransactor()
+	userName, isServer, gameName, err := contract.GetUser(callOpts, userAddress)
 	user := User{userAddress, userName, isServer, gameName}
 	return user, err
 }
 
 func (api *API) IsServer(userAddress common.Address) (bool, error) {
 	contract, err := getUsersContract()
-	callOpts := bind.CallOpts{}
-	result, err := contract.IsServer(&callOpts, userAddress)
+	callOpts := getFreeTxTransactor()
+	result, err := contract.IsServer(callOpts, userAddress)
 	return result, err
 }
 
