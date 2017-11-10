@@ -185,17 +185,7 @@ web3._extend({
 			params: 1,
 			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter]
 		}),
-			new web3._extend.Method({
-			name: 'getXNOGamesABI',
-			call: 'xenio_getXNOGamesABI',
-			params: 0
-		}),
-			new web3._extend.Method({
-			name: 'getXNOUsersABI',
-			call: 'xenio_getXNOUsersABI',
-			params: 0
-		}),
-			new web3._extend.Method({
+		new web3._extend.Method({
 			name: 'getCompletedTransactions',
 			call: 'xenio_getCompletedTransactions',
 			params: 2,

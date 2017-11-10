@@ -149,7 +149,7 @@ func getGamesContract() (*xnogames.XNOGames, error) {
 	return contract, err
 }
 
-func (api *API) GetXNOGamesABI() string {
+func (api *API) getXNOGamesABI() string {
 	api.xenio.lock.Lock()
 	defer api.xenio.lock.Unlock()
 	return xnogames.XNOGamesABI

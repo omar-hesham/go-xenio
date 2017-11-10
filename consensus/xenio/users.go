@@ -185,7 +185,7 @@ func getUsersContract() (*xnousers.XNOUsers, error) {
 	return contract, err
 }
 
-func (api *API) GetXNOUsersABI() string {
+func (api *API) getXNOUsersABI() string {
 	api.xenio.lock.Lock()
 	defer api.xenio.lock.Unlock()
 	return xnousers.XNOUsersABI
