@@ -83,10 +83,10 @@ func New(assetPath string, output io.Writer) *JSRE {
 	go re.runEventLoop()
 	re.Set("loadScript", re.loadScript)
 	re.Set("inspect", re.prettyPrintJS)
-	re.Set("XNOCreateUsersContract", re.XNOCreateUsersContract)
-	re.Set("XNOGetUsersContract", re.XNOGetUsersContract)
-	re.Set("XNOCreateGamesContract", re.XNOCreateGamesContract)
-	re.Set("XNOGetGamesContract", re.XNOGetGamesContract)
+	//re.Set("XNOCreateUsersContract", re.XNOCreateUsersContract)
+	//re.Set("XNOGetUsersContract", re.XNOGetUsersContract)
+	//re.Set("XNOCreateGamesContract", re.XNOCreateGamesContract)
+	//re.Set("XNOGetGamesContract", re.XNOGetGamesContract)
 	return re
 }
 
@@ -290,7 +290,7 @@ func (self *JSRE) Set(ns string, v interface{}) (err error) {
 	return err
 }
 
-func (self *JSRE) XNOCreateUsersContract(call otto.FunctionCall) otto.Value {
+func (self *JSRE) xnoCreateUsersContract(call otto.FunctionCall) otto.Value {
 	contractRawABI := xnousers.XNOUsersABI
 	goStringABI := "var userContract = eth.contract(" + contractRawABI + ")"
 	_, err := compileAndRun(call.Otto, "", goStringABI)
@@ -308,7 +308,7 @@ func (self *JSRE) XNOCreateUsersContract(call otto.FunctionCall) otto.Value {
 	return otto.TrueValue()
 }
 
-func (self *JSRE) XNOGetUsersContract(call otto.FunctionCall) otto.Value {
+func (self *JSRE) xnoGetUsersContract(call otto.FunctionCall) otto.Value {
 	address, _ := compileAndRun(call.Otto, "", "xenio.getSnapshot().userscontractaddress")
 	if address.String() == "undefined" || address.String() == "0x0000000000000000000000000000000000000000" {
 		log.Error("No Users Contract Address in Snapshot")
@@ -334,7 +334,7 @@ func (self *JSRE) XNOGetUsersContract(call otto.FunctionCall) otto.Value {
 	return otto.TrueValue()
 }
 
-func (self *JSRE) XNOCreateGamesContract(call otto.FunctionCall) otto.Value {
+func (self *JSRE) xnoCreateGamesContract(call otto.FunctionCall) otto.Value {
 	contractRawABI := xnogames.XNOGamesABI
 	goStringABI := "var gameContract = eth.contract(" + contractRawABI + ")"
 	_, err := compileAndRun(call.Otto, "", goStringABI)
@@ -352,7 +352,7 @@ func (self *JSRE) XNOCreateGamesContract(call otto.FunctionCall) otto.Value {
 	return otto.TrueValue()
 }
 
-func (self *JSRE) XNOGetGamesContract(call otto.FunctionCall) otto.Value {
+func (self *JSRE) xnoGetGamesContract(call otto.FunctionCall) otto.Value {
 	address, err := compileAndRun(call.Otto, "", "xenio.getSnapshot().gamescontractaddress")
 	if address.String() == "undefined" || address.String() == "0x0000000000000000000000000000000000000000" {
 		log.Error("No Games Contract Address in Snapshot")
