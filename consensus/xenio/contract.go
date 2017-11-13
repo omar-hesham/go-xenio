@@ -22,7 +22,6 @@ package xenio
 import (
 	"io/ioutil"
 	"strings"
-	"strconv"
 	"errors"
 
 	"github.com/xenioplatform/go-xenio/accounts/abi/bind"
