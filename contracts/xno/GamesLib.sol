@@ -81,7 +81,7 @@ library GamesLib {
     // Variables
 
     /// @dev Returns the total number of previously registered games in Xenio.
-    function getGamesCount(address _storageContract) private constant returns(uint256) {
+    function getGamesCount(address _storageContract) public constant returns(uint256) {
         return EternalStorage(_storageContract).getUIntValue(keccak256("games_count"));
     }
 
@@ -98,6 +98,11 @@ library GamesLib {
     function getNextID(address _storageContract, uint _id) private constant returns(uint nextID) {
         nextID = _id; // initialise   
         while (EternalStorage(_storageContract).getBooleanValue(keccak256("game_registered", nextID))) {nextID++;}
+    }
+
+    /// @dev Checks whether the gameID corresponds to an active game
+    function isActive(address _storageContract, uint _id) public constant returns(bool) {
+        return EternalStorage(_storageContract).getBooleanValue(keccak256("game_registered", _id));
     }
 
     /// @dev Checks whether the title of a given game is taken

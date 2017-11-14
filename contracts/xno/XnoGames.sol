@@ -14,7 +14,7 @@ contract XnoGames is Ownable {
     address public eternalStorage;
 
     // EVENTS
-    
+
     // Storage
     event StorageCreated(address _storageAddress);
     event StorageAttached(address _storageAddress);
@@ -208,6 +208,16 @@ contract XnoGames is Ownable {
     ) 
     {
         return eternalStorage.getGameDetailsByTitle(_title);
+    }
+
+    // @dev Returns a list with all active gameIDs.
+    function getAllGameIDs() external storageAttached(true) constant returns(uint[] memory list) {
+        uint counter = 0;
+        list = new uint[](eternalStorage.getActiveGamesCount()); // initialise
+        for (uint i = 0; i < eternalStorage.getGamesCount(); i++) {
+            if (eternalStorage.isActive(i))
+                list[counter++] = i;
+        }
     }
 
 }
