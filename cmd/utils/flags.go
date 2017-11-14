@@ -33,6 +33,8 @@ import (
 	"github.com/xenioplatform/go-xenio/accounts"
 	"github.com/xenioplatform/go-xenio/accounts/keystore"
 	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/consensus"
+	"github.com/xenioplatform/go-xenio/consensus/clique"
 	"github.com/xenioplatform/go-xenio/consensus/ethash"
 	"github.com/xenioplatform/go-xenio/core"
 	"github.com/xenioplatform/go-xenio/core/state"
@@ -54,7 +56,6 @@ import (
 	"github.com/xenioplatform/go-xenio/p2p/netutil"
 	"github.com/xenioplatform/go-xenio/params"
 	whisper "github.com/xenioplatform/go-xenio/whisper/whisperv5"
-
 	"gopkg.in/urfave/cli.v1"
 )
 

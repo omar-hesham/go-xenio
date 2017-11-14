@@ -31,7 +31,7 @@ import (
 	"time"
 
 	"github.com/xenioplatform/go-xenio/log"
-	"github.com/ethereum/go-ethereum/swarm/api"
+	"github.com/xenioplatform/go-xenio/swarm/api"
 )
 
 //templateMap holds a mapping of an HTTP error code to a template

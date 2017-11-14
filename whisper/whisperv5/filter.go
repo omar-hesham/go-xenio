@@ -24,6 +24,7 @@ import (
 	"sync"
 
 	"github.com/xenioplatform/go-xenio/common"
+	"github.com/xenioplatform/go-xenio/crypto"
 	"github.com/xenioplatform/go-xenio/log"
 )
 
