@@ -834,12 +834,13 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 		for hash, vote := range snap.NewVotes {
 			if vote.VoteType == MasterNode{
 				if !signingNode.IsMasterNode { continue }
-				ourhash := common.GetMD5Hash(vote.Address.String() + signingNode.String())// to see if the vote is ours
+				ourhash := common.GetMD5Hash(vote.Address.String() + signer.String())// to see if the vote is ours
 				if ourhash == hash || vote.Signer == ca{
 					continue
 				}
 				var newVote Vote
 				newVote.VoteType = MasterNode
+				newVote.Signer = vote.Signer
 				if HasCoins(vote.Address, requiredCoins, currentState) {
 					log.Warn("automated upvote for a gameserver")
 					newVote.Authorize = true
