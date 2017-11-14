@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	XenioVersion = "0.2.1a"
+	XenioVersion = "0.2.2a"
 	VersionMajor = 1        // Major version component of the current release
 	VersionMinor = 7        // Minor version component of the current release
 	VersionPatch = 1        // Patch version component of the current release
