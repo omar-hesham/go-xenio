@@ -109,7 +109,7 @@ func (api *PublicWhisperAPI) Info(ctx context.Context) Info {
 	stats := api.w.Stats()
 	return Info{
 		Memory:         stats.memoryUsed,
-		Messages:        len(api.w.messageQueue) + len(api.w.p2pMsgQueue),
+		Messages:       len(api.w.messageQueue) + len(api.w.p2pMsgQueue),
 		MinPow:         api.w.MinPow(),
 		MaxMessageSize: api.w.MaxMessageSize(),
 	}

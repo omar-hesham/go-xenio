@@ -70,6 +70,10 @@ func (fs *Filters) Install(watcher *Filter) (string, error) {
 		return "", fmt.Errorf("failed to generate unique ID")
 	}
 
+	if watcher.expectsSymmetricEncryption() {
+		watcher.SymKeyHash = crypto.Keccak256Hash(watcher.KeySym)
+	}
+
 	fs.watchers[id] = watcher
 	return id, err
 }
@@ -121,7 +125,9 @@ func (fs *Filters) NotifyWatchers(env *Envelope, p2pMessage bool) {
 
 		if match && msg != nil {
 			log.Trace("processing message: decrypted", "hash", env.Hash().Hex())
-			watcher.Trigger(msg)
+			if watcher.Src == nil || IsPubKeyEqual(msg.Src, watcher.Src) {
+				watcher.Trigger(msg)
+			}
 		}
 	}
 }
@@ -172,9 +178,6 @@ func (f *Filter) Retrieve() (all []*ReceivedMessage) {
 
 func (f *Filter) MatchMessage(msg *ReceivedMessage) bool {
 	if f.PoW > 0 && msg.PoW < f.PoW {
-		return false
-	}
-	if f.Src != nil && !IsPubKeyEqual(msg.Src, f.Src) {
 		return false
 	}
 
