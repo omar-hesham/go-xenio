@@ -840,7 +840,7 @@ func (c *Xenio) Seal(chain consensus.ChainReader, block *types.Block, stop <-cha
 				}
 				var newVote Vote
 				newVote.VoteType = MasterNode
-				newVote.Signer = vote.Signer
+				newVote.Signer = signer
 				if HasCoins(vote.Address, requiredCoins, currentState) {
 					log.Warn("automated upvote for a gameserver")
 					newVote.Authorize = true
