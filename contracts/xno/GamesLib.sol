@@ -14,7 +14,7 @@ import "./EternalStorage.sol";
 // keccak256("game_price", idx) -> uint -- Game price in USD.
 // keccak256("game_server", idx, gidx) -> address -- Server address.
 // keccak256("game_servers_count", idx) -> uint -- Total count of servers.
-// keccak256("game_logo", idx) -> bytes32 -- imageUrl for the logo of the game.
+// keccak256("game_img_logo", idx) -> bytes32 -- imageUrl for the logo of the game.
 // keccak256("games_count") -> uint256 -- Total count of registered games.
 
 // Note that idx should always be uint
@@ -75,6 +75,61 @@ library GamesLib {
         EternalStorage(_storageContract).setBooleanValue(keccak256("game_registered", idx), false);
         GameRemoved(idx); // call event
     }
+
+    // UPDATE METHODS
+
+    // For Sender
+
+    /// @dev updates the title of the game owned by the function caller
+    function updateTitle(address _storageContract, address _address, bytes32 _title) public returns (bool) {
+        var (found, gameID) = getIDByAddress(_storageContract,_address);
+        if (found && isTitleAvailable(_storageContract,_title)) {
+            EternalStorage(_storageContract).setBytes32Value(keccak256("game_title", gameID), _title);
+        }
+        return found;
+    }
+
+    /// @dev updates the genre of the game owned by the function caller
+    function updateGenre(address _storageContract, address _address, bytes32 _genre) public returns (bool) {
+        var (found, gameID) = getIDByAddress(_storageContract,_address);
+        if (found) {EternalStorage(_storageContract).setBytes32Value(keccak256("game_genre", gameID), _genre);}
+        return found;
+    }    
+
+    /// @dev updates the publisher of the game owned by the function caller
+    function updatePublisher(address _storageContract, address _address, bytes32 _publisher) public returns (bool) {
+        var (found, gameID) = getIDByAddress(_storageContract,_address);
+        if (found) {EternalStorage(_storageContract).setBytes32Value(keccak256("game_publisher", gameID), _publisher);}
+        return found;
+    }
+
+    /// @dev updates the developer of the game owned by the function caller
+    function updateDeveloper(address _storageContract, address _address, bytes32 _developer) public returns (bool) {
+        var (found, gameID) = getIDByAddress(_storageContract,_address);
+        if (found) {EternalStorage(_storageContract).setBytes32Value(keccak256("game_developer", gameID), _developer);}
+        return found;
+    }      
+
+    /// @dev updates the release date of the game owned by the function caller
+    function updateReleaseDate(address _storageContract, address _address, uint _release) public returns (bool) {
+        var (found, gameID) = getIDByAddress(_storageContract,_address);
+        if (found) {EternalStorage(_storageContract).setUIntValue(keccak256("game_release_date", gameID), _release);}
+        return found;
+    }     
+
+    /// @dev updates the price of the game owned by the function caller
+    function updatePrice(address _storageContract, address _address, uint _price) public returns (bool) {
+        var (found, gameID) = getIDByAddress(_storageContract,_address);
+        if (found) {EternalStorage(_storageContract).setUIntValue(keccak256("game_price", gameID), _price);}
+        return found;
+    }          
+
+    /// @dev updates the price of the game owned by the function caller
+    function updateLogo(address _storageContract, address _address, bytes32 _imageUrl) public returns (bool) {
+        var (found, gameID) = getIDByAddress(_storageContract,_address);
+        if (found) {EternalStorage(_storageContract).setBytes32Value(keccak256("game_img_logo", gameID), _imageUrl);}
+        return found;
+    }                 
 
     // GETTER METHODS
 
@@ -172,7 +227,8 @@ library GamesLib {
         bytes32 gamePublisher, 
         bytes32 gameDeveloper, 
         uint gameRelease, 
-        uint gamePrice
+        uint gamePrice,
+        bytes32 gameLogo
     )
     {
         found = EternalStorage(_storageContract).getBooleanValue(keccak256("game_registered", _gameID));
@@ -183,9 +239,10 @@ library GamesLib {
         gameDeveloper = EternalStorage(_storageContract).getBytes32Value(keccak256("game_developer", _gameID));
         gameRelease = EternalStorage(_storageContract).getUIntValue(keccak256("game_release_date", _gameID));
         gamePrice = EternalStorage(_storageContract).getUIntValue(keccak256("game_price", _gameID));
+        gameLogo = EternalStorage(_storageContract).getBytes32Value(keccak256("game_img_logo", _gameID));        
     }
 
-    /// @dev Returns game's details given its game id.
+    /// @dev Returns game's details given its title.
     function getGameDetailsByTitle(address _storageContract, bytes32 _title)
         public
         constant
@@ -198,7 +255,8 @@ library GamesLib {
         bytes32 gamePublisher, 
         bytes32 gameDeveloper, 
         uint gameRelease, 
-        uint gamePrice
+        uint gamePrice,
+        bytes32 gameLogo
     )
     {
         (found, gameID) = getIDByTitle(_storageContract, _title); // get game id
@@ -208,5 +266,6 @@ library GamesLib {
         gameDeveloper = EternalStorage(_storageContract).getBytes32Value(keccak256("game_developer", gameID));
         gameRelease = EternalStorage(_storageContract).getUIntValue(keccak256("game_release_date", gameID));
         gamePrice = EternalStorage(_storageContract).getUIntValue(keccak256("game_price", gameID));
+        gameLogo = EternalStorage(_storageContract).getBytes32Value(keccak256("game_img_logo", gameID));
     }
 }

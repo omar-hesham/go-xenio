@@ -124,7 +124,7 @@ contract XnoGames is Ownable {
     // MAIN METHODS
 
     /// @dev Constructor
-    function XnoGames() {
+    function XnoGames() public {
         XnoGamesCreated(getOwner());
     }
 
@@ -152,6 +152,41 @@ contract XnoGames is Ownable {
     }
 
     // Update methods
+
+    /// @dev updates the title of the game owner by the sender
+    function updateGameTitle(bytes32 _title) external storageAttached(true) returns(bool success) {
+        success = eternalStorage.updateTitle(msg.sender, _title);
+    }
+
+    /// @dev updates the genre of the game owner by the sender
+    function updateGameGenre(bytes32 _genre) external storageAttached(true) returns(bool success) {
+        success = eternalStorage.updateGenre(msg.sender, _genre);
+    }  
+
+    /// @dev updates the publisher of the game owner by the sender
+    function updateGamePublisher(bytes32 _publisher) external storageAttached(true) returns(bool success) {
+        success = eternalStorage.updatePublisher(msg.sender, _publisher);
+    }        
+
+    /// @dev updates the developer of the game owner by the sender
+    function updateGameDeveloper(bytes32 _developer) external storageAttached(true) returns(bool success) {
+        success = eternalStorage.updateDeveloper(msg.sender, _developer);
+    }      
+
+    /// @dev updates the release date of the game owner by the sender
+    function updateGameReleaseDate(uint _release) external storageAttached(true) returns(bool success) {
+        success = eternalStorage.updateReleaseDate(msg.sender, _release);
+    }
+
+    /// @dev updates the release date of the game owner by the sender
+    function updateGamePrice(uint _price) external storageAttached(true) returns(bool success) {
+        success = eternalStorage.updatePrice(msg.sender, _price);
+    }  
+
+    /// @dev updates the logo image url of the game owner by the sender
+    function updateGameLogo(bytes32 _imgUrl) external storageAttached(true) returns(bool success) {
+        success = eternalStorage.updateLogo(msg.sender, _imgUrl);
+    }    
 
     // GETTER METHODS
 
@@ -184,7 +219,8 @@ contract XnoGames is Ownable {
         bytes32 gamePublisher, 
         bytes32 gameDeveloper, 
         uint gameRelease, 
-        uint gamePrice     
+        uint gamePrice,
+        bytes32 gameLogo    
     ) 
     {
         return eternalStorage.getGameDetailsByID(_gameID);
@@ -204,7 +240,8 @@ contract XnoGames is Ownable {
         bytes32 gamePublisher, 
         bytes32 gameDeveloper, 
         uint gameRelease, 
-        uint gamePrice   
+        uint gamePrice,
+        bytes32 gameLogo   
     ) 
     {
         return eternalStorage.getGameDetailsByTitle(_title);
