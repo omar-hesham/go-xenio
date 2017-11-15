@@ -89,14 +89,7 @@ library GamesLib {
             EternalStorage(_storageContract).setBytes32Value(keccak256("game_title", gameID), _title);
         }
         return found;
-    }
-
-    /// @dev updates the genre of the game
-    function updateGenre(address _storageContract, address _address, bytes32 _genre) public returns (bool) {
-        var (found, gameID) = getIDByAddress(_storageContract,_address);
-        if (found) {EternalStorage(_storageContract).setBytes32Value(keccak256("game_genre", gameID), _genre);}
-        return found;
-    }    
+    } 
 
     /// @dev updates the publisher of the game
     function updatePublisher(address _storageContract, address _address, bytes32 _publisher) public returns (bool) {
@@ -144,11 +137,13 @@ library GamesLib {
     function addGenre(address _storageContract, address _address, bytes32 _genre) public returns (bool) {
         var (found, gameID) = getIDByAddress(_storageContract,_address);
         if (found) {
-            // Validation check
-            require(isGenreDuplicated(_storageContract,gameID,_genre)); // check whether the genre for this game already exists
 
             // Get first available genre id
             uint gidx = getNextGenreID(_storageContract,gameID,0); 
+
+            // Validation check
+            require(isGenreDuplicated(_storageContract,gameID,_genre)); // check whether the genre for this game already exists
+            require(gidx + 1 <= 10); // maximum number of genres per game
 
             // Insert
             EternalStorage(_storageContract).setBytes32Value(keccak256("game_genre", gameID, gidx), _genre);        
@@ -163,11 +158,24 @@ library GamesLib {
     }
 
     /// @dev removes a genre description from the respective game given its genre id
-    function removeGenre(address _storageContract, address _address, uint _genreID) public returns (bool) {
+    function removeGenreByID(address _storageContract, address _address, uint _genreID) public returns (bool) {
         var (found, gameID) = getIDByAddress(_storageContract,_address);
         if (found) {EternalStorage(_storageContract).setBooleanValue(keccak256("game_genre_registered", gameID, _genreID), false);}
         return found;
     }    
+
+    /// @dev removes a genre description from the respective game given its genre name
+    function removeGenreByName(address _storageContract, address _address, bytes32 _genreName) public returns (bool) {
+        var (gameFound, gameID) = getIDByAddress(_storageContract,_address);
+        if (gameFound) {
+            var (genreFound, genreID) = getGenreIDByName(_storageContract,gameID,_genreName);
+            if (genreFound) {
+                EternalStorage(_storageContract).setBooleanValue(keccak256("game_genre_registered", gameID, genreID), false);
+                return true;
+            }
+        }
+        return false;
+    }        
 
     // GETTER METHODS
 
@@ -288,6 +296,19 @@ library GamesLib {
         return (false,0);
     }
 
+    /// @dev Returns genre id given a gameID and a genreName
+    function getGenreIDByName(address _storageContract, uint _gameID, bytes32 _genreName) private constant returns (bool found, uint id) {
+        var totalCount = getGenresCount(_storageContract,_gameID);
+        for (uint i = 0; i < totalCount; i++) {
+            if (EternalStorage(_storageContract).getBooleanValue(keccak256("game_genre_registered", _gameID, i))) {
+                if (keccak256(EternalStorage(_storageContract).getBytes32Value(keccak256("game_genre", _gameID, i))) == keccak256(_genreName)) {  
+                    return (true, i);
+                }                
+            }    
+        }
+        return (false,0);
+    }
+
     // Game details
 
     /// @dev Returns game's details given its game id.
@@ -299,23 +320,24 @@ library GamesLib {
         bool found,
         address gameAddress,
         bytes32 gameTitle,
-        bytes32 gameGenre, 
         bytes32 gamePublisher, 
         bytes32 gameDeveloper, 
         uint gameRelease, 
         uint gamePrice,
-        bytes32 gameLogo
+        bytes32 gameLogo,
+        bytes32[10] gameGenreList
     )
     {
         found = EternalStorage(_storageContract).getBooleanValue(keccak256("game_registered", _gameID));
+        if (!found) {return;}        
         gameAddress = EternalStorage(_storageContract).getAddressValue(keccak256("game_address", _gameID));
         gameTitle = EternalStorage(_storageContract).getBytes32Value(keccak256("game_title", _gameID));
-        gameGenre = EternalStorage(_storageContract).getBytes32Value(keccak256("game_genre", _gameID));
         gamePublisher = EternalStorage(_storageContract).getBytes32Value(keccak256("game_publisher", _gameID));
         gameDeveloper = EternalStorage(_storageContract).getBytes32Value(keccak256("game_developer", _gameID));
         gameRelease = EternalStorage(_storageContract).getUIntValue(keccak256("game_release_date", _gameID));
         gamePrice = EternalStorage(_storageContract).getUIntValue(keccak256("game_price", _gameID));
         gameLogo = EternalStorage(_storageContract).getBytes32Value(keccak256("game_img_logo", _gameID));        
+        gameGenreList = getGenreListByID(_storageContract,_gameID);
     }
 
     /// @dev Returns game's details given its title.
@@ -327,21 +349,44 @@ library GamesLib {
         bool found,
         uint gameID,
         address gameAddress,
-        bytes32 gameGenre, 
         bytes32 gamePublisher, 
         bytes32 gameDeveloper, 
         uint gameRelease, 
         uint gamePrice,
-        bytes32 gameLogo
+        bytes32 gameLogo,
+        bytes32[10] gameGenreList        
     )
     {
         (found, gameID) = getIDByTitle(_storageContract, _title); // get game id
+        if (!found) {return;}
         gameAddress = EternalStorage(_storageContract).getAddressValue(keccak256("game_address", gameID));
-        gameGenre = EternalStorage(_storageContract).getBytes32Value(keccak256("game_genre", gameID));
         gamePublisher = EternalStorage(_storageContract).getBytes32Value(keccak256("game_publisher", gameID));
         gameDeveloper = EternalStorage(_storageContract).getBytes32Value(keccak256("game_developer", gameID));
         gameRelease = EternalStorage(_storageContract).getUIntValue(keccak256("game_release_date", gameID));
         gamePrice = EternalStorage(_storageContract).getUIntValue(keccak256("game_price", gameID));
         gameLogo = EternalStorage(_storageContract).getBytes32Value(keccak256("game_img_logo", gameID));
+        gameGenreList = getGenreListByID(_storageContract,gameID);
     }
+
+    /// @dev Returns the list of genres for a given game.
+    function getGenreListByID(address _storageContract, uint _gameID)
+        public
+        constant
+        returns
+    (
+        bytes32[10] genreList
+    )
+    {
+        // Validation check
+        if (!EternalStorage(_storageContract).getBooleanValue(keccak256("game_registered", _gameID))) {return;}
+
+        // Update list
+        for (uint i = 0; i < 10; i++) {
+            if (EternalStorage(_storageContract).getBooleanValue(keccak256("game_genre_registered", _gameID, i))) {
+                genreList[i] = EternalStorage(_storageContract).getBytes32Value(keccak256("game_genre", _gameID, i));
+            }
+        } 
+
+    }
+
 }

@@ -128,11 +128,6 @@ contract XnoGames is Ownable {
         success = eternalStorage.updateTitle(_address, _title);
     }
 
-    /// @dev updates the genre of a game given its address. only admins can call this function.
-    function changeGameGenre(address _address, bytes32 _genre) external storageAttached(true) onlyAdmin returns(bool success) {
-        success = eternalStorage.updateGenre(_address, _genre);
-    }  
-
     /// @dev updates the publisher of a game given its address. only admins can call this function.
     function changeGamePublisher(address _address, bytes32 _publisher) external storageAttached(true) onlyAdmin returns(bool success) {
         success = eternalStorage.updatePublisher(_address, _publisher);
@@ -161,7 +156,22 @@ contract XnoGames is Ownable {
     /// @dev updates the address of a game given its current address. only admins can call this function.
     function changeGameAddress(address _currentAddress, address _newAddress) external storageAttached(true) onlyAdmin returns(bool success) {
         success = eternalStorage.updateAddress(_currentAddress, _newAddress);
-    }        
+    }
+
+    /// @dev inserts a new genre into the genre list of the game given its address. only admins can call this function.
+    function insertGameGenre(address _address, bytes32 _genre) external storageAttached(true) onlyAdmin returns(bool success) {
+        success = eternalStorage.addGenre(_address, _genre);
+    }
+
+    /// @dev removes a genre from the genre list of the game given its game address and its genreID. only admins can call this function.
+    function removeGameGenreByID(address _address, uint _genreID) external storageAttached(true) onlyAdmin returns(bool success) {
+        success = eternalStorage.removeGenreByID(_address, _genreID);
+    }
+
+    /// @dev removes a genre from the genre list of the game given its game address its genre name. only admins can call this function.
+    function removeGameGenreByName(address _address, bytes32 _genreName) external storageAttached(true) onlyAdmin returns(bool success) {
+        success = eternalStorage.removeGenreByName(_address, _genreName);
+    }          
 
     // MAIN METHODS
 
@@ -195,40 +205,52 @@ contract XnoGames is Ownable {
 
     // Update methods for senders
 
-    /// @dev updates the title of the game owner by the sender
+    /// @dev updates the title of the game owned by the sender
     function updateGameTitle(bytes32 _title) external storageAttached(true) returns(bool success) {
         success = eternalStorage.updateTitle(msg.sender, _title);
     }
 
-    /// @dev updates the genre of the game owner by the sender
-    function updateGameGenre(bytes32 _genre) external storageAttached(true) returns(bool success) {
-        success = eternalStorage.updateGenre(msg.sender, _genre);
-    }  
-
-    /// @dev updates the publisher of the game owner by the sender
+    /// @dev updates the publisher of the game owned by the sender
     function updateGamePublisher(bytes32 _publisher) external storageAttached(true) returns(bool success) {
         success = eternalStorage.updatePublisher(msg.sender, _publisher);
     }        
 
-    /// @dev updates the developer of the game owner by the sender
+    /// @dev updates the developer of the game owned by the sender
     function updateGameDeveloper(bytes32 _developer) external storageAttached(true) returns(bool success) {
         success = eternalStorage.updateDeveloper(msg.sender, _developer);
     }      
 
-    /// @dev updates the release date of the game owner by the sender
+    /// @dev updates the release date of the game owned by the sender
     function updateGameReleaseDate(uint _release) external storageAttached(true) returns(bool success) {
         success = eternalStorage.updateReleaseDate(msg.sender, _release);
     }
 
-    /// @dev updates the release date of the game owner by the sender
+    /// @dev updates the release date of the game owned by the sender
     function updateGamePrice(uint _price) external storageAttached(true) returns(bool success) {
         success = eternalStorage.updatePrice(msg.sender, _price);
     }  
 
-    /// @dev updates the logo image url of the game owner by the sender
+    /// @dev updates the logo image url of the game owned by the sender
     function updateGameLogo(bytes32 _imgUrl) external storageAttached(true) returns(bool success) {
         success = eternalStorage.updateLogo(msg.sender, _imgUrl);
-    }    
+    }
+
+    // Genre methods
+
+    /// @dev inserts a new genre into the genre list of the game owned by the sender
+    function addGameGenre(bytes32 _genre) external storageAttached(true) returns(bool success) {
+        success = eternalStorage.addGenre(msg.sender, _genre);
+    }
+
+    /// @dev removes a genre from the genre list of the game owned by the sender given its genreID
+    function deleteGameGenreByID(uint _genreID) external storageAttached(true) returns(bool success) {
+        success = eternalStorage.removeGenreByID(msg.sender, _genreID);
+    }
+
+    /// @dev removes a genre from the genre list of the game owned by the sender given its genre name
+    function deleteGameGenreByName(bytes32 _genreName) external storageAttached(true) returns(bool success) {
+        success = eternalStorage.removeGenreByName(msg.sender, _genreName);
+    }     
 
     // GETTER METHODS
 
@@ -256,13 +278,13 @@ contract XnoGames is Ownable {
     (
         bool found,
         address gameAddress,
-        bytes32 gameTitle,
-        bytes32 gameGenre, 
+        bytes32 gameTitle, 
         bytes32 gamePublisher, 
         bytes32 gameDeveloper, 
         uint gameRelease, 
         uint gamePrice,
-        bytes32 gameLogo    
+        bytes32 gameLogo,
+        bytes32[10] gameGenreList    
     ) 
     {
         return eternalStorage.getGameDetailsByID(_gameID);
@@ -278,12 +300,12 @@ contract XnoGames is Ownable {
         bool found,
         uint gameID,
         address gameAddress,
-        bytes32 gameGenre, 
         bytes32 gamePublisher, 
         bytes32 gameDeveloper, 
         uint gameRelease, 
         uint gamePrice,
-        bytes32 gameLogo   
+        bytes32 gameLogo,
+        bytes32[10] gameGenreList
     ) 
     {
         return eternalStorage.getGameDetailsByTitle(_title);
