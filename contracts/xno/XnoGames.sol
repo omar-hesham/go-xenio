@@ -121,6 +121,48 @@ contract XnoGames is Ownable {
         return found;
     }
 
+    // Update methods
+
+    /// @dev updates the title of a game given its address. only admins can call this function.
+    function changeGameTitle(address _address, bytes32 _title) external storageAttached(true) onlyAdmin returns(bool success) {
+        success = eternalStorage.updateTitle(_address, _title);
+    }
+
+    /// @dev updates the genre of a game given its address. only admins can call this function.
+    function changeGameGenre(address _address, bytes32 _genre) external storageAttached(true) onlyAdmin returns(bool success) {
+        success = eternalStorage.updateGenre(_address, _genre);
+    }  
+
+    /// @dev updates the publisher of a game given its address. only admins can call this function.
+    function changeGamePublisher(address _address, bytes32 _publisher) external storageAttached(true) onlyAdmin returns(bool success) {
+        success = eternalStorage.updatePublisher(_address, _publisher);
+    }        
+
+    /// @dev updates the developer of a game given its address. only admins can call this function.
+    function changeGameDeveloper(address _address, bytes32 _developer) external storageAttached(true) onlyAdmin returns(bool success) {
+        success = eternalStorage.updateDeveloper(_address, _developer);
+    }      
+
+    /// @dev updates the release date of a game given its address. only admins can call this function.
+    function changeGameReleaseDate(address _address, uint _release) external storageAttached(true) onlyAdmin returns(bool success) {
+        success = eternalStorage.updateReleaseDate(_address, _release);
+    }
+
+    /// @dev updates the release date of a game given its address. only admins can call this function.
+    function changeGamePrice(address _address, uint _price) external storageAttached(true) onlyAdmin returns(bool success) {
+        success = eternalStorage.updatePrice(_address, _price);
+    }  
+
+    /// @dev updates the logo image url of a game given its address. only admins can call this function.
+    function changeGameLogo(address _address, bytes32 _imgUrl) external storageAttached(true) onlyAdmin returns(bool success) {
+        success = eternalStorage.updateLogo(_address, _imgUrl);
+    } 
+
+    /// @dev updates the address of a game given its current address. only admins can call this function.
+    function changeGameAddress(address _currentAddress, address _newAddress) external storageAttached(true) onlyAdmin returns(bool success) {
+        success = eternalStorage.updateAddress(_currentAddress, _newAddress);
+    }        
+
     // MAIN METHODS
 
     /// @dev Constructor
