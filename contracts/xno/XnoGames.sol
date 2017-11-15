@@ -121,7 +121,7 @@ contract XnoGames is Ownable {
         return found;
     }
 
-    // Update methods
+    // Update methods for admins
 
     /// @dev updates the title of a game given its address. only admins can call this function.
     function changeGameTitle(address _address, bytes32 _title) external storageAttached(true) onlyAdmin returns(bool success) {
@@ -193,7 +193,7 @@ contract XnoGames is Ownable {
         if (found) {eternalStorage.removeGame(id);} // remove game
     }
 
-    // Update methods
+    // Update methods for senders
 
     /// @dev updates the title of the game owner by the sender
     function updateGameTitle(bytes32 _title) external storageAttached(true) returns(bool success) {
