@@ -45,7 +45,6 @@ library GamesLib {
         public
         returns (bool success)
     {
-
         // Validation check
         require(isTitleAvailable(_storageContract,_title)); // check whether the title of the game is taken
         require(isAddressAvailable(_storageContract,_address)); // check whether the given address is taken
@@ -119,7 +118,7 @@ library GamesLib {
         return found;
     }          
 
-    /// @dev updates the price of the game
+    /// @dev updates the image url of the logo of the game
     function updateLogo(address _storageContract, address _address, bytes32 _imageUrl) public returns (bool) {
         var (found, gameID) = getIDByAddress(_storageContract,_address);
         if (found) {EternalStorage(_storageContract).setBytes32Value(keccak256("game_img_logo", gameID), _imageUrl);}
