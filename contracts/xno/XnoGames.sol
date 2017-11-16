@@ -95,7 +95,7 @@ contract XnoGames is Ownable {
     }
 
     // onlyAdmin METHODS
-    // Only the admins that are registered in the eternal storage attached to this contract can call the following methods.
+    // Only the admins, which are registered in the eternal storage attached to this contract, can call the following methods.
 
     /// @dev removes a Xenio game for a given address. Only admins are allowed to call this function.
     function removeGameByAddress(address _address)
@@ -123,52 +123,52 @@ contract XnoGames is Ownable {
 
     // Update methods for admins
 
-    /// @dev updates the title of a game given its address. only admins can call this function.
+    /// @dev updates the title of a game given its address. Only admins are allowed to call this function.
     function changeGameTitle(address _address, bytes32 _title) external storageAttached(true) onlyAdmin returns(bool success) {
         success = eternalStorage.updateTitle(_address, _title);
     }
 
-    /// @dev updates the publisher of a game given its address. only admins can call this function.
+    /// @dev updates the publisher of a game given its address. Only admins are allowed to call this function.
     function changeGamePublisher(address _address, bytes32 _publisher) external storageAttached(true) onlyAdmin returns(bool success) {
         success = eternalStorage.updatePublisher(_address, _publisher);
     }        
 
-    /// @dev updates the developer of a game given its address. only admins can call this function.
+    /// @dev updates the developer of a game given its address. Only admins are allowed to call this function.
     function changeGameDeveloper(address _address, bytes32 _developer) external storageAttached(true) onlyAdmin returns(bool success) {
         success = eternalStorage.updateDeveloper(_address, _developer);
     }      
 
-    /// @dev updates the release date of a game given its address. only admins can call this function.
+    /// @dev updates the release date of a game given its address. Only admins are allowed to call this function.
     function changeGameReleaseDate(address _address, uint _release) external storageAttached(true) onlyAdmin returns(bool success) {
         success = eternalStorage.updateReleaseDate(_address, _release);
     }
 
-    /// @dev updates the release date of a game given its address. only admins can call this function.
+    /// @dev updates the release date of a game given its address. Only admins are allowed to call this function.
     function changeGamePrice(address _address, uint _price) external storageAttached(true) onlyAdmin returns(bool success) {
         success = eternalStorage.updatePrice(_address, _price);
     }  
 
-    /// @dev updates the logo image url of a game given its address. only admins can call this function.
+    /// @dev updates the logo image url of a game given its address. Only admins are allowed to call this function.
     function changeGameLogo(address _address, bytes32 _imgUrl) external storageAttached(true) onlyAdmin returns(bool success) {
         success = eternalStorage.updateLogo(_address, _imgUrl);
     } 
 
-    /// @dev updates the address of a game given its current address. only admins can call this function.
+    /// @dev updates the address of a game given its current address. Only admins are allowed to call this function.
     function changeGameAddress(address _currentAddress, address _newAddress) external storageAttached(true) onlyAdmin returns(bool success) {
         success = eternalStorage.updateAddress(_currentAddress, _newAddress);
     }
 
-    /// @dev inserts a new genre into the genre list of the game given its address. only admins can call this function.
+    /// @dev inserts a new genre into the genre list of the game given its address. Only admins are allowed to call this function.
     function insertGameGenre(address _address, bytes32 _genre) external storageAttached(true) onlyAdmin returns(bool success) {
         success = eternalStorage.addGenre(_address, _genre);
     }
 
-    /// @dev removes a genre from the genre list of the game given its game address and its genreID. only admins can call this function.
+    /// @dev removes a genre from the genre list of the game given its game address and its genreID. Only admins are allowed to call this function.
     function removeGameGenreByID(address _address, uint _genreID) external storageAttached(true) onlyAdmin returns(bool success) {
         success = eternalStorage.removeGenreByID(_address, _genreID);
     }
 
-    /// @dev removes a genre from the genre list of the game given its game address its genre name. only admins can call this function.
+    /// @dev removes a genre from the genre list of the game given its game address its genre name. Only admins are allowed to call this function.
     function removeGameGenreByName(address _address, bytes32 _genreName) external storageAttached(true) onlyAdmin returns(bool success) {
         success = eternalStorage.removeGenreByName(_address, _genreName);
     }          
