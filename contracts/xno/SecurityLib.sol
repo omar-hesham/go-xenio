@@ -5,8 +5,8 @@ import "./EternalStorage.sol";
 
 /** @title Library for managing multiple admin accounts. */
 // Manages records for admins stored in the format: 
-// keccak256("admin:", address) -> bool isUserAdmin , e.g. 0xd91cf6dac04d456edc5fcb6659dd8ddedbb26661 -> true.
-// keccak256("AdminsCount")
+// keccak256("admin", address) -> bool isUserAdmin , e.g. 0xd91cf6dac04d456edc5fcb6659dd8ddedbb26661 -> true.
+// keccak256("admins_count")
 library SecurityLib {
 
     event AdminAdded(address _user);
@@ -17,7 +17,7 @@ library SecurityLib {
         @return The number of admin accounts registered.
     */
     function getAdminsCount(address _storageContract) public constant returns(uint256) {
-        return EternalStorage(_storageContract).getUIntValue(keccak256("AdminsCount"));
+        return EternalStorage(_storageContract).getUIntValue(keccak256("admin_counts"));
     }
 
      /** @dev Adds a new admin into the list.
@@ -27,15 +27,15 @@ library SecurityLib {
     function addAdmin(address _storageContract, address _user) public {
         
         // Validation check -- if admin exists, revert
-        var userIsAdmin = EternalStorage(_storageContract).getBooleanValue(keccak256("admin:", _user));
+        var userIsAdmin = EternalStorage(_storageContract).getBooleanValue(keccak256("admin", _user));
         require(!userIsAdmin); 
 
         // Insert the new admin into storage
-        EternalStorage(_storageContract).setBooleanValue(keccak256("admin:", _user), true); 
+        EternalStorage(_storageContract).setBooleanValue(keccak256("admin", _user), true); 
 
         // Increment the admins count in storage
-        var adminsCount = EternalStorage(_storageContract).getUIntValue(keccak256("AdminsCount"));
-        EternalStorage(_storageContract).setUIntValue(keccak256("AdminsCount"), adminsCount + 1);
+        var adminsCount = EternalStorage(_storageContract).getUIntValue(keccak256("admin_counts"));
+        EternalStorage(_storageContract).setUIntValue(keccak256("admin_counts"), adminsCount + 1);
 
         AdminAdded(_user); // event call
     }
@@ -47,18 +47,18 @@ library SecurityLib {
     function removeAdmin(address _storageContract, address _user) public {
 
         // Validation check -- admin should exist
-        var userIsAdmin = EternalStorage(_storageContract).getBooleanValue(keccak256("admin:", _user));
+        var userIsAdmin = EternalStorage(_storageContract).getBooleanValue(keccak256("admin", _user));
         require(userIsAdmin);
 
-        var adminsCount = EternalStorage(_storageContract).getUIntValue(keccak256("AdminsCount"));
+        var adminsCount = EternalStorage(_storageContract).getUIntValue(keccak256("admin_counts"));
         require(adminsCount != 1);
 
         // Remove admin from storage
-        EternalStorage(_storageContract).setBooleanValue(keccak256("admin:", _user), false); 
+        EternalStorage(_storageContract).setBooleanValue(keccak256("admin", _user), false); 
 
         // Decrement the admins count in storage
         adminsCount -= 1;
-        EternalStorage(_storageContract).setUIntValue(keccak256("AdminsCount"), adminsCount);
+        EternalStorage(_storageContract).setUIntValue(keccak256("admin_counts"), adminsCount);
 
         AdminRemoved(_user); // event call
     }
@@ -69,6 +69,6 @@ library SecurityLib {
         @return True or false whether the user is registered as an admin or not.
     */     
     function isUserAdmin(address _storageContract, address _user) public constant returns (bool) {
-        return EternalStorage(_storageContract).getBooleanValue(keccak256("admin:", _user));
+        return EternalStorage(_storageContract).getBooleanValue(keccak256("admin", _user));
     }
 }

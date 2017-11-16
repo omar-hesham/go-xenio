@@ -94,6 +94,24 @@ contract XnoGames is Ownable {
         XnoGamesDeactivated();
     }
 
+    /// @dev adds an admin given the address of the admin. Only admins are allowed to call this function.
+    function addXnoAdmin(address _admin) 
+        external
+        storageAttached(true)
+        onlyOwner
+    {
+        eternalStorage.addAdmin(_admin);
+    }
+
+    /// @dev removes an admin by the address of the admin. Only admins are allowed to call this function.
+    function removeXnoAdmin(address _admin) 
+        external
+        storageAttached(true)
+        onlyOwner
+    {
+        eternalStorage.removeAdmin(_admin);
+    }       
+
     // onlyAdmin METHODS
     // Only the admins, which are registered in the eternal storage attached to this contract, can call the following methods.
 
