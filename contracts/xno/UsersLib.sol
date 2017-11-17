@@ -15,8 +15,6 @@ import "./EternalStorage.sol";
 // Note that idx and gidx should always be uint
 
 /** @title Library for Users. */
-
-/** Library for Users. */
 library UsersLib {
 
     // EVENTS
@@ -64,7 +62,7 @@ library UsersLib {
 
     // UPDATE METHODS    
 
-   /// @dev updates the name of the user
+    /// @dev updates the name of the user
     function updateName(address _storageContract, address _address, bytes32 _name) public returns (bool) {
         var (found, userID) = getIDByAddress(_storageContract,_address);
         if (found && isNameAvailable(_storageContract,_name)) {
